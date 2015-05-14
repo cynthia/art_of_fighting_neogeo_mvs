@@ -1,0 +1,129 @@
+************************************************************************
+*								       *
+*		[[[ NOP	]]]  SOUND INTERFACE			       *
+*								       *
+************************************************************************
+
+
+
+		XDEF	INIT_SOUND,SOUND_SEND,SET_SOUND
+		XDEF	SET_BGM,SET_SPHERO
+		XDEF	SOUND_CODE_TBL
+		XDEF	SET_SOUND_DIRECT
+
+		SECT.S	SYS,,C
+
+		INCLUDE	NEO_GEO.INC
+		INCLUDE	LABEL.INC
+		INCLUDE	MACRO.INC
+
+
+INIT_SOUND:
+
+;		sound work initialize
+
+		MOVEQ.L	#0,D0
+		MOVE.B	D0,SD_IN_POINT(A5)
+		MOVE.B	D0,SD_OUT_POINT(A5)
+		MOVE.W	D0,BGM_CODE(A5)		no keep	BGM
+
+		SOUND	#2
+		SOUND	#2			send wait
+		SOUND	#2
+		RTS
+
+
+SOUND_SEND:
+
+;		outer sound code send from sound buffer	to sound I/O
+;			0 = skip code
+;			1 = 1 time wait
+;			2-FF send sound
+
+		MOVEQ.L	#0,D0
+		LEA.L	SOUND_BUFFER(A5),A0
+SOUND_SEND_1:
+		MOVE.B	SD_OUT_POINT(A5),D0
+		CMP.B	SD_IN_POINT(A5),D0
+		BEQ.S	SOUND_SEND_2
+
+		ADDQ.B	#1,SD_OUT_POINT(A5)
+		MOVE.B	0(A0,D0.W),D0
+		BEQ.S	SOUND_SEND_1		skip code
+
+		CMP.B	#1,D0			wait code
+		BEQ.S	SOUND_SEND_2		no send
+
+		MOVE.B	D0,SOUND
+SOUND_SEND_2:
+		RTS
+
+
+SET_BGM:
+
+;		BGM code set with ignore send same code
+;		in)	D0(.W)	BGM inner code
+;		all register keep
+
+		CMP.W	BGM_CODE(A5),D0
+		BEQ.S	SET_BGM_1	ignore same code
+
+		MOVE.W	D0,BGM_CODE(A5)
+		JSR	SET_SOUND(PC)
+SET_BGM_1:
+		RTS
+
+
+
+SET_SPHERO:
+
+;		sphero code set.(judgement by REL_X of master work)
+;		in)	D0(.W)	sphero left inner sound code
+;			A0	master work
+;		broked)	D0
+
+		CMP.W	#320/3,REL_X(A0)
+		BCS.S	SET_SOUND		right area
+
+		ADDQ.W	#2,D0
+		CMP.W	#(320*2)/3,REL_X(A0)
+		BCS.S	SET_SOUND		centor area
+
+		ADDQ.W	#2,D0			left area
+
+SET_SOUND:
+
+;		sound code set to sound	buffer
+;		in)	D0(.W)	inner sound code (*2)
+;		all register keep
+
+		MOVE.W	SOUND_CODE_TBL(PC,D0.W),SOUND_CODE_W(A5)
+SET_SOUND_DIRECT:
+		MOVE.L	A0,-(SP)
+		LEA.L	SOUND_BUFFER(A5),A0
+		MOVEQ.L	#0,D0
+		MOVE.B	SD_IN_POINT(A5),D0
+		MOVE.W	SOUND_CODE_W(A5),0(A0,D0.W)
+		ADDQ.B	#2,SD_IN_POINT(A5)
+		MOVE.L	(SP)+,A0
+		RTS
+
+
+
+SCN		SET	0
+
+SCODE		MACRO	CODE,NAME
+S_\2		SET	SCN
+		DC.W	CODE
+SCN		SET	SCN+2
+		ENDM
+
+
+SOUND_CODE_TBL:
+
+		INCLUDE	SCODE.INC
+
+		INCLUDE	WORK.INC
+
+
+

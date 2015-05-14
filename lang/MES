@@ -1,0 +1,61 @@
+	"挑戦者が現れたので"
+	"対戦モードに"
+	"変わります"
+
+	"HERE COMES A CHALLENGER. THE"
+	"SCREEN SWITCHES TO VS MODE."
+
+	"AQUI LLEGA EL RETADOR. LA"
+	"PANTALLA CAMBIA A MODO VS."
+;---------------------------------------------------------------------------
+	"挑戦者がいないので"
+	"ストーリー．モードに"
+	"戻ります"
+
+		DC.B	'THERE ARE NO CHALLENGERS. THE',0FFH
+		DC.B	'SCREEN SWITCHES TO STORY MODE.',0FFH
+
+		DC.B	'NO HAY RETADORES. LA PANTALLA',0FFH
+		DC.B	'CAMBIA A MODO DE HISTORIA.',0FFH
+
+;---------------------------------------------------------------------------
+		"その程度の腕では、話にならん。"
+		"出直して来るんだな！！"
+		
+		DC.B	'YOU HAVE NO ABILITY.',0FFH
+		DC.B	'TRY AGAIN!',0FFH
+		
+		DC.B	'DEMOSTRE TU HABILIDAD?  ',0FFH
+		DC.B	'TRATE DE NUEVO.',0FFH
+		
+;---------------------------------------------------------------------------
+		"女の居場所は"
+		"わしにも分からん．．．．"
+		
+		DC.B	'I DON''T KNOW WHERE SHE IS.',0FFH
+		
+		DC.B	'AUN YO NO SE DONDE ESTA.',0FFH
+		
+;---------------------------------------------------------------------------
+		"バイカーのジャックなら"
+		"何かを知っているかもな．．．．"
+		
+		DC.B	'JACK AT "MAC''S BAR" MIGHT',0FFH
+		DC.B	'KNOW.',0FFH
+		
+		DC.B	'JACK EN "MAC''S BAR" PODRA',0FFH
+		DC.B	'ADIVINAR.',0FFH
+		
+;---------------------------------------------------------------------------
+		"まだ分からん事があれば、いつでも"
+		"ここへ来い！いくらでも教えてやる"
+		
+		DC.B	'COME BACK ANYTIME. I''LL SHOW',0FFH
+		DC.B	'YOU A LESSON YOU WON''T FORGET.',0FFH
+		
+		DC.B	'REGRESA CUANDO GUSTES, TE DARE',0FFH
+		
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------

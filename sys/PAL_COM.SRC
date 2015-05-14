@@ -1,0 +1,1056 @@
+************************************************************************
+*								       *
+*		[[[ NOP ]]]  PALETTE COMMAND			       *
+*								       *
+************************************************************************
+
+
+
+		XDEF	COLOR_SET
+		XDEF	COLOR_COMMAND
+		XDEF	R_TYPE
+
+		XREF	?A5
+
+		SECT.S	SYS,,C
+
+		INCLUDE	NEO_GEO.INC	@@@
+
+
+
+COLOR_SET:
+
+;	Transfer from COLOR_BUFFER_0 to color generator
+;	Request v-blanking top
+;	Transfer flag = color 0 of palette 00,10,20,...,E0,F0
+;			is not 0 (16 palette transfer)
+;	1 time max 128 palette transfer
+
+		LEA.L	COLOR_BUFFER_0(A5),A0
+		LEA.L	COLOR_GEN,A1
+		MOVE.L	#16*16*2,D4
+		MOVEQ.L	#8,D6
+		MOVEQ.L	#16-1,D7
+COLOR_SET_1:
+		TST.W	(A0)
+		BEQ	COLOR_SET_3
+
+		DBRA	D6,COLOR_SET_2
+
+		MOVE.B	D6,COLOR_FLAG(A5)
+		RTS
+COLOR_SET_2:
+		CLR.W	(A0)
+
+		REPT	16*8
+		MOVE.L	(A0)+,(A1)+
+		ENDR
+
+		DBRA	D7,COLOR_SET_1
+
+		MOVE.B	#0,COLOR_FLAG(A5)
+		RTS
+COLOR_SET_3:
+		ADD.L	D4,A0
+		ADD.L	D4,A1
+		DBRA	D7,COLOR_SET_1
+
+		MOVE.B	#0,COLOR_FLAG(A5)
+		RTS
+
+
+
+COLOR_COMMAND:
+
+;	color command (fade out etc,)
+;	Request end of main routine
+;	set COLOR_STATE(byte)
+;		d0-d6	:1=comman effective
+;		d7	:1=all command pause
+;	command -> COLOR_BUFFER anypalette color 0 (word)
+;		d0-d1	:speed	 00B=PAL_SPEED0/60 sec
+;				 01B=PAL_SPEED1/60 sec
+;				 10B=PAL_SPEED2/60 sec
+;				 11B=PAL_SPEED3/60 sec
+;		d2-d3	:command 00B=from base color to target color
+;				 01B=from target color to base color
+;				 10B=target color set
+;				 11B=base color set
+;		d4	:B
+;		d5	:G target color switch (negative)
+;		d6	:R
+;		d7	:palette group load & command(d0-d6) set
+;			d8-d15=palette group No
+
+;*** speed defintion ***
+
+PAL_SPEED0	EQU	128
+PAL_SPEED1	EQU	64
+PAL_SPEED2	EQU	32
+PAL_SPEED3	EQU	16
+
+		TST.B	COLOR_FLAG(A5)
+		BMI	COLOR_COMMAND_7
+
+		TST.B	COLOR_STATE(A5)
+		BLE	COLOR_COMMAND_7
+
+		CLR.B	COLOR_STATE+1(A5)
+		LEA.L	COLOR_BUFFER(A5),A0
+		LEA.L	COLOR_BUFFER_0(A5),A1
+		LEA.L	(A1),A5
+		LEA.L	R_TYPE+64(PC),A6
+		MOVEQ.L	#16-1,D7
+COLOR_COMMAND_1:
+		MOVEQ.L	#16-1,D6
+COLOR_COMMAND_2:
+		MOVE.W	(A0),D0
+		BEQ.S	COLOR_COMMAND_4
+
+		TST.B	D0
+		BMI	PALETTE_GROUP_LOAD
+COLOR_COMMAND_3:
+		AND.W	#1111100B,D0
+		JMP	COLOR_COM_VECTOR(PC,D0.W)
+COLOR_COMMAND_4:
+		LEA.L	16*2(A1),A1
+COLOR_COMMAND_5:
+		LEA.L	16*2(A0),A0
+COLOR_COMMAND_6:
+		DBRA	D6,COLOR_COMMAND_2
+
+		LEA.L	16*16*2(A5),A5
+		DBRA	D7,COLOR_COMMAND_1
+
+		LEA.L	?A5,A5
+		MOVE.B	COLOR_STATE+1(A5),COLOR_STATE(A5)
+		ADDQ.B	#1,COLOR_TIMER(A5)
+COLOR_COMMAND_7:
+		RTS
+
+
+COLOR_COM_VECTOR:
+		JMP	RGB_OUT(PC)
+		JMP	RGB_IN(PC)
+		JMP	RGB_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+		JMP	RGO_OUT(PC)
+		JMP	RGO_IN(PC)
+		JMP	RGO_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+		JMP	ROB_OUT(PC)
+		JMP	ROB_IN(PC)
+		JMP	ROB_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+		JMP	ROO_OUT(PC)
+		JMP	ROO_IN(PC)
+		JMP	ROO_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+		JMP	OGB_OUT(PC)
+		JMP	OGB_IN(PC)
+		JMP	OGB_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+		JMP	OGO_OUT(PC)
+		JMP	OGO_IN(PC)
+		JMP	OGO_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+		JMP	OOB_OUT(PC)
+		JMP	OOB_IN(PC)
+		JMP	OOB_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+		JMP	OOO_OUT(PC)
+		JMP	OOO_IN(PC)
+		JMP	OOO_SET(PC)
+		JMP	BASE_COLOR_SET(PC)
+
+
+PALETTE_GROUP_LOAD:
+		MOVEQ.L	#15,D1
+		SUB.W	D7,D1
+		LEA.L	PG_NUMBER,A2
+		MOVE.B	(A0),0(A2,D1.W)
+		MOVE.L	PALETTE_INFO,A2
+		MOVEQ.L	#7FH,D1
+		AND.W	D0,D1
+		CLR.B	D0
+		ADD.W	D0,D0
+		LEA.L	0(A2,D0.W),A2
+		LEA.L	(A0),A3
+		MOVEQ.L	#16-1,D2
+PGL_1:
+		REPT	8
+		MOVE.L	(A2)+,(A3)+
+		ENDR
+
+		MOVE.W	D1,-32(A3)
+		DBRA	D2,PGL_1
+
+		MOVE.W	D1,D0
+		JMP	COLOR_COMMAND_3(PC)
+
+BASE_COLOR_SET:
+		CLR.W	(A0)
+
+		REPT	8
+		MOVE.L	(A0)+,(A1)+
+		ENDR
+
+		MOVE.W	#1,(A5)
+		JMP	COLOR_COMMAND_6(PC)
+
+OOO_SET:
+		MOVE.L	#0,D0
+		BRA.S	TARGET_SET
+OOB_SET:
+		MOVE.L	#100F100FH,D0
+		BRA.S	TARGET_SET
+OGO_SET:
+		MOVE.L	#20F020F0H,D0
+		BRA.S	TARGET_SET
+OGB_SET:
+		MOVE.L	#30FF30FFH,D0
+		BRA.S	TARGET_SET
+ROO_SET:
+		MOVE.L	#4F004F00H,D0
+		BRA.S	TARGET_SET
+ROB_SET:
+		MOVE.L	#5F0F5F0FH,D0
+		BRA.S	TARGET_SET
+RGO_SET:
+		MOVE.L	#6FF06FF0H,D0
+		BRA.S	TARGET_SET
+RGB_SET:
+		MOVE.L	#7FFF7FFFH,D0
+TARGET_SET:
+		CLR.W	(A0)
+
+		REPT	8
+		MOVE.L	D0,(A1)+
+		ENDR
+
+		MOVE.W	#1,(A5)
+		JMP	COLOR_COMMAND_5(PC)
+
+
+OOO_IN:
+		LEA.L	FROM_MIN(PC),A2
+		LEA.L	FROM_MIN(PC),A3
+		LEA.L	FROM_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+OOO_OUT:
+		LEA.L	TO_MIN(PC),A2
+		LEA.L	TO_MIN(PC),A3
+		LEA.L	TO_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+OOB_IN:
+		LEA.L	FROM_MIN(PC),A2
+		LEA.L	FROM_MIN(PC),A3
+		LEA.L	FROM_MAX(PC),A4
+		JMP	PAL_COM_SUB(PC)
+OOB_OUT:
+		LEA.L	TO_MIN(PC),A2
+		LEA.L	TO_MIN(PC),A3
+		LEA.L	TO_MAX(PC),A4
+		JMP	PAL_COM_SUB(PC)
+OGO_IN:
+		LEA.L	FROM_MIN(PC),A2
+		LEA.L	FROM_MAX(PC),A3
+		LEA.L	FROM_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+OGO_OUT:
+		LEA.L	TO_MIN(PC),A2
+		LEA.L	TO_MAX(PC),A3
+		LEA.L	TO_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+OGB_IN:
+		LEA.L	FROM_MIN(PC),A2
+		LEA.L	FROM_MAX(PC),A3
+		LEA.L	FROM_MAX(PC),A4
+		JMP	PAL_COM_SUB(PC)
+OGB_OUT:
+		LEA.L	TO_MIN(PC),A2
+		LEA.L	TO_MAX(PC),A3
+		LEA.L	TO_MAX(PC),A4
+		JMP	PAL_COM_SUB(PC)
+ROO_IN:
+		LEA.L	FROM_MAX(PC),A2
+		LEA.L	FROM_MIN(PC),A3
+		LEA.L	FROM_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+ROO_OUT:
+		LEA.L	TO_MAX(PC),A2
+		LEA.L	TO_MIN(PC),A3
+		LEA.L	TO_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+ROB_IN:
+		LEA.L	FROM_MAX(PC),A2
+		LEA.L	FROM_MIN(PC),A3
+		LEA.L	FROM_MAX(PC),A4
+		JMP	PAL_COM_SUB(PC)
+ROB_OUT:
+		LEA.L	TO_MAX(PC),A2
+		LEA.L	TO_MIN(PC),A3
+		LEA.L	TO_MAX(PC),A4
+		JMP	PAL_COM_SUB(PC)
+RGO_IN:
+		LEA.L	FROM_MAX(PC),A2
+		LEA.L	FROM_MAX(PC),A3
+		LEA.L	FROM_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+RGO_OUT:
+		LEA.L	TO_MAX(PC),A2
+		LEA.L	TO_MAX(PC),A3
+		LEA.L	TO_MIN(PC),A4
+		JMP	PAL_COM_SUB(PC)
+RGB_IN:
+		LEA.L	FROM_MAX(PC),A2
+		LEA.L	FROM_MAX(PC),A3
+		LEA.L	FROM_MAX(PC),A4
+		JMP	PAL_COM_SUB(PC)
+RGB_OUT:
+		LEA.L	TO_MAX(PC),A2
+		LEA.L	TO_MAX(PC),A3
+		LEA.L	TO_MAX(PC),A4
+
+PAL_INC:
+		DC.B	256/PAL_SPEED0,256/PAL_SPEED1
+		DC.B	256/PAL_SPEED2,256/PAL_SPEED3
+
+PAL_COM_SUB:
+		MOVE.B	#1,COLOR_STATE+1
+		MOVE.B	(A0),D0
+		MOVEQ.L	#11B,D4
+		AND.W	(A0),D4
+		MOVE.B	PAL_INC(PC,D4.W),D5
+		ADD.B	D5,(A0)
+		BCS	PCS_2
+
+		MOVEQ.L	#111B,D5
+		AND.B	D0,D5
+		BNE	COLOR_COMMAND_4
+
+;		MOVE.W	#1,(A5)
+		ADDQ.W	#2,A0
+		ADDQ.W	#2,A1
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		LEA.L	0(A2,D0.W),A2
+		LEA.L	0(A3,D0.W),A3
+		LEA.L	0(A4,D0.W),A4
+		MOVEQ.L	#0FH,D0
+		MOVEQ.L	#15-1,D5
+PCS_1:
+		MOVE.B	(A0),D2			8
+		AND.W	D0,D2			4
+		MOVE.W	(A0)+,D1		8
+		MOVE.W	D1,D3			4
+		MOVE.B	D3,D4			4
+		ADD.W	D1,D1			4
+		ADD.W	D1,D1			4
+		ADDX.B	D2,D2			4
+		LSR.B	#4,D3			14
+		AND.W	D0,D3			4
+		ADD.W	D1,D1			4
+		ADDX.B	D3,D3			4
+		AND.W	D0,D4			4
+		ADD.W	D1,D1			4
+		ADDX.B	D4,D4			4
+		MOVE.B	0(A2,D2.W),D2		14
+		MOVE.B	0(A3,D3.W),D3		14
+		MOVE.B	0(A4,D4.W),D4		14
+		MOVE.W	-64(A6,D2.W),D1		14
+		OR.W	000(A6,D3.W),D1		14
+		OR.W	064(A6,D4.W),D1		14
+		MOVE.W	D1,(A1)+		8
+		DBRA	D5,PCS_1		12 sum 182cl= 15us
+;						1 pal 230us
+		MOVE.W	#1,(A5)
+		JMP	COLOR_COMMAND_6(PC)
+PCS_2:
+		OR.W	#1001B,(A0)
+		JMP	COLOR_COMMAND_4(PC)
+
+
+
+
+R_TYPE:
+	DC.W	0000H,4000H,0100H,4100H,0200H,4200H,0300H,4300H
+	DC.W	0400H,4400H,0500H,4500H,0600H,4600H,0700H,4700H
+	DC.W	0800H,4800H,0900H,4900H,0A00H,4A00H,0B00H,4B00H
+	DC.W	0C00H,4C00H,0D00H,4D00H,0E00H,4E00H,0F00H,4F00H
+;G_TYPE
+	DC.W	0000H,2000H,0010H,2010H,0020H,2020H,0030H,2030H
+	DC.W	0040H,2040H,0050H,2050H,0060H,2060H,0070H,2070H
+	DC.W	0080H,2080H,0090H,2090H,00A0H,20A0H,00B0H,20B0H
+	DC.W	00C0H,20C0H,00D0H,20D0H,00E0H,20E0H,00F0H,20F0H
+;B_TYPE
+	DC.W	0000H,1000H,0001H,1001H,0002H,1002H,0003H,1003H
+	DC.W	0004H,1004H,0005H,1005H,0006H,1006H,0007H,1007H
+	DC.W	0008H,1008H,0009H,1009H,000AH,100AH,000BH,100BH
+	DC.W	000CH,100CH,000DH,100DH,000EH,100EH,000FH,100FH
+
+
+
+TO_MIN:
+*
+                DC.B    00H,02H,04H,06H,08H,0AH,0CH,0EH
+                DC.B    10H,12H,14H,16H,18H,1AH,1CH,1EH
+                DC.B    20H,20H,22H,24H,26H,28H,2AH,2CH
+                DC.B    2EH,30H,32H,34H,36H,38H,3AH,3CH
+;
+                DC.B    00H,02H,04H,06H,08H,0AH,0CH,0EH
+                DC.B    10H,10H,12H,14H,16H,18H,1AH,1CH
+                DC.B    1EH,20H,22H,24H,26H,28H,2AH,2CH
+                DC.B    2EH,2EH,30H,32H,34H,36H,38H,3AH
+;
+                DC.B    00H,02H,04H,06H,08H,0AH,0AH,0CH
+                DC.B    0EH,10H,12H,14H,16H,18H,1AH,1CH
+                DC.B    1EH,1EH,20H,22H,24H,26H,28H,2AH
+                DC.B    2CH,2EH,30H,30H,32H,34H,36H,38H
+;
+                DC.B    00H,02H,04H,06H,08H,08H,0AH,0CH
+                DC.B    0EH,10H,12H,14H,16H,16H,18H,1AH
+                DC.B    1CH,1EH,20H,22H,24H,24H,26H,28H
+                DC.B    2AH,2CH,2EH,30H,32H,32H,34H,36H
+;
+                DC.B    00H,02H,04H,06H,06H,08H,0AH,0CH
+                DC.B    0EH,10H,10H,12H,14H,16H,18H,1AH
+                DC.B    1CH,1CH,1EH,20H,22H,24H,26H,26H
+                DC.B    28H,2AH,2CH,2EH,30H,30H,32H,34H
+;
+                DC.B    00H,02H,04H,04H,06H,08H,0AH,0CH
+                DC.B    0EH,0EH,10H,12H,14H,16H,16H,18H
+                DC.B    1AH,1CH,1EH,1EH,20H,22H,24H,26H
+                DC.B    28H,28H,2AH,2CH,2EH,30H,30H,32H
+;
+                DC.B    00H,02H,04H,04H,06H,08H,0AH,0AH
+                DC.B    0CH,0EH,10H,12H,12H,14H,16H,18H
+                DC.B    1AH,1AH,1CH,1EH,20H,20H,22H,24H
+                DC.B    26H,28H,28H,2AH,2CH,2EH,2EH,30H
+;
+                DC.B    00H,02H,04H,04H,06H,08H,0AH,0AH
+                DC.B    0CH,0EH,10H,10H,12H,14H,16H,16H
+                DC.B    18H,1AH,1CH,1CH,1EH,20H,22H,22H
+                DC.B    24H,26H,28H,28H,2AH,2CH,2EH,2EH
+;
+                DC.B    00H,02H,02H,04H,06H,08H,08H,0AH
+                DC.B    0CH,0CH,0EH,10H,12H,12H,14H,16H
+                DC.B    18H,18H,1AH,1CH,1CH,1EH,20H,22H
+                DC.B    22H,24H,26H,26H,28H,2AH,2CH,2CH
+;
+                DC.B    00H,02H,02H,04H,06H,06H,08H,0AH
+                DC.B    0CH,0CH,0EH,10H,10H,12H,14H,14H
+                DC.B    16H,18H,18H,1AH,1CH,1CH,1EH,20H
+                DC.B    22H,22H,24H,26H,26H,28H,2AH,2AH
+;
+                DC.B    00H,02H,02H,04H,06H,06H,08H,0AH
+                DC.B    0AH,0CH,0EH,0EH,10H,12H,12H,14H
+                DC.B    16H,16H,18H,18H,1AH,1CH,1CH,1EH
+                DC.B    20H,20H,22H,24H,24H,26H,28H,28H
+;
+                DC.B    00H,02H,02H,04H,06H,06H,08H,08H
+                DC.B    0AH,0CH,0CH,0EH,10H,10H,12H,12H
+                DC.B    14H,16H,16H,18H,1AH,1AH,1CH,1CH
+                DC.B    1EH,20H,20H,22H,24H,24H,26H,26H
+;
+                DC.B    00H,02H,02H,04H,04H,06H,08H,08H
+                DC.B    0AH,0AH,0CH,0EH,0EH,10H,10H,12H
+                DC.B    14H,14H,16H,16H,18H,18H,1AH,1CH
+                DC.B    1CH,1EH,1EH,20H,22H,22H,24H,24H
+;
+                DC.B    00H,02H,02H,04H,04H,06H,06H,08H
+                DC.B    0AH,0AH,0CH,0CH,0EH,0EH,10H,10H
+                DC.B    12H,14H,14H,16H,16H,18H,18H,1AH
+                DC.B    1CH,1CH,1EH,1EH,20H,20H,22H,22H
+;
+                DC.B    00H,02H,02H,04H,04H,06H,06H,08H
+                DC.B    08H,0AH,0AH,0CH,0CH,0EH,0EH,10H
+                DC.B    12H,12H,14H,14H,16H,16H,18H,18H
+                DC.B    1AH,1AH,1CH,1CH,1EH,1EH,20H,20H
+;
+                DC.B    00H,02H,02H,04H,04H,06H,06H,08H
+                DC.B    08H,0AH,0AH,0CH,0CH,0EH,0EH,10H
+                DC.B    10H,12H,12H,14H,14H,16H,16H,18H
+                DC.B    18H,1AH,1AH,1CH,1CH,1EH,1EH,20H
+;
+                DC.B    00H,00H,02H,02H,04H,04H,06H,06H
+                DC.B    08H,08H,0AH,0AH,0CH,0CH,0EH,0EH
+                DC.B    10H,10H,10H,12H,12H,14H,14H,16H
+                DC.B    16H,18H,18H,1AH,1AH,1CH,1CH,1EH
+;
+                DC.B    00H,00H,02H,02H,04H,04H,06H,06H
+                DC.B    08H,08H,08H,0AH,0AH,0CH,0CH,0EH
+                DC.B    0EH,0EH,10H,10H,12H,12H,14H,14H
+                DC.B    16H,16H,16H,18H,18H,1AH,1AH,1CH
+;
+                DC.B    00H,00H,02H,02H,04H,04H,04H,06H
+                DC.B    06H,08H,08H,08H,0AH,0AH,0CH,0CH
+                DC.B    0EH,0EH,0EH,10H,10H,12H,12H,12H
+                DC.B    14H,14H,16H,16H,16H,18H,18H,1AH
+;
+                DC.B    00H,00H,02H,02H,04H,04H,04H,06H
+                DC.B    06H,06H,08H,08H,0AH,0AH,0AH,0CH
+                DC.B    0CH,0CH,0EH,0EH,10H,10H,10H,12H
+                DC.B    12H,12H,14H,14H,16H,16H,16H,18H
+;
+                DC.B    00H,00H,02H,02H,02H,04H,04H,04H
+                DC.B    06H,06H,06H,08H,08H,08H,0AH,0AH
+                DC.B    0CH,0CH,0CH,0EH,0EH,0EH,10H,10H
+                DC.B    10H,12H,12H,12H,14H,14H,14H,16H
+;
+                DC.B    00H,00H,02H,02H,02H,04H,04H,04H
+                DC.B    06H,06H,06H,06H,08H,08H,08H,0AH
+                DC.B    0AH,0AH,0CH,0CH,0CH,0EH,0EH,0EH
+                DC.B    10H,10H,10H,10H,12H,12H,12H,14H
+;
+                DC.B    00H,00H,02H,02H,02H,02H,04H,04H
+                DC.B    04H,06H,06H,06H,06H,08H,08H,08H
+                DC.B    0AH,0AH,0AH,0AH,0CH,0CH,0CH,0CH
+                DC.B    0EH,0EH,0EH,10H,10H,10H,10H,12H
+;
+                DC.B    00H,00H,02H,02H,02H,02H,04H,04H
+                DC.B    04H,04H,06H,06H,06H,06H,08H,08H
+                DC.B    08H,08H,0AH,0AH,0AH,0AH,0CH,0CH
+                DC.B    0CH,0CH,0EH,0EH,0EH,0EH,10H,10H
+;
+                DC.B    00H,00H,00H,02H,02H,02H,02H,04H
+                DC.B    04H,04H,04H,04H,06H,06H,06H,06H
+                DC.B    08H,08H,08H,08H,08H,0AH,0AH,0AH
+                DC.B    0AH,0AH,0CH,0CH,0CH,0CH,0EH,0EH
+;
+                DC.B    00H,00H,00H,02H,02H,02H,02H,02H
+                DC.B    04H,04H,04H,04H,04H,04H,06H,06H
+                DC.B    06H,06H,06H,08H,08H,08H,08H,08H
+                DC.B    0AH,0AH,0AH,0AH,0AH,0AH,0CH,0CH
+;
+                DC.B    00H,00H,00H,00H,02H,02H,02H,02H
+                DC.B    02H,02H,04H,04H,04H,04H,04H,04H
+                DC.B    06H,06H,06H,06H,06H,06H,06H,08H
+                DC.B    08H,08H,08H,08H,08H,0AH,0AH,0AH
+;
+                DC.B    00H,00H,00H,00H,02H,02H,02H,02H
+                DC.B    02H,02H,02H,02H,04H,04H,04H,04H
+                DC.B    04H,04H,04H,04H,06H,06H,06H,06H
+                DC.B    06H,06H,06H,06H,08H,08H,08H,08H
+;
+                DC.B    00H,00H,00H,00H,00H,00H,02H,02H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    04H,04H,04H,04H,04H,04H,04H,04H
+                DC.B    04H,04H,04H,06H,06H,06H,06H,06H
+;
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    04H,04H,04H,04H,04H,04H,04H,04H
+;
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+;
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+;
+FROM_MIN:
+*
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+;
+                DC.B    00H,00H,00H,00H,00H,00H,00H,00H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    04H,04H,04H,04H,04H,04H,04H,04H
+;
+                DC.B    00H,00H,00H,00H,00H,00H,02H,02H
+                DC.B    02H,02H,02H,02H,02H,02H,02H,02H
+                DC.B    04H,04H,04H,04H,04H,04H,04H,04H
+                DC.B    04H,04H,04H,06H,06H,06H,06H,06H
+;
+                DC.B    00H,00H,00H,00H,02H,02H,02H,02H
+                DC.B    02H,02H,02H,02H,04H,04H,04H,04H
+                DC.B    04H,04H,04H,04H,06H,06H,06H,06H
+                DC.B    06H,06H,06H,06H,08H,08H,08H,08H
+;
+                DC.B    00H,00H,00H,00H,02H,02H,02H,02H
+                DC.B    02H,02H,04H,04H,04H,04H,04H,04H
+                DC.B    06H,06H,06H,06H,06H,06H,06H,08H
+                DC.B    08H,08H,08H,08H,08H,0AH,0AH,0AH
+;
+                DC.B    00H,00H,00H,02H,02H,02H,02H,02H
+                DC.B    04H,04H,04H,04H,04H,04H,06H,06H
+                DC.B    06H,06H,06H,08H,08H,08H,08H,08H
+                DC.B    0AH,0AH,0AH,0AH,0AH,0AH,0CH,0CH
+;
+                DC.B    00H,00H,00H,02H,02H,02H,02H,04H
+                DC.B    04H,04H,04H,04H,06H,06H,06H,06H
+                DC.B    08H,08H,08H,08H,08H,0AH,0AH,0AH
+                DC.B    0AH,0AH,0CH,0CH,0CH,0CH,0EH,0EH
+;
+                DC.B    00H,00H,02H,02H,02H,02H,04H,04H
+                DC.B    04H,04H,06H,06H,06H,06H,08H,08H
+                DC.B    08H,08H,0AH,0AH,0AH,0AH,0CH,0CH
+                DC.B    0CH,0CH,0EH,0EH,0EH,0EH,10H,10H
+;
+                DC.B    00H,00H,02H,02H,02H,02H,04H,04H
+                DC.B    04H,06H,06H,06H,06H,08H,08H,08H
+                DC.B    0AH,0AH,0AH,0AH,0CH,0CH,0CH,0CH
+                DC.B    0EH,0EH,0EH,10H,10H,10H,10H,12H
+;
+                DC.B    00H,00H,02H,02H,02H,04H,04H,04H
+                DC.B    06H,06H,06H,06H,08H,08H,08H,0AH
+                DC.B    0AH,0AH,0CH,0CH,0CH,0EH,0EH,0EH
+                DC.B    10H,10H,10H,10H,12H,12H,12H,14H
+;
+                DC.B    00H,00H,02H,02H,02H,04H,04H,04H
+                DC.B    06H,06H,06H,08H,08H,08H,0AH,0AH
+                DC.B    0CH,0CH,0CH,0EH,0EH,0EH,10H,10H
+                DC.B    10H,12H,12H,12H,14H,14H,14H,16H
+;
+                DC.B    00H,00H,02H,02H,04H,04H,04H,06H
+                DC.B    06H,06H,08H,08H,0AH,0AH,0AH,0CH
+                DC.B    0CH,0CH,0EH,0EH,10H,10H,10H,12H
+                DC.B    12H,12H,14H,14H,16H,16H,16H,18H
+;
+                DC.B    00H,00H,02H,02H,04H,04H,04H,06H
+                DC.B    06H,08H,08H,08H,0AH,0AH,0CH,0CH
+                DC.B    0EH,0EH,0EH,10H,10H,12H,12H,12H
+                DC.B    14H,14H,16H,16H,16H,18H,18H,1AH
+;
+                DC.B    00H,00H,02H,02H,04H,04H,06H,06H
+                DC.B    08H,08H,08H,0AH,0AH,0CH,0CH,0EH
+                DC.B    0EH,0EH,10H,10H,12H,12H,14H,14H
+                DC.B    16H,16H,16H,18H,18H,1AH,1AH,1CH
+;
+                DC.B    00H,00H,02H,02H,04H,04H,06H,06H
+                DC.B    08H,08H,0AH,0AH,0CH,0CH,0EH,0EH
+                DC.B    10H,10H,10H,12H,12H,14H,14H,16H
+                DC.B    16H,18H,18H,1AH,1AH,1CH,1CH,1EH
+;
+                DC.B    00H,02H,02H,04H,04H,06H,06H,08H
+                DC.B    08H,0AH,0AH,0CH,0CH,0EH,0EH,10H
+                DC.B    10H,12H,12H,14H,14H,16H,16H,18H
+                DC.B    18H,1AH,1AH,1CH,1CH,1EH,1EH,20H
+;
+                DC.B    00H,02H,02H,04H,04H,06H,06H,08H
+                DC.B    08H,0AH,0AH,0CH,0CH,0EH,0EH,10H
+                DC.B    12H,12H,14H,14H,16H,16H,18H,18H
+                DC.B    1AH,1AH,1CH,1CH,1EH,1EH,20H,20H
+;
+                DC.B    00H,02H,02H,04H,04H,06H,06H,08H
+                DC.B    0AH,0AH,0CH,0CH,0EH,0EH,10H,10H
+                DC.B    12H,14H,14H,16H,16H,18H,18H,1AH
+                DC.B    1CH,1CH,1EH,1EH,20H,20H,22H,22H
+;
+                DC.B    00H,02H,02H,04H,04H,06H,08H,08H
+                DC.B    0AH,0AH,0CH,0EH,0EH,10H,10H,12H
+                DC.B    14H,14H,16H,16H,18H,18H,1AH,1CH
+                DC.B    1CH,1EH,1EH,20H,22H,22H,24H,24H
+;
+                DC.B    00H,02H,02H,04H,06H,06H,08H,08H
+                DC.B    0AH,0CH,0CH,0EH,10H,10H,12H,12H
+                DC.B    14H,16H,16H,18H,1AH,1AH,1CH,1CH
+                DC.B    1EH,20H,20H,22H,24H,24H,26H,26H
+;
+                DC.B    00H,02H,02H,04H,06H,06H,08H,0AH
+                DC.B    0AH,0CH,0EH,0EH,10H,12H,12H,14H
+                DC.B    16H,16H,18H,18H,1AH,1CH,1CH,1EH
+                DC.B    20H,20H,22H,24H,24H,26H,28H,28H
+;
+                DC.B    00H,02H,02H,04H,06H,06H,08H,0AH
+                DC.B    0CH,0CH,0EH,10H,10H,12H,14H,14H
+                DC.B    16H,18H,18H,1AH,1CH,1CH,1EH,20H
+                DC.B    22H,22H,24H,26H,26H,28H,2AH,2AH
+;
+                DC.B    00H,02H,02H,04H,06H,08H,08H,0AH
+                DC.B    0CH,0CH,0EH,10H,12H,12H,14H,16H
+                DC.B    18H,18H,1AH,1CH,1CH,1EH,20H,22H
+                DC.B    22H,24H,26H,26H,28H,2AH,2CH,2CH
+;
+                DC.B    00H,02H,04H,04H,06H,08H,0AH,0AH
+                DC.B    0CH,0EH,10H,10H,12H,14H,16H,16H
+                DC.B    18H,1AH,1CH,1CH,1EH,20H,22H,22H
+                DC.B    24H,26H,28H,28H,2AH,2CH,2EH,2EH
+;
+                DC.B    00H,02H,04H,04H,06H,08H,0AH,0AH
+                DC.B    0CH,0EH,10H,12H,12H,14H,16H,18H
+                DC.B    1AH,1AH,1CH,1EH,20H,20H,22H,24H
+                DC.B    26H,28H,28H,2AH,2CH,2EH,2EH,30H
+;
+                DC.B    00H,02H,04H,04H,06H,08H,0AH,0CH
+                DC.B    0EH,0EH,10H,12H,14H,16H,16H,18H
+                DC.B    1AH,1CH,1EH,1EH,20H,22H,24H,26H
+                DC.B    28H,28H,2AH,2CH,2EH,30H,30H,32H
+;
+                DC.B    00H,02H,04H,06H,06H,08H,0AH,0CH
+                DC.B    0EH,10H,10H,12H,14H,16H,18H,1AH
+                DC.B    1CH,1CH,1EH,20H,22H,24H,26H,26H
+                DC.B    28H,2AH,2CH,2EH,30H,30H,32H,34H
+;
+                DC.B    00H,02H,04H,06H,08H,08H,0AH,0CH
+                DC.B    0EH,10H,12H,14H,16H,16H,18H,1AH
+                DC.B    1CH,1EH,20H,22H,24H,24H,26H,28H
+                DC.B    2AH,2CH,2EH,30H,32H,32H,34H,36H
+;
+                DC.B    00H,02H,04H,06H,08H,0AH,0AH,0CH
+                DC.B    0EH,10H,12H,14H,16H,18H,1AH,1CH
+                DC.B    1EH,1EH,20H,22H,24H,26H,28H,2AH
+                DC.B    2CH,2EH,30H,30H,32H,34H,36H,38H
+;
+                DC.B    00H,02H,04H,06H,08H,0AH,0CH,0EH
+                DC.B    10H,10H,12H,14H,16H,18H,1AH,1CH
+                DC.B    1EH,20H,22H,24H,26H,28H,2AH,2CH
+                DC.B    2EH,2EH,30H,32H,34H,36H,38H,3AH
+;
+                DC.B    00H,02H,04H,06H,08H,0AH,0CH,0EH
+                DC.B    10H,12H,14H,16H,18H,1AH,1CH,1EH
+                DC.B    20H,20H,22H,24H,26H,28H,2AH,2CH
+                DC.B    2EH,30H,32H,34H,36H,38H,3AH,3CH
+;
+                DC.B    00H,02H,04H,06H,08H,0AH,0CH,0EH
+                DC.B    10H,12H,14H,16H,18H,1AH,1CH,1EH
+                DC.B    20H,22H,24H,26H,28H,2AH,2CH,2EH
+                DC.B    30H,32H,34H,36H,38H,3AH,3CH,3EH
+;
+TO_MAX:
+*
+                DC.B    02H,04H,06H,08H,0AH,0CH,0EH,10H
+                DC.B    12H,14H,16H,18H,1AH,1CH,1EH,20H
+                DC.B    20H,22H,24H,26H,28H,2AH,2CH,2EH
+                DC.B    30H,32H,34H,36H,38H,3AH,3CH,3EH
+;
+                DC.B    04H,06H,08H,0AH,0CH,0EH,10H,12H
+                DC.B    12H,14H,16H,18H,1AH,1CH,1EH,20H
+                DC.B    22H,24H,26H,28H,2AH,2CH,2EH,30H
+                DC.B    30H,32H,34H,36H,38H,3AH,3CH,3EH
+;
+                DC.B    06H,08H,0AH,0CH,0EH,0EH,10H,12H
+                DC.B    14H,16H,18H,1AH,1CH,1EH,20H,22H
+                DC.B    22H,24H,26H,28H,2AH,2CH,2EH,30H
+                DC.B    32H,34H,34H,36H,38H,3AH,3CH,3EH
+;
+                DC.B    08H,0AH,0CH,0EH,0EH,10H,12H,14H
+                DC.B    16H,18H,1AH,1CH,1CH,1EH,20H,22H
+                DC.B    24H,26H,28H,2AH,2AH,2CH,2EH,30H
+                DC.B    32H,34H,36H,38H,38H,3AH,3CH,3EH
+;
+                DC.B    0AH,0CH,0EH,0EH,10H,12H,14H,16H
+                DC.B    18H,18H,1AH,1CH,1EH,20H,22H,24H
+                DC.B    24H,26H,28H,2AH,2CH,2EH,2EH,30H
+                DC.B    32H,34H,36H,38H,38H,3AH,3CH,3EH
+;
+                DC.B    0CH,0EH,0EH,10H,12H,14H,16H,18H
+                DC.B    18H,1AH,1CH,1EH,20H,20H,22H,24H
+                DC.B    26H,28H,28H,2AH,2CH,2EH,30H,32H
+                DC.B    32H,34H,36H,38H,3AH,3AH,3CH,3EH
+;
+                DC.B    0EH,10H,10H,12H,14H,16H,16H,18H
+                DC.B    1AH,1CH,1EH,1EH,20H,22H,24H,26H
+                DC.B    26H,28H,2AH,2CH,2CH,2EH,30H,32H
+                DC.B    34H,34H,36H,38H,3AH,3AH,3CH,3EH
+;
+                DC.B    10H,12H,12H,14H,16H,18H,18H,1AH
+                DC.B    1CH,1EH,1EH,20H,22H,24H,24H,26H
+                DC.B    28H,2AH,2AH,2CH,2EH,30H,30H,32H
+                DC.B    34H,36H,36H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    12H,12H,14H,16H,18H,18H,1AH,1CH
+                DC.B    1CH,1EH,20H,22H,22H,24H,26H,28H
+                DC.B    28H,2AH,2CH,2CH,2EH,30H,32H,32H
+                DC.B    34H,36H,36H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    14H,14H,16H,18H,18H,1AH,1CH,1EH
+                DC.B    1EH,20H,22H,22H,24H,26H,26H,28H
+                DC.B    2AH,2AH,2CH,2EH,2EH,30H,32H,34H
+                DC.B    34H,36H,38H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    16H,16H,18H,1AH,1AH,1CH,1EH,1EH
+                DC.B    20H,22H,22H,24H,26H,26H,28H,2AH
+                DC.B    2AH,2CH,2CH,2EH,30H,30H,32H,34H
+                DC.B    34H,36H,38H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    18H,18H,1AH,1CH,1CH,1EH,1EH,20H
+                DC.B    22H,22H,24H,26H,26H,28H,28H,2AH
+                DC.B    2CH,2CH,2EH,30H,30H,32H,32H,34H
+                DC.B    36H,36H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    1AH,1AH,1CH,1CH,1EH,20H,20H,22H
+                DC.B    22H,24H,26H,26H,28H,28H,2AH,2CH
+                DC.B    2CH,2EH,2EH,30H,30H,32H,34H,34H
+                DC.B    36H,36H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    1CH,1CH,1EH,1EH,20H,20H,22H,24H
+                DC.B    24H,26H,26H,28H,28H,2AH,2AH,2CH
+                DC.B    2EH,2EH,30H,30H,32H,32H,34H,36H
+                DC.B    36H,38H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    1EH,1EH,20H,20H,22H,22H,24H,24H
+                DC.B    26H,26H,28H,28H,2AH,2AH,2CH,2EH
+                DC.B    2EH,30H,30H,32H,32H,34H,34H,36H
+                DC.B    36H,38H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    20H,20H,22H,22H,24H,24H,26H,26H
+                DC.B    28H,28H,2AH,2AH,2CH,2CH,2EH,2EH
+                DC.B    30H,30H,32H,32H,34H,34H,36H,36H
+                DC.B    38H,38H,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    20H,22H,22H,24H,24H,26H,26H,28H
+                DC.B    28H,2AH,2AH,2CH,2CH,2EH,2EH,30H
+                DC.B    30H,30H,32H,32H,34H,34H,36H,36H
+                DC.B    38H,38H,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    22H,24H,24H,26H,26H,28H,28H,2AH
+                DC.B    2AH,2AH,2CH,2CH,2EH,2EH,30H,30H
+                DC.B    30H,32H,32H,34H,34H,36H,36H,38H
+                DC.B    38H,38H,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    24H,26H,26H,28H,28H,28H,2AH,2AH
+                DC.B    2CH,2CH,2CH,2EH,2EH,30H,30H,32H
+                DC.B    32H,32H,34H,34H,36H,36H,36H,38H
+                DC.B    38H,3AH,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    26H,28H,28H,2AH,2AH,2AH,2CH,2CH
+                DC.B    2CH,2EH,2EH,30H,30H,30H,32H,32H
+                DC.B    32H,34H,34H,36H,36H,36H,38H,38H
+                DC.B    38H,3AH,3AH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    28H,2AH,2AH,2AH,2CH,2CH,2CH,2EH
+                DC.B    2EH,2EH,30H,30H,30H,32H,32H,34H
+                DC.B    34H,34H,36H,36H,36H,38H,38H,38H
+                DC.B    3AH,3AH,3AH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    2AH,2CH,2CH,2CH,2EH,2EH,2EH,30H
+                DC.B    30H,30H,30H,32H,32H,32H,34H,34H
+                DC.B    34H,36H,36H,36H,38H,38H,38H,3AH
+                DC.B    3AH,3AH,3AH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    2CH,2EH,2EH,2EH,2EH,30H,30H,30H
+                DC.B    32H,32H,32H,32H,34H,34H,34H,36H
+                DC.B    36H,36H,36H,38H,38H,38H,38H,3AH
+                DC.B    3AH,3AH,3CH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    2EH,30H,30H,30H,30H,32H,32H,32H
+                DC.B    32H,34H,34H,34H,34H,36H,36H,36H
+                DC.B    36H,38H,38H,38H,38H,3AH,3AH,3AH
+                DC.B    3AH,3CH,3CH,3CH,3CH,3EH,3EH,3EH
+;
+                DC.B    30H,30H,32H,32H,32H,32H,34H,34H
+                DC.B    34H,34H,34H,36H,36H,36H,36H,38H
+                DC.B    38H,38H,38H,38H,3AH,3AH,3AH,3AH
+                DC.B    3AH,3CH,3CH,3CH,3CH,3EH,3EH,3EH
+;
+                DC.B    32H,32H,34H,34H,34H,34H,34H,36H
+                DC.B    36H,36H,36H,36H,36H,38H,38H,38H
+                DC.B    38H,38H,3AH,3AH,3AH,3AH,3AH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3EH,3EH,3EH
+;
+                DC.B    34H,34H,34H,36H,36H,36H,36H,36H
+                DC.B    36H,38H,38H,38H,38H,38H,38H,3AH
+                DC.B    3AH,3AH,3AH,3AH,3AH,3AH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3EH,3EH,3EH,3EH
+;
+                DC.B    36H,36H,36H,38H,38H,38H,38H,38H
+                DC.B    38H,38H,38H,3AH,3AH,3AH,3AH,3AH
+                DC.B    3AH,3AH,3AH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    38H,38H,38H,38H,38H,3AH,3AH,3AH
+                DC.B    3AH,3AH,3AH,3AH,3AH,3AH,3AH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    3AH,3AH,3AH,3AH,3AH,3AH,3AH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+FROM_MAX:
+*
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    3AH,3AH,3AH,3AH,3AH,3AH,3AH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3EH
+                DC.B    3EH,3EH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    38H,38H,38H,38H,38H,3AH,3AH,3AH
+                DC.B    3AH,3AH,3AH,3AH,3AH,3AH,3AH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3EH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    36H,36H,36H,38H,38H,38H,38H,38H
+                DC.B    38H,38H,38H,3AH,3AH,3AH,3AH,3AH
+                DC.B    3AH,3AH,3AH,3CH,3CH,3CH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3EH,3EH,3EH,3EH,3EH
+;
+                DC.B    34H,34H,34H,36H,36H,36H,36H,36H
+                DC.B    36H,38H,38H,38H,38H,38H,38H,3AH
+                DC.B    3AH,3AH,3AH,3AH,3AH,3AH,3CH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3EH,3EH,3EH,3EH
+;
+                DC.B    32H,32H,34H,34H,34H,34H,34H,36H
+                DC.B    36H,36H,36H,36H,36H,38H,38H,38H
+                DC.B    38H,38H,3AH,3AH,3AH,3AH,3AH,3CH
+                DC.B    3CH,3CH,3CH,3CH,3CH,3EH,3EH,3EH
+;
+                DC.B    30H,30H,32H,32H,32H,32H,34H,34H
+                DC.B    34H,34H,34H,36H,36H,36H,36H,38H
+                DC.B    38H,38H,38H,38H,3AH,3AH,3AH,3AH
+                DC.B    3AH,3CH,3CH,3CH,3CH,3EH,3EH,3EH
+;
+                DC.B    2EH,30H,30H,30H,30H,32H,32H,32H
+                DC.B    32H,34H,34H,34H,34H,36H,36H,36H
+                DC.B    36H,38H,38H,38H,38H,3AH,3AH,3AH
+                DC.B    3AH,3CH,3CH,3CH,3CH,3EH,3EH,3EH
+;
+                DC.B    2CH,2EH,2EH,2EH,2EH,30H,30H,30H
+                DC.B    32H,32H,32H,32H,34H,34H,34H,36H
+                DC.B    36H,36H,36H,38H,38H,38H,38H,3AH
+                DC.B    3AH,3AH,3CH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    2AH,2CH,2CH,2CH,2EH,2EH,2EH,30H
+                DC.B    30H,30H,30H,32H,32H,32H,34H,34H
+                DC.B    34H,36H,36H,36H,38H,38H,38H,3AH
+                DC.B    3AH,3AH,3AH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    28H,2AH,2AH,2AH,2CH,2CH,2CH,2EH
+                DC.B    2EH,2EH,30H,30H,30H,32H,32H,34H
+                DC.B    34H,34H,36H,36H,36H,38H,38H,38H
+                DC.B    3AH,3AH,3AH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    26H,28H,28H,2AH,2AH,2AH,2CH,2CH
+                DC.B    2CH,2EH,2EH,30H,30H,30H,32H,32H
+                DC.B    32H,34H,34H,36H,36H,36H,38H,38H
+                DC.B    38H,3AH,3AH,3CH,3CH,3CH,3EH,3EH
+;
+                DC.B    24H,26H,26H,28H,28H,28H,2AH,2AH
+                DC.B    2CH,2CH,2CH,2EH,2EH,30H,30H,32H
+                DC.B    32H,32H,34H,34H,36H,36H,36H,38H
+                DC.B    38H,3AH,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    22H,24H,24H,26H,26H,28H,28H,2AH
+                DC.B    2AH,2AH,2CH,2CH,2EH,2EH,30H,30H
+                DC.B    30H,32H,32H,34H,34H,36H,36H,38H
+                DC.B    38H,38H,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    20H,22H,22H,24H,24H,26H,26H,28H
+                DC.B    28H,2AH,2AH,2CH,2CH,2EH,2EH,30H
+                DC.B    30H,30H,32H,32H,34H,34H,36H,36H
+                DC.B    38H,38H,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    20H,20H,22H,22H,24H,24H,26H,26H
+                DC.B    28H,28H,2AH,2AH,2CH,2CH,2EH,2EH
+                DC.B    30H,30H,32H,32H,34H,34H,36H,36H
+                DC.B    38H,38H,3AH,3AH,3CH,3CH,3EH,3EH
+;
+                DC.B    1EH,1EH,20H,20H,22H,22H,24H,24H
+                DC.B    26H,26H,28H,28H,2AH,2AH,2CH,2EH
+                DC.B    2EH,30H,30H,32H,32H,34H,34H,36H
+                DC.B    36H,38H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    1CH,1CH,1EH,1EH,20H,20H,22H,24H
+                DC.B    24H,26H,26H,28H,28H,2AH,2AH,2CH
+                DC.B    2EH,2EH,30H,30H,32H,32H,34H,36H
+                DC.B    36H,38H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    1AH,1AH,1CH,1CH,1EH,20H,20H,22H
+                DC.B    22H,24H,26H,26H,28H,28H,2AH,2CH
+                DC.B    2CH,2EH,2EH,30H,30H,32H,34H,34H
+                DC.B    36H,36H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    18H,18H,1AH,1CH,1CH,1EH,1EH,20H
+                DC.B    22H,22H,24H,26H,26H,28H,28H,2AH
+                DC.B    2CH,2CH,2EH,30H,30H,32H,32H,34H
+                DC.B    36H,36H,38H,3AH,3AH,3CH,3CH,3EH
+;
+                DC.B    16H,16H,18H,1AH,1AH,1CH,1EH,1EH
+                DC.B    20H,22H,22H,24H,26H,26H,28H,2AH
+                DC.B    2AH,2CH,2CH,2EH,30H,30H,32H,34H
+                DC.B    34H,36H,38H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    14H,14H,16H,18H,18H,1AH,1CH,1EH
+                DC.B    1EH,20H,22H,22H,24H,26H,26H,28H
+                DC.B    2AH,2AH,2CH,2EH,2EH,30H,32H,34H
+                DC.B    34H,36H,38H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    12H,12H,14H,16H,18H,18H,1AH,1CH
+                DC.B    1CH,1EH,20H,22H,22H,24H,26H,28H
+                DC.B    28H,2AH,2CH,2CH,2EH,30H,32H,32H
+                DC.B    34H,36H,36H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    10H,12H,12H,14H,16H,18H,18H,1AH
+                DC.B    1CH,1EH,1EH,20H,22H,24H,24H,26H
+                DC.B    28H,2AH,2AH,2CH,2EH,30H,30H,32H
+                DC.B    34H,36H,36H,38H,3AH,3CH,3CH,3EH
+;
+                DC.B    0EH,10H,10H,12H,14H,16H,16H,18H
+                DC.B    1AH,1CH,1EH,1EH,20H,22H,24H,26H
+                DC.B    26H,28H,2AH,2CH,2CH,2EH,30H,32H
+                DC.B    34H,34H,36H,38H,3AH,3AH,3CH,3EH
+;
+                DC.B    0CH,0EH,0EH,10H,12H,14H,16H,18H
+                DC.B    18H,1AH,1CH,1EH,20H,20H,22H,24H
+                DC.B    26H,28H,28H,2AH,2CH,2EH,30H,32H
+                DC.B    32H,34H,36H,38H,3AH,3AH,3CH,3EH
+;
+                DC.B    0AH,0CH,0EH,0EH,10H,12H,14H,16H
+                DC.B    18H,18H,1AH,1CH,1EH,20H,22H,24H
+                DC.B    24H,26H,28H,2AH,2CH,2EH,2EH,30H
+                DC.B    32H,34H,36H,38H,38H,3AH,3CH,3EH
+;
+                DC.B    08H,0AH,0CH,0EH,0EH,10H,12H,14H
+                DC.B    16H,18H,1AH,1CH,1CH,1EH,20H,22H
+                DC.B    24H,26H,28H,2AH,2AH,2CH,2EH,30H
+                DC.B    32H,34H,36H,38H,38H,3AH,3CH,3EH
+;
+                DC.B    06H,08H,0AH,0CH,0EH,0EH,10H,12H
+                DC.B    14H,16H,18H,1AH,1CH,1EH,20H,22H
+                DC.B    22H,24H,26H,28H,2AH,2CH,2EH,30H
+                DC.B    32H,34H,34H,36H,38H,3AH,3CH,3EH
+;
+                DC.B    04H,06H,08H,0AH,0CH,0EH,10H,12H
+                DC.B    12H,14H,16H,18H,1AH,1CH,1EH,20H
+                DC.B    22H,24H,26H,28H,2AH,2CH,2EH,30H
+                DC.B    30H,32H,34H,36H,38H,3AH,3CH,3EH
+;
+                DC.B    02H,04H,06H,08H,0AH,0CH,0EH,10H
+                DC.B    12H,14H,16H,18H,1AH,1CH,1EH,20H
+                DC.B    20H,22H,24H,26H,28H,2AH,2CH,2EH
+                DC.B    30H,32H,34H,36H,38H,3AH,3CH,3EH
+;
+
+
+
+		INCLUDE	WORK.INC
+
+
+
+

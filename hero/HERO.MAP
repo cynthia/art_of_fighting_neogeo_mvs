@@ -1,0 +1,94 @@
+            Microtec Research Lod68K V6.4a         Wed Sep 02 20:42:43 1992
+
+Command line: A:\68K\ASM\LOD68K.EXE  @HERO,HERO,HERO 
+
+LIST D,S
+*MAKE  ABS HEROL
+*MAKE  @echo .
+*MAKE  @echo .
+
+*MAKE !if $d(WORK)
+*MAKE WORK=WORK.INC
+*MAKE !endif
+
+*MAKE !if $d(LABEL)
+*MAKE LABEL=LABEL.INC
+*MAKE !endif
+
+*MAKE !if $d(ACT_No)
+*MAKE ACT_No=ACT_No.INC
+*MAKE !endif
+
+*MAKE !if $d(CTRL_No)
+*MAKE CTRL_No=CTRL_No.INC
+*MAKE !endif
+
+*MAKE !if $d(GAME_SYM)
+*MAKE GAME_SYM=GAME_SYM.INC
+*MAKE !endif
+
+*MAKE !if $d(SCODE)
+*MAKE SCODE=SCODE.INC
+*MAKE !endif
+
+SECT HERO=12000H
+
+COMMON WORK=100000H
+INDEX ?A5,WORK,8000H
+
+LOAD GAME_SYM
+LOAD HERO_TBL
+LOAD HERO,MOVE_CHG,HERO_SET,HERO_ST2,DMG_SET,HERO_PM
+LOAD HERO_CML
+LOAD ATTACK
+
+END
+            Microtec Research Lod68K V6.4a         Wed Sep 02 20:42:43 1992
+
+
+
+OUTPUT MODULE NAME:    HERO
+OUTPUT MODULE FORMAT:  MOTOROLA S2
+
+
+SECTION SUMMARY
+---------------
+
+SECTION    ATTRIBUTE                   START      END        LENGTH     ALIGN
+
+HERO       NORMAL CODE                 00012000   0001894B   0000694C   2 (WORD)  
+WORK       COMMON                      00100000   0010FFFF   00010000   2 (WORD)  
+
+
+MODULE SUMMARY
+--------------
+
+MODULE         SECTION:START        SECTION:END       FILE
+
+GAME_SYM             0:                   0:          B:\044\GAME_SYM.OBJ   
+HERO_TBL          HERO:00012000        HERO:000120C5  B:\044\HERO_TBL.OBJ   
+HERO              HERO:000120C6        HERO:00013911  B:\044\HERO.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+MOVE_CHG          HERO:00013912        HERO:00014557  B:\044\MOVE_CHG.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+HERO_SET          HERO:00014558        HERO:0001552F  B:\044\HERO_SET.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+HERO_ST2          HERO:00015530        HERO:0001601F  B:\044\HERO_ST2.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+DMG_SET           HERO:00016020        HERO:00016D59  B:\044\DMG_SET.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+HERO_PM           HERO:00016D5A        HERO:000175F3  B:\044\HERO_PM.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+HERO_CML          HERO:000175F4        HERO:000178A3  B:\044\HERO_CML.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+ATTACK            HERO:000178A4        HERO:0001894B  B:\044\ATTACK.OBJ   
+
+
+
+START ADDRESS:   00000000
+
+
+Load Completed 
+
+
+ Errors: 0, Warnings: 0

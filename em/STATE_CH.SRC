@@ -1,0 +1,221 @@
+;************************************************************************
+;*									*
+;*		*HK3 STATE_CONDITION SEARCHING PROGRAM			*
+;*					presented by k.morikawa		*
+;*						1992/5/1~		*
+;************************************************************************
+
+		XREF	?A5
+
+		SECT	HK3,,C
+
+;by HK3_SET
+		XREF	SPECIAL_ADRS_SET,ACT_DATA_SET
+
+;by HK3_SUB
+		XREF	SET_RD16,ACT_TYPE_READ
+		XREF	TYPE1_SET,TYPE2_SET
+;by EM_DATA
+		XREF	DEFENCE_TBL
+;by HK3_SET
+		XREF	TBL_ADRS_SET
+
+		INCLUDE	LABEL.INC
+		INCLUDE	HFLAG.INC
+		INCLUDE	EM_MAC2.INC
+
+;************************************************************************
+
+	XDEF	SPECIAL_STATE_CHK
+;
+;	special_attack checker
+;
+SPECIAL_STATE_CHK:
+		MOVE.W	#11011111B,D0
+		AND.B	HERO_STATE+HERO_OFFSET(A6),D0
+		BNE	SP_STA_SKIP
+
+		MOVE.B	NOW_STATE(A6),D0
+		BEQ	NEXT_AT_CHECK
+		BPL	NEXT_AT_CHECK
+
+		ANDI.W	#7FH,D0
+		MOVE.B	SP_PRIO(PC,D0.W),D2
+		CMP.B	SPEED_RANK(A6),D2
+		BLS	NEXT_AT_CHECK
+
+		MOVE.B	D2,SPEED_RANK(A6)
+		MOVE.B	D0,TEST_R+1(A5)
+		MOVE.B	D0,STATE_MODE(A6)
+
+		JSR	SPECIAL_ADRS_SET
+
+		CLR.B	STATE_CNT(A6)
+		MOVEQ.L	#1,D0
+		RTS
+SP_STA_SKIP:
+NEXT_AT_CHECK:
+		MOVEQ.L	#0,D0
+		RTS
+
+SP_PRIO:
+;			   80 81 82 83 84 85 86 87 88 89 8A
+		DC.B	00,08,09,10,11,06,01,06,05,04,02,03
+
+		DS.W	0
+
+SPECIAL_TEST:;	0:1:2:3:4:5:6:7
+	DC.B	0,0,0,0,0,0,0,0
+	DC.B	0,0,1,1,0,0,0,0
+
+;************************************************************************
+
+	XDEF	ATTACK_STATE_CHK
+;
+;	*attack_state checker
+;
+ATTACK_STATE_CHK:
+;		BTST.B	#SPECIAL_MODE,PLAYER_CONTROL(A6)
+;		BNE	NEXT_SPSTA_CHK
+;
+		TST	NOW_STATE(A6)
+		BEQ	NEXT_SPSTA_CHK
+		BMI	NEXT_SPSTA_CHK
+
+		JSR	AT_BIT_CHK(PC)
+		BEQ	NEXT_SPSTA_CHK
+
+		MOVE.L	ANOTHER_PLAYER(A6),A0
+		MOVE	HERO_TYPE+HERO_OFFSET(A0),D0
+		D0R_ADD
+		LEA	DEFENCE_TBL,A0
+		MOVE.L	(A0,D0),A0
+
+		MOVE	HERO_TYPE+HERO_OFFSET(A6),D0
+		SUB.B 	#2,D0
+
+		LSL	#5,D0		;defence_tbl top_address
+		MOVEQ.L	#0,D1
+		MOVE.B	NOW_STATE(A6),D1
+		MOVE.B	D1,STATE_MODE(A6)
+		MOVE.B	D1,TEST_R+1(A5)
+		SUB	#7,D1
+
+		ADD	D1,D1
+		ADD	D1,D0
+		ADDA	(A0,D0),A0
+		ADDA	D0,A0
+		MOVE.L	A0,ACTION_ADRS(A6)
+
+		JSR	TBL_ADRS_SET
+
+		MOVE.W	#0,ACT_COM(A6)
+		ANDI.B	#11000111B,PLAYER_CONTROL(A6)
+		MOVEQ.L	#1,D0
+		RTS
+NEXT_SPSTA_CHK:
+		MOVEQ.L	#0,D0
+		RTS
+
+;************************************************************************
+
+		XDEF	PLAYER_SCLIM_CHECK
+;
+;		* screen limit checker program
+;						1992/5/1
+PLAYER_SCLIM_CHECK:
+		MOVE	X_POSITION+HERO_OFFSET(A1),D3
+		CMP	#70H,D3
+		BLT	PL_SCLIM_SET
+
+		CMP	#02A0H,D3
+		BCC	PL_SCLIM_SET	;screen_check
+PLAYER_STA_NEXT:
+		MOVEQ.L	#0,D3
+		RTS
+PL_SCLIM_SET:
+		MOVEQ.L	#1,D3
+		RTS
+
+;************************************************************************
+  
+		XDEF	SCREEN_LIM_CHECK
+;
+;		* screen limit checker program
+;						1992/5/1
+SCREEN_LIM_CHECK:
+		MOVEQ.L	#0,D0
+		RTS
+
+		CMP.B	#6,STATE_MODE(A6)
+		BEQ	STA_NML_NEXT
+
+		BTST.B	#SPECIAL_MODE,PLAYER_CONTROL(A6)
+		BNE	STA_NML_NEXT
+
+		MOVE	X_POSITION+HERO_OFFSET(A6),D0
+		CMP	#70H,D0
+		BLT	LIMIT_SEARCH
+
+		CMP	#02A0H,D0
+		BCC	LIMIT_SEARCH	;screen_check
+STA_NML_NEXT:
+		MOVEQ.L	#0,D0
+		RTS
+LIMIT_SEARCH:
+		MOVE.B	#6,STATE_MODE(A6)
+
+		JSR	SPECIAL_ADRS_SET
+
+		MOVEQ.L	#1,D0
+		RTS
+
+;************************************************************************
+  
+		XDEF	PLAYER_SCLIM_CHK
+;
+;		* screen limit checker program
+;						1992/5/1
+PLAYER_SCLIM_CHK:
+		MOVE	X_POSITION+HERO_OFFSET(A1),D0
+		CMP	#70H,D0
+		BLT	PL_STA_NEXT
+
+		CMP	#02A0H,D0
+		BCC	PL_STA_NEXT	;screen_check
+SP_NEXT:
+		MOVEQ.L	#0,D0
+		RTS
+PL_STA_NEXT:
+		MOVEQ.L	#1,D0
+		RTS
+
+;************************************************************************
+
+		XDEF	AT_BIT_CHK
+;
+;	*return_resista :D3(equal => skip : not_equal => set defence)
+;
+AT_BIT_CHK:
+		MOVEQ.L	#0,D3
+		TST.B	NOW_STATE(A6)
+		BMI	AT_BIT_2
+		BEQ	AT_BIT_2
+
+		MOVE.L	ANOTHER_PLAYER(A6),A2
+
+		CLR.W	(A5)
+		MOVE.B	WORK_N0+HERO_OFFSET(A2),(A5)
+		MOVE.W	(A5),D0
+		CLR.W	(A5)
+		BTST.B	#4,ACT_FLAG(A5,D0)
+		SEQ	D3
+AT_BIT_1:
+		ADDQ.B	#1,D3
+AT_BIT_2:
+		RTS
+
+;************************************************************************
+		INCLUDE	WORK.INC
+;************************************************************************
+

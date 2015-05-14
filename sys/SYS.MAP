@@ -1,0 +1,77 @@
+            Microtec Research Lod68K V6.4a         Wed Aug 26 09:41:46 1992
+
+Command line: A:\68K\ASM\LOD68K.EXE  @SYS,SYS,SYS 
+
+LIST D
+*MAKE  ABS SYSL
+*MAKE  @echo .
+*MAKE  @echo .
+
+*MAKE !if $d(WORK)
+*MAKE WORK=WORK.INC
+*MAKE !endif
+
+*MAKE !if $d(LABEL)
+*MAKE LABEL=LABEL.INC
+*MAKE !endif
+
+*MAKE !if $d(NEO_GEO)
+*MAKE NEO_GEO=NEO_GEO.INC
+*MAKE !endif
+
+*MAKE !if $d(MACRO)
+*MAKE MACRO=MACRO.INC
+*MAKE !endif
+
+*MAKE !if $d(SCODE)
+*MAKE SCODE=SCODE.INC
+*MAKE !endif
+
+SECT SYS=0A00H
+COMMON WORK=100000H
+INDEX ?A5,WORK,8000H
+LOAD PAL_COM,ACTION,SUB,SOUND,FIX
+END
+            Microtec Research Lod68K V6.4a         Wed Aug 26 09:41:46 1992
+
+
+
+OUTPUT MODULE NAME:    SYS
+OUTPUT MODULE FORMAT:  MOTOROLA S2
+
+
+SECTION SUMMARY
+---------------
+
+SECTION    ATTRIBUTE                   START      END        LENGTH     ALIGN
+
+SYS        SHORT CODE                  00000A00   00004F3B   0000453C   2 (WORD)  
+WORK       COMMON                      00100000   0010FFFF   00010000   2 (WORD)  
+
+
+MODULE SUMMARY
+--------------
+
+MODULE         SECTION:START        SECTION:END       FILE
+
+PAL_COM            SYS:00000A00         SYS:00001F13  B:\044\PAL_COM.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+ACTION             SYS:00001F14         SYS:0000401D  B:\044\ACTION.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+SUB                SYS:0000401E         SYS:000044BD  B:\044\SUB.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+SOUND              SYS:000044BE         SYS:00004951  B:\044\SOUND.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+FIX                  0:                   0:          B:\044\FIX.OBJ   
+                   SYS:00004952         SYS:00004F3B      
+                  WORK:00100000        WORK:0010FFFF      
+
+
+
+START ADDRESS:   00000000
+
+
+Load Completed 
+
+
+ Errors: 0, Warnings: 0

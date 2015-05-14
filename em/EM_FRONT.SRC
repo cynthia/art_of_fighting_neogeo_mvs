@@ -1,0 +1,237 @@
+;************************************************************************
+;*			enemy action front_moveing			*
+;*						1992/5/6		*
+;*						presented by k.morikawa	*
+;*									*
+;************************************************************************
+
+		XDEF	DIS_FRNT_TBL
+
+ 	  	SECT	HK3,,C
+
+  		INCLUDE	EM_MAC.INC
+  		INCLUDE	EM_MAC2.INC
+ 		INCLUDE	HFLAG.INC
+
+;
+;************************************************************************
+;
+;
+;
+DIS_FRNT_TBL:
+	DSP_T4	FRNT_SKIP,EM1_FRNT_00,EM1_FRNT_01,EM1_FRNT_02
+	DSP_T4	FRNT_SKIP,EM2_FRNT_00,EM2_FRNT_01,EM2_FRNT_02
+	DSP_T4	FRNT_SKIP,EM3_FRNT_00,EM3_FRNT_01,EM3_FRNT_02
+	DSP_T4	FRNT_SKIP,EM4_FRNT_00,EM4_FRNT_01,EM4_FRNT_02
+	DSP_T4	FRNT_SKIP,EM5_FRNT_00,EM5_FRNT_01,EM5_FRNT_02
+	DSP_T4	FRNT_SKIP,EM6_FRNT_00,EM6_FRNT_01,EM6_FRNT_02
+	DSP_T4	FRNT_SKIP,EM7_FRNT_00,EM7_FRNT_01,EM7_FRNT_02
+	DSP_T4	FRNT_SKIP,EM8_FRNT_00,EM8_FRNT_01,EM8_FRNT_02
+
+
+		XDEF	EM1_FRNT_00
+
+;	*enemy 1
+
+EM1_FRNT_00:
+	TYPE	491,491
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,39h ;0
+	DC.B	2Eh,2Fh,30h,39h ;1
+	DC.B	0Ah,0Ah,0Ah,39h ;2
+	DC.B	39h,39h,39h,39h ;3
+EM1_FRNT_01:
+	TYPE	492,492
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,39h ;0
+	DC.B	2Eh,2Fh,30h,39h ;1
+	DC.B	08h,08h,08h,39h ;2
+;	DC.B	0Bh,0Bh,0Bh,39h ;3
+	DC.B	28h,29h,2Ah,39h ;3
+
+		XDEF	EM1_FRNT_02
+
+EM1_FRNT_02:
+	TYPE	493,493
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,39h ;0
+	DC.B	2Eh,2Fh,30h,39h ;1
+	DC.B	08h,08h,08h,39h ;2
+	DC.B	28h,29h,2Ah,39h ;3
+	DC.B	28h,29h,2Ah,39h ;4
+
+;	DC.B	0Ch,0Ch,0Ch,39h ;3
+;	DC.B	0Dh,0Dh,0Dh,39h ;4
+
+;	*enemy 2
+
+EM2_FRNT_00:
+	TYPE	53,53
+;dis_mode	  0   1   2   3
+	DC.B	01h,01h,01h,01h ;0
+	DC.B	28h,29h,2Ah,39h ;1
+EM2_FRNT_01:
+	TYPE	54,54
+;dis_mode	  0   1   2   3
+	DC.B	03h,03h,03h,03h ;0
+	DC.B	28h,29h,2Ah,39h ;1
+	DC.B	42h,42h,42h,42h ;2
+EM2_FRNT_02:
+	TYPE	45,45
+;dis_mode	  0   1   2   3
+	DC.B	07h,07h,07h,07h ;0
+	DC.B	42h,42h,42h,42h ;1
+	DC.B	28h,29h,2Ah,39h ;2
+
+;	*enemy 3
+
+EM3_FRNT_00:
+	TYPE	398,398
+;dis_mode	  0   1   2   3
+	DC.B	23h,23h,23h,23h ;0
+	DC.B	28h,29h,2Ah,39h ;1
+EM3_FRNT_01:
+	TYPE	399,399
+;dis_mode	  0   1   2   3
+	DC.B	03h,03h,03h,03h ;0
+	DC.B	39h,39h,39h,39h ;1
+	DC.B	28h,29h,2Ah,39h ;1
+EM3_FRNT_02:
+	TYPE	399,399
+;dis_mode	  0   1   2   3
+	DC.B	02h,02h,02h,02h ;0
+	DC.B	39h,39h,39h,39h ;1
+	DC.B	28h,29h,2Ah,39h ;1
+
+	XDEF	EM4_FRNT_00
+
+;	*enemy 4
+
+EM4_FRNT_00:
+	TYPE	4,4
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,5Bh ;0
+	DC.B	2Eh,2Fh,30h,5Bh ;1
+
+EM4_FRNT_01:
+	TYPE	23,23
+;dis_mode	  0   1   2   3
+;	DC.B	54h,54h,54h,54h ;0
+	DC.B	28h,29h,2Ah,5Bh ;1
+	DC.B	28h,29h,2Ah,5Bh ;1
+	DC.B	2Eh,2Fh,30h,5Bh ;2
+
+EM4_FRNT_02:
+	TYPE	24,24
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,5Bh ;1
+;	DC.B	54h,54h,54h,54h ;2
+	DC.B	28h,29h,2Ah,5Bh ;1
+	DC.B	2Eh,2Fh,30h,5Bh ;2
+
+;	*enemy 5
+
+EM5_FRNT_00:
+	TYPE	432,432
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	2Eh,2Fh,30h,42h	;2
+	DC.B	03h,03h,03h,03h	;3
+EM5_FRNT_01:
+	TYPE	427,427
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h ;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+	DC.B	02h,02h,02h,02h ;3
+	DC.B	03h,03h,03h,03h ;4
+EM5_FRNT_02:
+	TYPE	425,425
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h ;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+	DC.B	01h,01h,01h,42h ;3
+	DC.B	02h,02h,02h,42h ;4
+	DC.B	04h,04h,04h,42h ;5
+
+;	*enemy 6
+
+EM6_FRNT_00:
+	TYPE	247,247
+;dis_mode	  0   1   2   3
+	DC.B	2Eh,2Fh,30h,42h ;1
+	DC.B	28h,29h,2Ah,42h ;2
+EM6_FRNT_01:
+	TYPE	445,445
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Bh,2Bh,2Bh
+	DC.B	28h,29h,2Ah,42h ;2
+	DC.B	2Eh,2Fh,30h,42h ;1
+	DC.B	50h,50h,50h,50h ;3
+EM6_FRNT_02:
+	TYPE	254,254
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h ;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+	DC.B	50h,50h,50h,50h ;3
+	DC.B	03h,03h,03h,03h ;4
+	DC.B	04h,04h,04h,04h ;4
+
+;	*enemy 7
+
+EM7_FRNT_00:
+	TYPE	293,293
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+EM7_FRNT_01:
+	TYPE	293,293
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	28h,29h,2Ah,42h	;1
+EM7_FRNT_02:
+	TYPE	277,277
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+	DC.B	2Eh,2Fh,30h,42h ;2
+
+;	*enemy 8
+
+EM8_FRNT_00:
+	TYPE	4,4
+;dis_mode	 0   1   2   3
+	DC.B	43h,43h,43h,43h ;3
+	DC.B	28h,29h,2Ah,42h	;1
+EM8_FRNT_01:
+	TYPE	342,342
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+	DC.B	2Eh,2Fh,30h,42h ;2
+;	DC.B	5Fh,5Fh,5Fh,5Fh :3
+	DC.B	43h,43h,43h,43h ;4
+	DC.B	44h,44h,44h,44h ;5
+EM8_FRNT_02:
+	TYPE	342,342
+;dis_mode	  0   1   2   3
+	DC.B	28h,29h,2Ah,42h	;1
+	DC.B	2Eh,2Fh,30h,42h ;2
+	DC.B	2Eh,2Fh,30h,42h ;2
+;	DC.B	5Fh,5Fh,5Fh,5Fh :3
+	DC.B	44h,44h,44h,44h ;4
+	DC.B	45h,45h,45h,45h ;5
+
+;	*all_enemy
+
+FRNT_SKIP:
+	TYPE	22,22
+;dis_mode 	  0   1   2   3
+	DC.B	2Bh,2Bh,2Bh,2Bh
+	DC.B	31h,31h,31h,31h
+
+

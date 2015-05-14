@@ -1,0 +1,20 @@
+;
+;	    *** HK3 section jump table ***
+;
+ 
+
+		SECT	HK3,,C
+
+TBL		MACRO	NAME
+		XREF	NAME
+		JMP.L	NAME
+		ENDM
+
+
+    		TBL	INIT_HK3
+		TBL	HK3_SYSTEM
+
+
+
+
+

@@ -1,0 +1,2659 @@
+;************************************************************************
+;*			enemy action patern no.1			*
+;*						1992/4/27		*
+;*						presented by k.morikawa	*
+;*									*
+;************************************************************************
+
+		XDEF	PATERN1_STAND,PATERN1_DOWN,PATERN1_VJUMP
+		XDEF	PATERN1_FJUMP,PATERN1_BJUMP
+
+ 	  	SECT	HK3,,C
+
+  		INCLUDE	EM_MAC.INC
+  		INCLUDE	EM_MAC2.INC
+ 		INCLUDE	HFLAG.INC
+;
+;	*warning => SD_SD_P1 is 
+;			top_label   => player state
+;			next_label  => enemy  state
+;			last_label  => patern state
+
+PATERN1_STAND:;	 stand	: down	 : v_jump : f_jump : b_jump
+	DC.L	SD_SD_P1,SD_DN_P1,SD_VJ_P1,SD_FJ_P1,SD_BJ_P1
+PATERN1_DOWN:
+	DC.L	DN_SD_P1,DN_DN_P1,DN_VJ_P1,DN_FJ_P1,DN_BJ_P1
+PATERN1_VJUMP:
+	DC.L	VJ_SD_P1,VJ_DN_P1,VJ_VJ_P1,VJ_FJ_P1,VJ_BJ_P1
+PATERN1_FJUMP:
+	DC.L	FJ_SD_P1,FJ_DN_P1,FJ_VJ_P1,FJ_FJ_P1,FJ_BJ_P1
+PATERN1_BJUMP:
+	DC.L	BJ_SD_P1,BJ_DN_P1,BJ_VJ_P1,BJ_FJ_P1,BJ_BJ_P1
+
+
+;***********************************************************************
+;
+;	****_0nn => distance_mode '0'
+;	****_1nn => distance_mode '1'
+;	****_2nn => distance_mode '2'
+;	****_3nn => distance_mode '3'
+;
+;	****_?0n => stand_data
+;	****_?1n => crouch_data
+;	****_?2n => vjump_data
+;	****_?3n => fjump_data
+;	****_?4n => bjump_data
+
+;***********************************************************************
+
+;
+;	stand or v_jump or f_jump or b_jump
+;
+
+;	4*8 =32
+;	player=stand 
+SD_SD_P1: ; enemy_stand
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_100	;enemy 1*
+	DSP_T4	STAND_200,STAND_201,STAND_202,STAND_200	;enemy 2
+	DSP_T4	STAND_300,STAND_301,STAND_302,STAND_300	;enemy 3
+	DSP_T4	STAND_400,STAND_401,STAND_402,STAND_404	;enemy 4*
+	DSP_T4	STAND_500,STAND_501,STAND_502,STAND_500	;enemy 5*
+	DSP_T4	STAND_600,STAND_601,STAND_602,STAND_604	;enemy 6
+	DSP_T4	STAND_700,STAND_701,STAND_702,STAND_700	;enemy 7
+	DSP_T4	STAND_800,STAND_801,STAND_802,STAND_800	;enemy 8
+	XDEF	STAND_100
+
+;
+;	***** distance 0 *****
+;
+STAND_100:
+	TYPE	190,190
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1CH,1DH,01H,03H,17H,18H,17H,18H
+	DS.W	0
+STAND_200:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54H,55H,3EH,3CH,48H,40H,3CH,3EH
+	DS.W	0
+STAND_300:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	18H,34H,26H,26H,36H,36H,35H,35H
+	DS.W	0
+STAND_400:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	6DH,6EH,6EH,44H,6EH,37H,4DH,51H
+	DS.W	0
+STAND_500:
+	TYPE	433,433
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	36h,39h,18h,19h,1Bh,1Ch,1Dh,1Ah
+	DS.W	0
+STAND_600:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	65h,65h,65h,5Bh,1Ah,5Eh,5DH,5CH
+	DS.W	0
+STAND_700:
+	TYPE	200,200
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	07h,22h,20H,01h,05h,06h,1Fh,22h
+	DS.W	0
+STAND_800:
+	TYPE	352,352
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1BH,1CH,5BH,5BH,57H,57H,4CH,4CH
+	DS.W	0
+
+;
+;	***** distance 1 *****
+;
+
+STAND_101:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	02H,03H,1CH,1DH,1EH,1EH,1FH,1FH
+	DS.W	0
+STAND_201:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	42H,15H,26H,26H,49H,49H,3DH,3FH
+	DS.W	0
+STAND_301:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	49H,48H,19H,19H,47H,48H,4AH,4AH
+	DS.W	0
+STAND_401:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	66H,66H,67H,67H,12H,5AH,19H,6DH
+	DS.W	0
+STAND_501:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	18h,19h,1Ah,1Bh,1Ch,1Dh,22h,23h
+	DS.W	0
+STAND_601:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Dh,5Dh,5Bh,35h,3Eh,35h,3EH,5CH
+	DS.W	0
+STAND_701:
+	TYPE	201,201
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	22h,20h,05h,07h,09h,06h,05h,09h
+	DS.W	0
+STAND_801:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0BH,10H,59H,57H,10H,59H,57H,10H
+	DS.W	0
+
+
+
+
+;
+;	***** distance 2 *****
+;
+STAND_102:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1EH,1FH,21H,22H,24H,45H,45H,45H
+	DS.W	0
+STAND_202:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,17H,53H,1AH,49H,53H,17H,4FH
+	DS.W	0
+STAND_302:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4AH,4AH,4CH,4CH,4DH,4DH,3EH,3DH
+	DS.W	0
+STAND_402:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	66H,66H,3BH,3BH,12H,13H,1AH,3BH
+	DS.W	0
+STAND_404:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1BH,1BH,0BH,0Bh,0CH,0CH,0BH,0BH
+	DS.W	0
+STAND_502:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,42H,42H,22H,23H
+	DS.W	0
+STAND_602:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Eh,60h,39h,39h,3EH,5CH,3EH,40H
+	DS.W	0
+STAND_604:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0Eh,0Fh,0Fh,0Bh,0BH,0EH,0FH,36H
+	DS.W	0
+STAND_702:
+	TYPE	202,202
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,04h,05h,11h,16h,02h,10h,10h
+;	DC.B	26h,1Dh
+	DS.W	0
+STAND_802:
+	TYPE	353,353
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+;	DC.B	22H,2FH,22H,2FH,1EH,1EH,41H,41H
+	DC.B	2FH,2FH,2FH,2FH,1EH,1EH,41H,41H
+	DS.W	0
+
+
+
+
+SD_DN_P1: ; enemy_down
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_140,STAND_141,STAND_142,STAND_993	;enemy 1*
+	DSP_T4	STAND_240,STAND_241,STAND_242,STAND_993	;enemy 2
+	DSP_T4	STAND_340,STAND_341,STAND_342,STAND_993	;enemy 3
+	DSP_T4	STAND_400,STAND_401,STAND_402,STAND_993	;enemy 4*
+	DSP_T4	STAND_540,STAND_541,STAND_542,STAND_993	;enemy 5*
+	DSP_T4	STAND_600,STAND_601,STAND_602,STAND_993	;enemy 6
+	DSP_T4	STAND_700,STAND_701,STAND_702,STAND_993	;enemy 7
+	DSP_T4	STAND_840,STAND_841,STAND_842,STAND_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+STAND_140:
+	TYPE	190,190
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1CH,1DH,01H,03H,17H,18H,17H,18H
+	DS.W	0
+STAND_240:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54H,55H,55H,55H,48H,40H,3CH,3EH
+	DS.W	0
+STAND_340:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26H,26H,35H,35H,34H,36H,35H,35H
+	DS.W	0
+STAND_540:
+	TYPE	192,192
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3AH,3BH,3BH,3BH,3BH,3AH,3BH,20H
+	DS.W	0
+STAND_840:
+	TYPE	352,352
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1CH,1CH,56H,58H,58H,58H,56H,56H
+	DS.W	0
+;
+;	***** distance 1 *****
+
+STAND_141:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	02H,03H,1CH,1DH,1EH,1EH,1FH,1FH
+	DS.W	0
+STAND_241:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	42H,15H,26H,26H,49H,49H,3DH,3FH
+	DS.W	0
+STAND_341:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	49H,49H,19H,19H,47H,48H,4AH,4AH
+	DS.W	0
+STAND_541:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3BH,3BH,3AH,3AH,3AH,3AH,20H,20H
+	DS.W	0
+STAND_841:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	55H,55H,56H,56H,55H,55H,56H,56H
+	DS.W	0
+
+;	***** distance 2 *****
+
+STAND_142:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1FH,1FH,21H,23H,24H,45H,45H,45H
+	DS.W	0
+
+STAND_242:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	47H,51H,1AH,17H,4FH,17H,49H,46H
+	DS.W	0
+
+STAND_342:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4AH,4AH,4CH,4CH,4DH,4DH,3EH,3DH
+	DS.W	0
+
+STAND_542:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,42H,42H,16H,17H
+	DS.W	0
+
+STAND_842:
+	TYPE	353,353
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	05H,22H,05H,22H,22H,30H,05H,30H
+	DS.W	0
+
+STAND_993:
+	TYPE	22,22
+	DC.B	30h,30h
+	DS.W	0
+
+;************************************************************************
+
+SD_VJ_P1: ; enemy_vjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_110,STAND_110,STAND_110,STAND_993	;enemy 1*
+	DSP_T4	STAND_210,STAND_211,STAND_211,STAND_993	;enemy 2
+	DSP_T4	STAND_310,STAND_311,STAND_311,STAND_993	;enemy 3
+	DSP_T4	STAND_410,STAND_410,STAND_410,STAND_993	;enemy 4*
+	DSP_T4	STAND_510,STAND_510,STAND_510,STAND_993	;enemy 5*
+	DSP_T4	STAND_610,STAND_610,STAND_612,STAND_993	;enemy 6
+	DSP_T4	STAND_710,STAND_711,STAND_712,STAND_993	;enemy 7
+	DSP_T4	STAND_810,STAND_811,STAND_812,STAND_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+STAND_110:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	05h,23h
+	DS.W	0
+STAND_210:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4EH,41H
+	DS.W	0
+STAND_310:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	38h,37h,4EH,2Bh
+	DS.W	0
+STAND_410:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1EH
+	DS.W	0
+STAND_510:
+	TYPE	422,422
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,2Bh
+	DS.W	0
+STAND_610:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23H,23H,15H,2BH
+	DS.W	0
+STAND_710:
+	TYPE	450,450
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,22h,20H,05H,07H,2BH
+	DS.W	0
+STAND_810:
+	TYPE	316,316
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,2Bh
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+STAND_211:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,42H
+	DS.W	0
+STAND_311:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	37h,38h,4Eh,2Bh
+	DS.W	0
+STAND_711:
+	TYPE	457,457
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	22h,25h,05h,06h,07h,09h
+	DS.W	0
+STAND_811:
+	TYPE	327,327
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,53h
+	DS.W	0
+
+
+;
+;	***** distance 2 *****
+;
+STAND_612:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Eh,23h,15h,2Bh
+	DS.W	0
+STAND_712:
+	TYPE	456,456
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,25h,02h,04h,0Bh,26h
+	DS.W	0
+STAND_812:
+	TYPE	317,317
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,26h,1Fh,1Eh
+	DS.W	0
+
+
+SD_FJ_P1: ; enemy_fjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_120,STAND_120,STAND_122,STAND_993	;enemy 1*
+	DSP_T4	STAND_220,STAND_220,STAND_220,STAND_993	;enemy 2
+	DSP_T4	STAND_320,STAND_321,STAND_321,STAND_993	;enemy 3
+	DSP_T4	STAND_420,STAND_420,STAND_420,STAND_993	;enemy 4*
+	DSP_T4	STAND_520,STAND_520,STAND_520,STAND_993	;enemy 5*
+	DSP_T4	STAND_620,STAND_620,STAND_622,STAND_993	;enemy 6
+	DSP_T4	STAND_720,STAND_721,STAND_722,STAND_993	;enemy 7
+	DSP_T4	STAND_820,STAND_821,STAND_822,STAND_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+STAND_120:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,22h
+	DS.W	0
+STAND_220:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,42H
+	DS.W	0
+STAND_320:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ah,39h,4Fh,2Bh
+	DS.W	0
+STAND_420:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Eh
+	DS.W	0
+STAND_520:
+	TYPE	421,421
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,1Eh
+	DS.W	0
+STAND_620:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,23h,16h,2BH
+	DS.W	0
+STAND_720:
+	TYPE	451,451
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,22h,20h,2Bh
+	DS.W	0
+STAND_820:
+	TYPE	322,322
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh,03h,04h,05h,06h
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+STAND_321:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	39h,3Ah,4Fh,2Bh
+	DS.W	0
+STAND_721:
+	TYPE	451,451
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,06h,26h,2Bh
+	DS.W	0
+STAND_821:
+	TYPE	325,325
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh,04h,5Dh,11h,13h
+	DS.W	0
+
+
+
+;	***** distance 2 *****
+
+STAND_122:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41h,22h
+	DS.W	0
+STAND_622:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13H,23H,16H,2BH
+	DS.W	0
+STAND_722:
+	TYPE	450,450
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	08H,04H,10H,22H,26H,2BH
+	DS.W	0
+STAND_822:
+	TYPE	338,338
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	35h,36h,1Eh,1Fh
+	DS.W	0
+
+
+
+
+SD_BJ_P1: ; enemy_bjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_130,STAND_130,STAND_130,STAND_993	;enemy 1*
+	DSP_T4	STAND_230,STAND_231,STAND_231,STAND_993	;enemy 2
+	DSP_T4	STAND_330,STAND_331,STAND_331,STAND_993	;enemy 3
+	DSP_T4	STAND_430,STAND_431,STAND_430,STAND_993	;enemy 4*
+	DSP_T4	STAND_530,STAND_530,STAND_532,STAND_993	;enemy 5*
+	DSP_T4	STAND_630,STAND_631,STAND_632,STAND_993	;enemy 6
+	DSP_T4	STAND_720,STAND_721,STAND_722,STAND_993	;enemy 7
+	DSP_T4	STAND_830,STAND_831,STAND_832,STAND_993	;enemy 8
+
+;
+;	***** distance 0 *****
+;
+STAND_130:
+	TYPE	24,24
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	09h,47h,1Bh,2Bh
+	DS.W	0
+STAND_230:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	50H,43H
+	DS.W	0
+STAND_330:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,3Bh,50h,2Bh
+	DS.W	0
+STAND_430:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Eh
+	DS.W	0
+STAND_530:
+	TYPE	421,421
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Eh,1Fh
+	DS.W	0
+STAND_630:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,23h,17h,2Bh
+	DS.W	0
+STAND_830:
+	TYPE	317,317
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03H,0FH,06H,1CH
+	DS.W	0
+
+
+
+;
+;	***** distance 1 *****
+
+STAND_231:
+	TYPE	45,45
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	50H,50H
+	DS.W	0
+STAND_331:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Bh,3Ch,50h,2Bh
+	DS.W	0
+STAND_431:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1DH
+	DS.W	0
+STAND_631:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,17h,17h,2Bh
+	DS.W	0
+STAND_831:
+	TYPE	325,325
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5DH,0Eh,0Fh,10h,21h
+	DS.W	0
+
+;	***** distance 2 *****
+
+STAND_232:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	50H,43H
+	DS.W	0
+STAND_532:
+	TYPE	424,424
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3EH,1FH
+	DS.W	0
+STAND_632:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13h,23h,17h,2Bh
+	DS.W	0
+
+STAND_832:
+	TYPE	334,334
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0Fh,16h,21h,34h
+	DS.W	0
+
+
+
+
+;
+;
+;
+DN_SD_P1: ; enemy_stand
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	DOWN_100,DOWN_101,STAND_102,DOWN_993	;enemy 1*
+	DSP_T4	DOWN_200,DOWN_201,DOWN_202,DOWN_993	;enemy 2*
+	DSP_T4	DOWN_300,DOWN_301,DOWN_302,DOWN_993	;enemy 3*
+	DSP_T4	DOWN_400,DOWN_401,DOWN_402,DOWN_993	;enemy 4*
+	DSP_T4	DOWN_500,DOWN_501,STAND_502,DOWN_993	;enemy 5*
+	DSP_T4	DOWN_600,DOWN_601,STAND_602,DOWN_993	;enemy 6
+	DSP_T4	DOWN_700,DOWN_701,DOWN_702,DOWN_993	;enemy 7*
+	DSP_T4	DOWN_800,DOWN_801,DOWN_802,DOWN_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+DOWN_100:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	01H,02H,04H,1DH,17H,18H,47H,4CH
+	DS.W	0
+DOWN_200:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4EH,41H,49H,49H,54H,40H,3EH,3FH
+	DS.W	0
+DOWN_300:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	18H,18H,25H,27H,49H,26H,36H,34H
+	DS.W	0
+DOWN_400:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	07h,66H,67H,67H,11H,56H,62H,6CH
+	DS.W	0
+DOWN_500:
+	TYPE	193,193
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	50H,1DH,3BH,20H,3AH,20H,25H,50H
+	DS.W	0
+DOWN_600:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5EH,5EH,5EH,4CH,4CH,40H,1EH,40H
+	DS.W	0
+DOWN_700:
+	TYPE	201,201
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	20H,3AH,38H,24H,38h,24H,3AH,3AH
+	DS.W	0
+DOWN_800:
+	TYPE	353,353
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1CH,57H,57H,10H,10H,10H,57H,57H
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+
+DOWN_101:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	02H,1EH,04H,1CH,1DH,15H,47H,1AH
+	DS.W	0
+DOWN_201:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26H,56H,57H,57H,26H,4FH,56H,49H
+	DS.W	0
+DOWN_301:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	47H,4AH,3EH,3DH,49H,4DH,47H,4AH
+	DS.W	0
+DOWN_401:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	66H,66H,67H,67H,13H,12H,67H,6DH
+	DS.W	0
+DOWN_501:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3AH,3AH,1EH,1EH,20H,20H,16H,23H
+	DS.W	0
+DOWN_601:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	37H,37H,20H,20H,13H,5EH,40H,13H
+	DS.W	0
+DOWN_701:
+	TYPE	200,200
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	39h,38h,24H,38h,38h,24H,3AH,3AH
+	DS.W	0
+DOWN_801:
+	TYPE	353,353
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	12H,5FH,59H,5FH,59H,5FH,5DH,5FH
+	DS.W	0
+
+
+
+
+;
+;	***** distance 2 *****
+;
+DOWN_102:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1EH,1FH,21H,22H,24H,45H,45H,45H
+	DS.W	0
+DOWN_202:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	51h,51h,4FH,46H,4FH,56H,49H,49H
+	DS.W	0
+DOWN_302:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4DH,4CH,4AH,3EH,3DH,4AH,4CH,4DH
+	DS.W	0
+DOWN_402:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	66H,66H,3BH,3BH,62H,62H,12H,67H
+	DS.W	0
+DOWN_502:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,42H,42H,16H,17H
+	DS.W	0
+DOWN_602:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4Ch,4Ch,37h,37h,5Eh,5Eh,3CH,13H
+	DS.W	0
+DOWN_702:
+	TYPE	205,205
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25H,1DH,02H,04H,16H,26H,29H,39H
+	DS.W	0
+DOWN_802:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	59H,05H,06H,37H,37H,5FH,05H,05H
+	DS.W	0
+
+DN_DN_P1: ; enemy_down
+	DSP_T4	DOWN_100,DOWN_101,DOWN_102,DOWN_993	;player 1
+	DSP_T4	DOWN_100,DOWN_101,DOWN_102,DOWN_993	;player 2
+
+	DSP_T4	DOWN_140,DOWN_141,DOWN_142,DOWN_993	;enemy 1
+	DSP_T4	DOWN_240,DOWN_241,DOWN_242,DOWN_993	;enemy 2
+	DSP_T4	DOWN_340,DOWN_341,DOWN_342,DOWN_993	;enemy 3
+	DSP_T4	STAND_400,STAND_401,STAND_402,STAND_993	;enemy 4
+	DSP_T4	DOWN_540,DOWN_541,DOWN_542,DOWN_993	;enemy 5
+	DSP_T4	STAND_600,STAND_601,STAND_602,STAND_993	;enemy 6
+	DSP_T4	STAND_700,STAND_701,STAND_702,STAND_993	;enemy 7
+	DSP_T4	DOWN_840,DOWN_841,DOWN_842,DOWN_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+DOWN_140:
+	TYPE	31,31
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	01H,02H,04H,1DH,17H,18H,47H,06H
+	DS.W	0
+;
+DOWN_240:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4EH,41H,49H,49H,54H,40H,3EH,3FH
+	DS.W	0
+;
+DOWN_340:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	36H,35H,26H,36H,35H,26H,36H,35H
+	DS.W	0
+;
+DOWN_540:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3AH,3AH,3AH,3AH,3BH,3BH,49H,50H
+	DS.W	0
+;
+DOWN_840:
+	TYPE	352,352
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	33H,55H,33H,33H,56H,55H,56H,55H
+	DS.W	0
+;
+;	***** distance 1 *****
+
+DOWN_141:
+	TYPE	31,31
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	02H,1EH,04H,1CH,1DH,1FH,47H,1AH
+	DS.W	0
+DOWN_241:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1BH,1BH,56H,56H,26H,4FH,46H,49H
+	DS.W	0
+DOWN_341:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	52H,52H,3EH,3DH,49H,4DH,47H,4AH
+	DS.W	0
+DOWN_541:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3AH,3AH,3BH,3BH,22H,23H,51H,20H
+	DS.W	0
+DOWN_841:
+	TYPE	353,353
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	56H,55H,56H,55H,56H,55H,56H,56H
+	DS.W	0
+
+;	***** distance 2 *****
+
+DOWN_142:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1EH,1FH,21H,22H,24H,45H,45H,45H
+	DS.W	0
+
+DOWN_242:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	51H,51H,4FH,4FH,46H,46H,49H,49H
+	DS.W	0
+
+DOWN_342:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	52H,52H,4AH,3EH,3DH,4AH,4CH,4DH
+	DS.W	0
+
+DOWN_542:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,42H,42H,22H,23H
+	DS.W	0
+
+DOWN_842:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	59H,06H,59H,06H,26H,26H,59H,26H
+	DS.W	0
+
+DOWN_993:
+	TYPE	22,22
+	DC.B	30h,30h
+	DS.W	0
+
+
+
+DN_VJ_P1: ; enemy_vjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_110,STAND_110,STAND_110,DOWN_993	;enemy 1*
+	DSP_T4	STAND_210,STAND_210,STAND_210,DOWN_993	;enemy 2
+	DSP_T4	STAND_310,DOWN_311,DOWN_311,DOWN_993	;enemy 3
+	DSP_T4	DOWN_410,DOWN_410,DOWN_410,DOWN_993	;enemy 4*
+	DSP_T4	STAND_510,STAND_510,STAND_510,STAND_993	;enemy 5*
+	DSP_T4	DOWN_610,DOWN_611,DOWN_612,DOWN_993	;enemy 6
+	DSP_T4	DOWN_710,DOWN_711,DOWN_712,DOWN_993	;enemy 7
+	DSP_T4	DOWN_810,DOWN_811,DOWN_812,DOWN_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+DOWN_310:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	38h,37h,4Eh,2Bh
+	DS.W	0
+DOWN_410:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Dh
+	DS.W	0
+DOWN_610:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,4Ch,17h,2Bh
+	DS.W	0
+DOWN_710:
+	TYPE	452,452
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,22h,01h,06h
+	DS.W	0
+DOWN_810:
+	TYPE	318,318
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,53h
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+DOWN_311:
+	TYPE	398,398
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	38h,4Eh
+	DS.W	0
+DOWN_611:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13h,17h,24H,2Bh
+	DS.W	0
+DOWN_711:
+	TYPE	456,456
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	22h,20h,25h,05h,07h,09h
+	DS.W	0
+DOWN_811:
+	TYPE	318,318
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,21h
+	DS.W	0
+
+;
+;	***** distance 3 *****
+;
+DOWN_612:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	40H,23H,23H,2Bh
+	DS.W	0
+DOWN_712:
+	TYPE	457,457
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26h,25h,04h,0Bh,02h,1Fh
+	DS.W	0
+DOWN_812:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,34h,06h,2Bh
+	DS.W	0
+
+
+DN_FJ_P1: ; enemy_fjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_120,STAND_120,DOWN_122,DOWN_993	;enemy 1
+	DSP_T4	STAND_220,STAND_220,STAND_220,STAND_993	;enemy 2
+	DSP_T4	DOWN_320,DOWN_321,DOWN_321,DOWN_993	;enemy 3
+	DSP_T4	DOWN_410,DOWN_410,DOWN_410,DOWN_993	;enemy 4
+	DSP_T4	STAND_520,STAND_520,STAND_520,STAND_993	;enemy 5
+	DSP_T4	DOWN_620,DOWN_621,STAND_622,DOWN_993	;enemy 6
+	DSP_T4	DOWN_720,DOWN_721,DOWN_722,DOWN_993	;enemy 7
+	DSP_T4	DOWN_820,DOWN_821,DOWN_822,DOWN_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+DOWN_320:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ah,39h,4Fh,2Bh
+	DS.W	0
+DOWN_620:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,15h,17h,2Bh
+	DS.W	0
+DOWN_720:
+	TYPE	451,451
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,22h,08h,2Bh
+	DS.W	0
+DOWN_820:
+	TYPE	319,319
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh,09h,22h
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+DOWN_321:
+	TYPE	398,398
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ah,4Fh
+	DS.W	0
+DOWN_621:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,13h,16h,2Bh
+	DS.W	0
+DOWN_721:
+	TYPE	451,451
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,06h,26h,2Bh
+	DS.W	0
+DOWN_821:
+	TYPE	328,328
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,5Dh,05h,11h,13h,2Bh
+	DS.W	0
+
+
+;	***** distance 2 *****
+
+DOWN_122:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41h,22h
+	DS.W	0
+DOWN_622:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13H,3EH,23H,2BH
+	DS.W	0
+DOWN_722:
+	TYPE	451,451
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26h,08h,22h,2Bh
+	DS.W	0
+DOWN_822:
+	TYPE	328,328
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	05h,06h,11h,1Fh,35h,2Bh
+	DS.W	0
+
+
+DN_BJ_P1: ; enemy_bjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_130,STAND_130,STAND_130,DOWN_993	;enemy 1
+	DSP_T4	STAND_230,STAND_230,STAND_230,STAND_993	;enemy 2
+	DSP_T4	DOWN_330,DOWN_331,DOWN_331,DOWN_993	;enemy 3
+	DSP_T4	STAND_431,STAND_431,STAND_431,STAND_993	;enemy 4
+	DSP_T4	STAND_530,STAND_530,STAND_530,STAND_993	;enemy 5
+	DSP_T4	DOWN_630,DOWN_631,STAND_632,DOWN_993	;enemy 6
+	DSP_T4	DOWN_720,DOWN_721,DOWN_722,DOWN_993	;enemy 7
+	DSP_T4	DOWN_830,DOWN_831,DOWN_832,DOWN_993	;enemy 8
+
+;
+;	***** distance 0 *****
+;
+DOWN_330:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,3Bh,50h,2Bh
+	DS.W	0
+DOWN_630:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,4Ch,21h,2Bh
+	DS.W	0
+DOWN_830:
+	TYPE	319,319
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5FH,5DH,0FH,10H
+	DS.W	0
+
+
+
+;
+;	***** distance 1 *****
+;
+DOWN_331:
+	TYPE	398,398
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,50h
+	DS.W	0
+DOWN_631:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13H,17H,23H,2BH
+	DS.W	0
+DOWN_831:
+	TYPE	329,329
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,21H
+	DS.W	0
+
+;	***** distance 2 *****
+
+DOWN_632:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13H,3EH,23H,2BH
+	DS.W	0
+DOWN_832:
+	TYPE	329,329
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,38h
+	DS.W	0
+
+;************************************************************************
+;
+;
+;
+VJ_SD_P1: ; enemy_stand
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	VJUMP_100,VJUMP_101,STAND_102,VJUMP_993	;enemy 1
+	DSP_T4	VJUMP_200,VJUMP_201,VJUMP_202,VJUMP_993	;enemy 2
+	DSP_T4	VJUMP_300,VJUMP_301,VJUMP_302,VJUMP_993	;enemy 3
+	DSP_T4	VJUMP_400,VJUMP_401,VJUMP_402,VJUMP_993	;enemy 4
+	DSP_T4	VJUMP_500,VJUMP_501,STAND_502,VJUMP_993	;enemy 5
+	DSP_T4	VJUMP_600,VJUMP_601,STAND_602,VJUMP_993	;enemy 6
+	DSP_T4	VJUMP_700,VJUMP_701,VJUMP_702,VJUMP_993	;enemy 7
+	DSP_T4	VJUMP_800,VJUMP_801,VJUMP_802,VJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+VJUMP_100:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03H,03H,05H,05H,19H,19H,1BH,23H
+	DS.W	0
+VJUMP_200:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,4FH,4FH,3EH,3EH,3CH,48H,4EH
+	DS.W	0
+VJUMP_300:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26h,26H,34H,34H,38H,4EH,37H,38H
+	DS.W	0
+VJUMP_400:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	09H,09H,63H,63H,54H,51H,4AH,3EH
+	DS.W	0
+VJUMP_500:
+	TYPE	191,191
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	18H,18H,1DH,1DH,38H,39H,39H,38H
+	DS.W	0
+VJUMP_600:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	20h,20h,20h,46h,1Eh,47h,5DH,46H
+	DS.W	0
+VJUMP_700:
+	TYPE	202,202
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	06H,30h,27h,1Fh,06h,21h,06H,21H
+	DS.W	0
+VJUMP_800:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4CH,4FH,52H,4CH,52H,4BH,4BH,4FH
+	DS.W	0
+
+;
+;	***** distance 1 *****
+;
+
+VJUMP_101:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03h,05h,23h,23h,1CH,1CH,1DH,22H
+	DS.W	0
+VJUMP_201:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	47h,3DH,4FH,4FH,5CH,4EH,47H,51H
+	DS.W	0
+VJUMP_301:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41H,37H,4AH,3AH,38H,38H,3AH,4EH
+	DS.W	0
+VJUMP_401:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	01H,01H,4AH,4AH,54H,22H,11H,5AH
+	DS.W	0
+VJUMP_501:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	35h,35H,1AH,1AH,38H,39H,38H,39H
+	DS.W	0
+VJUMP_601:
+	TYPE	228,228
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4Eh,4Eh,4Eh,4Eh,40H,12H,5EH,20H
+	DS.W	0
+VJUMP_701:
+	TYPE	200,200
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1FH,20H,20H,25H,05H,06h,05h,06h
+	DS.W	0
+VJUMP_801:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,59H,24H,4FH,24H,4FH,51H,4FH
+	DS.W	0
+
+
+
+
+;
+;	***** distance 2 *****
+;
+VJUMP_102:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1EH,1FH,21H,22H,24H,45H,45H,45H
+	DS.W	0
+VJUMP_202:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	42H,4FH,59H,4FH,51H,47H,47H,59H
+	DS.W	0
+VJUMP_302:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41H,4AH,47H,38H,3AH,3AH,4CH,4DH
+	DS.W	0
+VJUMP_402:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03H,03H,01H,01H,12H,13H,1AH,0CH
+	DS.W	0
+VJUMP_502:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,42H,42H,22H,43H
+	DS.W	0
+VJUMP_602:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	60h,60h,39h,39h,3Eh,5Ch,3CH,40H
+	DS.W	0
+VJUMP_702:
+	TYPE	203,203
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	02H,03H,25H,0AH,04H,0AH,02H,04H
+	DS.W	0
+VJUMP_802:
+	TYPE	356,356
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	59H,5AH,06H,26H,42H,06H,42H,42H
+	DS.W	0
+
+VJ_DN_P1: ; enemy_down
+	DSP_T4	VJUMP_100,VJUMP_101,VJUMP_102,VJUMP_993	;player 1
+	DSP_T4	VJUMP_100,VJUMP_101,VJUMP_102,VJUMP_993	;player 2
+
+	DSP_T4	VJUMP_100,VJUMP_101,VJUMP_102,VJUMP_993	;enemy 1
+	DSP_T4	VJUMP_240,VJUMP_241,VJUMP_242,VJUMP_993	;enemy 2
+	DSP_T4	VJUMP_300,VJUMP_301,VJUMP_302,VJUMP_993	;enemy 3
+	DSP_T4	VJUMP_400,VJUMP_401,VJUMP_402,VJUMP_993	;enemy 4
+	DSP_T4	VJUMP_540,VJUMP_541,VJUMP_542,VJUMP_993	;enemy 5
+	DSP_T4	VJUMP_600,VJUMP_601,VJUMP_602,VJUMP_993	;enemy 6
+	DSP_T4	VJUMP_700,VJUMP_701,VJUMP_702,VJUMP_993	;enemy 7
+	DSP_T4	VJUMP_840,VJUMP_841,VJUMP_842,VJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+VJUMP_240:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3CH,4FH,4FH,3EH,3EH,4FH,41H,4EH
+	DS.W	0
+VJUMP_540:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3BH,3BH,39H,35H,39H,35H,25H,38H
+	DS.W	0
+VJUMP_840:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1BH,4CH,4BH,4BH,56H,4BH,55H,4BH
+	DS.W	0
+;
+;	***** distance 1 *****
+
+VJUMP_241:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3FH,3DH,4FH,4FH,4FH,4EH,47H,51H
+	DS.W	0
+VJUMP_541:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3BH,3BH,35H,39H,39H,35H,25H,26H
+	DS.W	0
+VJUMP_841:
+	TYPE	356,356
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13H,16H,59H,05H,54H,59H,05H,54H
+	DS.W	0
+
+;	***** distance 2 *****
+
+VJUMP_242:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	42H,42H,4FH,4FH,51H,51H,47H,47H
+	DS.W	0
+VJUMP_542:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,42H,42H,22H,23H
+	DS.W	0
+VJUMP_842:
+	TYPE	356,356
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	05H,43H,30H,30H,05H,43H,05H,05H
+	DS.W	0
+
+VJUMP_993:
+	TYPE	22,22
+	DC.B	30h,30h
+	DS.W	0
+
+
+
+VJ_VJ_P1: ; enemy_vjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+
+	DSP_T4	STAND_110,STAND_110,STAND_110,VJUMP_993	;enemy 1
+	DSP_T4	STAND_210,STAND_210,STAND_210,STAND_993	;enemy 2
+	DSP_T4	STAND_310,STAND_311,STAND_311,STAND_993	;enemy 3
+	DSP_T4	VJUMP_410,VJUMP_410,VJUMP_410,VJUMP_993	;enemy 4
+	DSP_T4	STAND_510,STAND_510,STAND_510,STAND_993	;enemy 5
+	DSP_T4	VJUMP_610,VJUMP_611,VJUMP_612,VJUMP_993	;enemy 6
+	DSP_T4	VJUMP_700,VJUMP_701,VJUMP_702,VJUMP_993	;enemy 7
+	DSP_T4	VJUMP_810,VJUMP_811,VJUMP_812,VJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+VJUMP_410:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Dh
+	DS.W	0
+VJUMP_610:
+	TYPE	435,435
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,23h,15h,2Bh
+	DS.W	0
+VJUMP_810:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Dh,5Fh,06h,2Bh
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+VJUMP_411:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Eh,1Dh
+	DS.W	0
+VJUMP_611:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	18H,23H,15H,2BH
+	DS.W	0
+VJUMP_811:
+	TYPE	331,331
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,1Eh,20h,25h
+	DS.W	0
+
+;
+;	***** distance 2 *****
+;
+VJUMP_412:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Eh
+	DS.W	0
+VJUMP_612:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Eh,23h,15h,2Bh
+	DS.W	0
+VJUMP_812:
+	TYPE	318,318
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,34h
+	DS.W	0
+
+
+VJ_FJ_P1: ; enemy_fjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	VJUMP_120,VJUMP_120,VJUMP_122,VJUMP_993	;enemy 1
+	DSP_T4	STAND_220,STAND_220,STAND_220,STAND_993	;enemy 2
+	DSP_T4	STAND_320,STAND_321,STAND_321,STAND_993	;enemy 3
+	DSP_T4	VJUMP_420,VJUMP_421,VJUMP_410,VJUMP_993	;enemy 4
+	DSP_T4	STAND_520,STAND_520,STAND_520,STAND_993	;enemy 5
+	DSP_T4	STAND_620,STAND_620,STAND_622,STAND_993	;enemy 6
+	DSP_T4	VJUMP_700,VJUMP_701,VJUMP_702,VJUMP_993	;enemy 7
+	DSP_T4	VJUMP_820,VJUMP_821,VJUMP_822,VJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+VJUMP_120:
+	TYPE	24,24
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41h,42h,22h,2Bh
+	DS.W	0
+VJUMP_420:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Dh
+	DS.W	0
+VJUMP_820:
+	TYPE	327,327
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,09h
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+VJUMP_421:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Eh,1Dh
+	DS.W	0
+VJUMP_821:
+	TYPE	332,322
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,5Dh,04h,06h,11h,13h
+	DS.W	0
+
+
+;	***** distance 2 *****
+
+VJUMP_122:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41h,22h
+	DS.W	0
+VJUMP_422:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Eh
+	DS.W	0
+VJUMP_822:
+	TYPE	325,325
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	05h,06h,09h,11h,1Eh,37h
+	DS.W	0
+
+
+
+
+VJ_BJ_P1: ; enemy_bjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	VJUMP_130,VJUMP_130,VJUMP_132,VJUMP_993	;enemy 1
+	DSP_T4	VJUMP_230,VJUMP_230,VJUMP_230,VJUMP_993	;enemy 2
+	DSP_T4	STAND_330,STAND_331,STAND_331,STAND_993	;enemy 3
+	DSP_T4	VJUMP_420,VJUMP_420,VJUMP_420,VJUMP_993	;enemy 4
+	DSP_T4	STAND_530,STAND_530,STAND_530,STAND_993	;enemy 5
+	DSP_T4	STAND_630,STAND_630,STAND_632,STAND_993	;enemy 6
+	DSP_T4	VJUMP_700,VJUMP_701,VJUMP_702,VJUMP_993	;enemy 7
+	DSP_T4	VJUMP_830,VJUMP_831,VJUMP_832,VJUMP_993	;enemy 8
+
+;
+;	***** distance 0 *****
+;
+VJUMP_130:
+	TYPE	19,19
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	43h,44h,1Bh,47h
+	DS.W	0
+VJUMP_230:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	50h,43h
+	DS.W	0
+VJUMP_830:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0Eh,0Fh,10h,2Bh
+	DS.W	0
+
+
+
+;
+;	***** distance 1 *****
+;
+VJUMP_531:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Eh,1DH
+	DS.W	0
+VJUMP_831:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0Fh,10h,21h,2Bh
+	DS.W	0
+
+;
+;	***** distance 2 ******	
+;
+VJUMP_132:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	09H,47H,1BH,2BH
+	DS.W	0
+VJUMP_832:
+	TYPE	318,318
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	21h,38h
+	DS.W	0
+
+;************************************************************************
+;
+;
+;
+FJ_SD_P1: ; enemy_stand
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	FJUMP_100,FJUMP_101,STAND_102,FJUMP_993	;enemy 1
+	DSP_T4	FJUMP_200,FJUMP_201,FJUMP_202,FJUMP_993	;enemy 2
+	DSP_T4	FJUMP_300,FJUMP_301,FJUMP_302,FJUMP_993	;enemy 3
+	DSP_T4	FJUMP_400,FJUMP_401,FJUMP_402,FJUMP_993	;enemy 4
+	DSP_T4	FJUMP_500,FJUMP_501,FJUMP_502,FJUMP_993	;enemy 5
+	DSP_T4	FJUMP_600,FJUMP_601,STAND_602,FJUMP_993	;enemy 6
+	DSP_T4	FJUMP_700,FJUMP_701,FJUMP_702,FJUMP_993	;enemy 7
+	DSP_T4	FJUMP_800,FJUMP_801,FJUMP_802,FJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+FJUMP_100:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03h,03h,05H,05H,19H,19H,1CH,1DH
+	DS.W	0
+FJUMP_200:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41H,41H,3DH,3EH,3DH,3EH,3EH,3FH
+	DS.W	0
+FJUMP_300:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	40H,26H,26H,3AH,3AH,39H,3AH,50H
+	DS.W	0
+FJUMP_400:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3EH,3EH,24H,24H,22H,3EH,4DH,51H
+	DS.W	0
+FJUMP_500:
+	TYPE	191,191
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Ah,1Ah,1Dh,1Dh,38h,39H,39H,38H
+	DS.W	0
+FJUMP_600:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,1Fh,46h,46h,46h,26h,46H,26H
+	DS.W	0
+FJUMP_700:
+	TYPE	203,203
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	06H,1EH,06H,21H,06H,21H,37H,21H
+	DS.W	0
+FJUMP_800:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	51H,51H,51H,5BH,51H,5BH,51H,51H
+	DS.W	0
+
+;
+;	***** distance 1 *****
+;
+
+FJUMP_101:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03h,05h,19H,19H,1DH,1DH,22H,23H
+	DS.W	0
+FJUMP_201:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,3CH,42H,3FH,3FH,3CH,42H,45H
+	DS.W	0
+FJUMP_301:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4BH,49H,3AH,3AH,50H,50H,49H,46H
+	DS.W	0
+FJUMP_401:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	01H,01H,4AH,4AH,4AH,52H,4DH,5AH
+	DS.W	0
+FJUMP_501:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	18H,19H,1AH,1BH,38H,39H,38H,39H
+	DS.W	0
+FJUMP_601:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	20h,20h,46h,46h,46H,46H,26H,19H
+	DS.W	0
+FJUMP_701:
+	TYPE	201,201
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	21H,1FH,14H,20H,21H,14H,1FH,14H
+	DS.W	0
+FJUMP_801:
+	TYPE	474,474
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	52h,51h,50h,5Bh,5Ah,51h,52h,0Bh
+	DS.W	0
+
+
+
+
+;
+;	***** distance 2 *****
+FJUMP_102:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1EH,1FH,21H,21H,22H,22H,24H,24H
+	DS.W	0
+;
+FJUMP_202:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3CH,56H,45H,3CH,45H,4FH,5BH,46H
+	DS.W	0
+FJUMP_302:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	51H,51H,4DH,4DH,3AH,3AH,3AH,3AH
+	DS.W	0
+FJUMP_402:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	01H,01H,4Ah,4AH,52H,52H,4DH,5AH
+	DS.W	0
+FJUMP_502:
+	TYPE	194,194
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	21h,21h,24h,24h,27H,42H,27H,23H
+	DS.W	0
+FJUMP_602:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	60h,60h,39h,39h,3EH,5CH,3CH,40H
+	DS.W	0
+FJUMP_702:
+	TYPE	200,200
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25H,05H,04H,02H,26H,02H,11H,26H
+	DS.W	0
+FJUMP_802:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	51h,50h,51h,51h,50h,1Dh,4Fh,20h
+	DS.W	0
+
+
+FJ_DN_P1: ; enemy_down
+	DSP_T4	FJUMP_100,FJUMP_101,FJUMP_102,FJUMP_993	;player 1
+	DSP_T4	FJUMP_100,FJUMP_101,FJUMP_102,FJUMP_993	;player 2
+
+	DSP_T4	FJUMP_140,FJUMP_141,FJUMP_142,FJUMP_993	;enemy 1
+	DSP_T4	FJUMP_240,FJUMP_241,FJUMP_242,FJUMP_993	;enemy 2
+	DSP_T4	FJUMP_340,FJUMP_341,FJUMP_342,FJUMP_993	;enemy 3
+	DSP_T4	FJUMP_400,FJUMP_401,FJUMP_402,FJUMP_993	;enemy 4
+	DSP_T4	FJUMP_540,FJUMP_541,FJUMP_542,FJUMP_993	;enemy 5
+	DSP_T4	FJUMP_600,FJUMP_601,FJUMP_602,FJUMP_993	;enemy 6
+	DSP_T4	FJUMP_700,FJUMP_701,FJUMP_702,FJUMP_993	;enemy 7
+	DSP_T4	FJUMP_840,FJUMP_841,FJUMP_842,FJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+FJUMP_140:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03H,03H,05H,05H,19H,19H,1CH,1DH
+	DS.W	0
+FJUMP_240:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41H,41H,41H,3EH,3DH,3EH,3FH,3FH
+	DS.W	0
+FJUMP_340:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	40H,26H,26H,3AH,3AH,39H,3AH,50H
+	DS.W	0
+FJUMP_540:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3BH,3BH,35H,39H,35H,39H,25H,38H
+	DS.W	0
+FJUMP_840:
+	TYPE	355,355
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0EH,21H,0EH,50H,0EH,52H,52H,50H
+	DS.W	0
+;
+;	***** distance 1 *****
+
+FJUMP_141:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03H,05H,19H,19H,1DH,1DH,22H,23H
+	DS.W	0
+FJUMP_241:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,4FH,42H,42H,3FH,3FH,42H,46H
+	DS.W	0
+FJUMP_341:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4BH,49H,3AH,3AH,50H,50H,49H,46H
+	DS.W	0
+FJUMP_541:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25H,26H,26H,26H,38H,35H,38H,3AH
+	DS.W	0
+FJUMP_841:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	27H,4CH,52H,4CH,52H,4CH,52H,52H
+	DS.W	0
+
+;	***** distance 2 *****
+
+FJUMP_142:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1EH,1FH,21H,21H,22H,22H,24H,24H
+	DS.W	0
+FJUMP_242:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	56H,56H,42H,4FH,4FH,42H,46H,46H
+	DS.W	0
+FJUMP_342:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	51H,51H,4DH,4DH,3AH,3AH,3AH,3AH
+	DS.W	0
+FJUMP_542:
+	TYPE	194,194
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	21H,21H,24H,24H,22H,22H,22H,23H
+	DS.W	0
+FJUMP_842:
+	TYPE	357,357
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,20H,1DH,20H,20H,1DH,20H,20H
+	DS.W	0
+
+FJUMP_993:
+	TYPE	22,22
+	DC.B	30h,30h
+	DS.W	0
+
+
+
+FJ_VJ_P1: ; enemy_vjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_110,STAND_110,STAND_110,FJUMP_993	;enemy 1
+	DSP_T4	STAND_210,STAND_210,STAND_210,STAND_993	;enemy 2
+	DSP_T4	FJUMP_310,FJUMP_311,FJUMP_311,FJUMP_993	;enemy 3
+	DSP_T4	FJUMP_410,FJUMP_411,FJUMP_410,FJUMP_993	;enemy 4
+	DSP_T4	STAND_510,STAND_510,STAND_510,STAND_993	;enemy 5
+	DSP_T4	FJUMP_610,FJUMP_611,FJUMP_612,FJUMP_993	;enemy 6
+	DSP_T4	FJUMP_700,FJUMP_701,FJUMP_702,FJUMP_993	;enemy 7
+	DSP_T4	FJUMP_810,FJUMP_811,FJUMP_812,FJUMP_993	;enemy 8
+;
+;	***** distance 0 *****
+;
+FJUMP_310:
+	TYPE	398,398
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	38h,4Eh
+	DS.W	0
+FJUMP_410:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Eh
+	DS.W	0
+FJUMP_610:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24h,23h,15h,2Bh
+	DS.W	0
+FJUMP_810:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,53h,09h,2Bh
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+FJUMP_311:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	37h,38h,4Eh,2Bh
+	DS.W	0
+FJUMP_411:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Dh
+	DS.W	0
+FJUMP_611:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	23h,23h,15h,2Bh
+	DS.W	0
+FJUMP_811:
+	TYPE	334,334
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	53h,0Fh,13h,21h
+	DS.W	0
+
+
+;
+;	***** distance 2 *****
+;
+FJUMP_612:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Eh,23h,15h,2Bh
+	DS.W	0
+FJUMP_812:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,39h,1Ch,2Bh
+	DS.W	0
+
+
+
+
+FJ_FJ_P1: ; enemy_fjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	FJUMP_120,FJUMP_121,FJUMP_122,FJUMP_993	;enemy 1
+	DSP_T4	STAND_220,STAND_220,STAND_220,STAND_993	;enemy 2
+	DSP_T4	FJUMP_320,FJUMP_321,FJUMP_321,FJUMP_993	;enemy 3
+	DSP_T4	FJUMP_420,FJUMP_421,FJUMP_402,FJUMP_993	;enemy 4
+	DSP_T4	STAND_520,STAND_520,STAND_520,STAND_993	;enemy 5
+	DSP_T4	FJUMP_620,FJUMP_621,STAND_622,FJUMP_993	;enemy 6
+	DSP_T4	FJUMP_720,FJUMP_721,FJUMP_722,FJUMP_993	;enemy 7
+	DSP_T4	FJUMP_820,FJUMP_821,FJUMP_822,FJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+FJUMP_120:
+	TYPE	24,24
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41h,42h,22h,2Bh
+	DS.W	0
+FJUMP_320:
+	TYPE	398,398
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ah,4FH
+	DS.W	0
+FJUMP_420:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Eh,1Dh
+	DS.W	0
+FJUMP_620:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24h,23h,16h,2Bh
+	DS.W	0
+FJUMP_720:
+	TYPE	458,458
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	21h,06h,0Fh,2Bh
+	DS.W	0
+FJUMP_820:
+	TYPE	318,318
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+FJUMP_121:
+	TYPE	19,19
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	43H,47H,1BH,44H
+	DS.W	0
+FJUMP_321:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	39h,3Ah,4Fh,2Bh
+	DS.W	0
+FJUMP_421:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1DH
+	DS.W	0
+FJUMP_621:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,23h,16h,2Bh
+	DS.W	0
+FJUMP_721:
+	TYPE	453,453
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	21h,22H
+	DS.W	0
+FJUMP_821:
+	TYPE	334,334
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh,05h,11H
+	DS.W	0
+
+;
+;	***** distance 2 *****
+;
+
+FJUMP_122:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41H,22H
+	DS.W	0
+FJUMP_422:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1Eh
+	DS.W	0
+FJUMP_622:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13h,23h,16h,2Bh
+	DS.W	0
+FJUMP_722:
+	TYPE	459,459
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,02h,04h,26h
+	DS.W	0
+FJUMP_822:
+	TYPE	339,339
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh,05h,06h,13h,23h
+	DS.W	0
+
+
+
+FJ_BJ_P1: ; enemy_bjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	FJUMP_130,FJUMP_130,FJUMP_132,FJUMP_993	;enemy 1
+	DSP_T4	FJUMP_230,FJUMP_230,FJUMP_230,FJUMP_993	;enemy 2
+	DSP_T4	FJUMP_330,FJUMP_331,FJUMP_331,FJUMP_993	;enemy 3
+	DSP_T4	FJUMP_420,FJUMP_421,FJUMP_422,FJUMP_993	;enemy 4
+	DSP_T4	STAND_530,STAND_530,STAND_502,STAND_993	;enemy 5
+	DSP_T4	FJUMP_630,FJUMP_631,STAND_632,FJUMP_993	;enemy 6
+	DSP_T4	FJUMP_700,FJUMP_701,FJUMP_702,FJUMP_993	;enemy 7
+	DSP_T4	FJUMP_830,FJUMP_831,FJUMP_832,FJUMP_993	;enemy 8
+
+;
+;	***** distance 0 *****
+;
+FJUMP_130:
+	TYPE	19,19
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	43H,47H,1BH,44H
+	DS.W	0
+FJUMP_230:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	50H,43H
+	DS.W	0
+FJUMP_330:
+	TYPE	398,398
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,50h
+	DS.W	0
+FJUMP_630:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24h,23h,16h,2Bh
+	DS.W	0
+FJUMP_830:
+	TYPE	319,319
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,0Fh,10h,21h
+	DS.W	0
+
+
+
+;
+;	***** distance 1 *****
+;
+FJUMP_331:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Bh,3Ch,50h,2Bh
+	DS.W	0
+FJUMP_631:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,23h,17h,2Bh
+	DS.W	0
+FJUMP_831:
+	TYPE	334,334
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,0Fh,13h,21h
+	DS.W	0
+
+;
+;	***** distance 2 *****
+;
+FJUMP_132:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	09H,47H,1BH,2BH
+	DS.W	0
+FJUMP_632:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13H,23H,17H,2BH
+	DS.W	0
+FJUMP_832:
+	TYPE	333,333
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0Eh,21h,38h,2Bh
+	DS.W	0
+
+
+;************************************************************************
+;
+;
+;
+BJ_SD_P1: ; enemy_stand
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	BJUMP_100,BJUMP_101,BJUMP_102,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_200,BJUMP_201,BJUMP_202,BJUMP_993	;enemy 2
+	DSP_T4	BJUMP_300,BJUMP_301,BJUMP_302,BJUMP_993	;enemy 3
+	DSP_T4	BJUMP_400,BJUMP_401,BJUMP_402,BJUMP_993	;enemy 4
+	DSP_T4	BJUMP_500,BJUMP_500,STAND_502,BJUMP_993	;enemy 5
+	DSP_T4	BJUMP_600,BJUMP_601,STAND_602,BJUMP_993	;enemy 6
+	DSP_T4	BJUMP_700,BJUMP_701,BJUMP_702,BJUMP_993	;enemy 7
+	DSP_T4	BJUMP_800,BJUMP_801,BJUMP_802,BJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+BJUMP_100:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03h,03h,05h,05h,1EH,1EH,22H,23H
+	DS.W	0
+BJUMP_200:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,3BH,45H,45H,45H,4FH,56H,3BH
+	DS.W	0
+BJUMP_300:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3AH,3AH,39H,39H,47H,47H,48H,48H
+	DS.W	0
+BJUMP_400:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	01H,01H,03H,03H,19H,19H,5AH,24H
+	DS.W	0
+BJUMP_500:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Ah,1Ah,1Ah,1AH,38H,39H,38H,39H
+	DS.W	0
+BJUMP_600:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	27h,27h,27h,5Eh,3Ch,36h,13H,40H
+	DS.W	0
+BJUMP_700:
+	TYPE	204,204
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	05H,09H,06H,22H,22H,09H,06H,05H
+	DS.W	0
+BJUMP_800:
+	TYPE	352,352
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,4FH,5AH,5CH,1EH,59H,59H,5Ch
+	DS.W	0
+
+;
+;	***** distance 1 *****
+;
+
+BJUMP_101:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1EH,1EH,1FH,1FH,22H,22H,23H,24H
+	DS.W	0
+BJUMP_201:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	46H,46H,4FH,4FH,51H,47H,47H,47H
+	DS.W	0
+BJUMP_301:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	47H,47H,4FH,4FH,42H,42H,41H,41H
+	DS.W	0
+BJUMP_401:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26H,26H,01H,01H,15H,15H,27H,03H
+	DS.W	0
+BJUMP_601:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	39h,39h,3Eh,5Ch,3Dh,35h,13H,5EH
+	DS.W	0
+BJUMP_701:
+	TYPE	201,201
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	22H,25H,26H,22H,25H,26H,25H,26H
+	DS.W	0
+BJUMP_801:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	59H,59H,4FH,05H,59H,05H,05H,5CH
+	DS.W	0
+
+
+
+
+;
+;	***** distance 2 *****
+;
+BJUMP_102:
+	TYPE	182,182
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1FH,1FH,21H,21H,22H,22H,24H,24H
+	DS.W	0
+BJUMP_202:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3BH,3BH,45H,45H,51H,45H,47H,47H
+	DS.W	0
+BJUMP_302:
+	TYPE	99,99
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3DH,3DH,3DH,41H,41H,41H,42H,42H
+	DS.W	0
+BJUMP_402:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03H,03H,01H,01H,12H,13H,1AH,0CH
+	DS.W	0
+BJUMP_502:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,38H,39H,38H,39H
+	DS.W	0
+BJUMP_602:
+	TYPE	248,248
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	60h,60h,39h,39h,3Eh,5Ch,3CH,40H
+	DS.W	0
+BJUMP_702:
+	TYPE	201,201,
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	04H,05H,11H,26H,25H,26H,1DH,1DH
+	DS.W	0
+BJUMP_802:
+	TYPE	352,352
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	59H,22H,22H,40H,22H,59H,22H,40H
+	DS.W	0
+
+BJ_DN_P1: ; enemy_down
+	DSP_T4	BJUMP_100,BJUMP_101,BJUMP_102,BJUMP_993	;player 1
+
+	DSP_T4	BJUMP_100,BJUMP_101,BJUMP_102,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_200,BJUMP_201,BJUMP_202,BJUMP_993	;enemy 2
+	DSP_T4	BJUMP_300,BJUMP_301,BJUMP_302,BJUMP_993	;enemy 31
+	DSP_T4	BJUMP_400,BJUMP_401,BJUMP_402,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_540,BJUMP_541,BJUMP_542,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_600,BJUMP_601,BJUMP_602,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_700,BJUMP_701,BJUMP_702,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_840,BJUMP_841,BJUMP_842,BJUMP_993	;enemy 1
+
+
+;
+;	***** distance 0 *****
+;
+BJUMP_540:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3BH,3BH,35H,39H,39H,35H,1EH,22H
+	DS.W	0
+BJUMP_840:
+	TYPE	353,353
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5AH,24H,5AH,59H,24H,5AH,59H,59H
+	DS.W	0
+;
+;	***** distance 1 *****
+
+BJUMP_541:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25H,25H,26H,26H,39H,35H,38H,3AH
+	DS.W	0
+BJUMP_841:
+	TYPE	335,335
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	03H,05H,07H,11H,13H,16H,1EH,22H
+	DS.W	0
+
+;	***** distance 2 *****
+
+BJUMP_542:
+	TYPE	7,7
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24H,24H,21H,21H,42H,42H,22H,23H
+	DS.W	0
+BJUMP_842:
+	TYPE	354,354
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	30H,30H,21H,30H,30H,30H,30H,21H
+	DS.W	0
+
+BJUMP_993:
+	TYPE	22,22
+	DC.B	30h,30h
+
+	DS.W	0
+
+
+
+BJ_VJ_P1: ; enemy_vjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	STAND_110,STAND_110,STAND_110,BJUMP_993	;enemy 1
+	DSP_T4	STAND_210,STAND_210,STAND_210,STAND_993	;enemy 2
+	DSP_T4	STAND_310,STAND_311,STAND_311,STAND_993	;enemy 3
+	DSP_T4	BJUMP_410,BJUMP_411,BJUMP_412,BJUMP_993	;enemy 4
+	DSP_T4	STAND_510,STAND_510,STAND_510,STAND_993	;enemy 5
+	DSP_T4	BJUMP_610,BJUMP_611,BJUMP_612,BJUMP_993	;enemy 6
+	DSP_T4	BJUMP_710,BJUMP_711,BJUMP_712,BJUMP_993	;enemy 7
+	DSP_T4	BJUMP_810,BJUMP_811,BJUMP_812,BJUMP_993	;enemy 8
+;
+;	***** distance 0 *****
+;
+BJUMP_410:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1Dh
+	DS.W	0
+BJUMP_610:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23H,25H,15H,2BH
+	DS.W	0
+BJUMP_710:
+	TYPE	451,451
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	05h,07h,22h,2Bh
+	DS.W	0
+BJUMP_810:
+	TYPE	318,318
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,53h
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+BJUMP_411:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1EH
+	DS.W	0
+BJUMP_611:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23H,18H,15H,2BH
+	DS.W	0
+BJUMP_711:
+	TYPE	453,453
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26h,22h
+	DS.W	0
+BJUMP_811:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,34h,07h,2Bh
+	DS.W	0
+
+;
+;	***** distance 2 *****
+;
+BJUMP_412:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1EH
+	DS.W	0
+BJUMP_612:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3EH,23H,15H,2BH
+	DS.W	0
+BJUMP_712:
+	TYPE	452,452
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,26h,02h,04h
+	DS.W	0
+BJUMP_812:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	25h,26h,34h,2Bh
+	DS.W	0
+
+
+
+
+BJ_FJ_P1: ; enemy_fjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	BJUMP_120,BJUMP_120,BJUMP_122,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_220,BJUMP_220,BJUMP_220,BJUMP_993	;enemy 2
+	DSP_T4	BJUMP_320,BJUMP_321,BJUMP_321,BJUMP_993	;enemy 3
+	DSP_T4	BJUMP_420,BJUMP_421,BJUMP_421,BJUMP_993	;enemy 4
+	DSP_T4	BJUMP_520,BJUMP_520,BJUMP_522,BJUMP_993	;enemy 5
+	DSP_T4	BJUMP_620,BJUMP_621,STAND_622,BJUMP_993	;enemy 6
+	DSP_T4	BJUMP_720,BJUMP_721,BJUMP_722,BJUMP_993	;enemy 7
+	DSP_T4	BJUMP_820,BJUMP_821,BJUMP_822,BJUMP_993	;enemy 8
+
+
+;
+;	***** distance 0 *****
+;
+BJUMP_120:
+	TYPE	24,24
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41h,42h,22h,2Bh
+	DS.W	0
+BJUMP_220:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	4FH,42H
+	DS.W	0
+BJUMP_320:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ah,39h,4Fh,2Bh
+	DS.W	0
+BJUMP_420:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1Dh
+	DS.W	0
+BJUMP_520:
+	TYPE	421,421
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Dh,1Eh
+	DS.W	0
+BJUMP_620:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	24h,23h,16h,2BH
+	DS.W	0
+BJUMP_720:
+	TYPE	453,453
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	22h,0Eh
+	DS.W	0
+BJUMP_820:
+	TYPE	325,325
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	54h,53h,03h,04h,05h,22h
+	DS.W	0
+
+
+;
+;	***** distance 1 *****
+;
+BJUMP_321:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	39h,3Ah,4Fh,2Bh
+	DS.W	0
+BJUMP_421:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Eh,1Dh
+	DS.W	0
+BJUMP_621:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,23h,23h,2Bh
+	DS.W	0
+BJUMP_721:
+	TYPE	460,460
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Fh,0Fh
+	DS.W	0
+BJUMP_821:
+	TYPE	336,336
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh,05h,06h,0Dh,13h,1Eh,2Bh
+	DS.W	0
+
+;
+;	***** distance 2 *****
+;
+BJUMP_122:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	41H,22h
+	DS.W	0
+BJUMP_422:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Dh,1Eh
+	DS.W	0
+BJUMP_522:
+	TYPE	424,424
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Dh,1Eh
+	DS.W	0
+BJUMP_622:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13h,23h,16H,2Bh
+	DS.W	0
+BJUMP_722:
+	TYPE	459,459
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	26h,02h,04h,26h
+	DS.W	0
+BJUMP_822:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1Eh,1Fh,37h,2Bh
+	DS.W	0
+
+
+
+BJ_BJ_P1: ; enemy_bjump
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 1
+	DSP_T4	STAND_100,STAND_101,STAND_102,STAND_993	;player 2
+
+	DSP_T4	BJUMP_130,BJUMP_130,BJUMP_132,BJUMP_993	;enemy 1
+	DSP_T4	BJUMP_230,BJUMP_230,BJUMP_230,BJUMP_993	;enemy 2
+	DSP_T4	BJUMP_330,BJUMP_331,BJUMP_331,BJUMP_993	;enemy 3
+	DSP_T4	BJUMP_430,BJUMP_430,BJUMP_432,BJUMP_993	;enemy 4
+	DSP_T4	BJUMP_530,BJUMP_530,BJUMP_532,BJUMP_993	;enemy 5
+	DSP_T4	BJUMP_630,BJUMP_631,STAND_632,BJUMP_993	;enemy 6
+	DSP_T4	BJUMP_700,BJUMP_701,BJUMP_702,BJUMP_993	;enemy 7
+	DSP_T4	BJUMP_830,BJUMP_831,BJUMP_832,BJUMP_993	;enemy 8
+
+;
+;	***** distance 0 *****
+;
+BJUMP_130:
+	TYPE	19,19
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	43h,47h,1Bh,44h
+	DS.W	0
+BJUMP_230:
+	TYPE	58,58
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	50H,43H
+	DS.W	0
+BJUMP_330:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Ch,3Bh,50h,2Bh
+	DS.W	0
+BJUMP_430:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1Dh
+	DS.W	0
+BJUMP_530:
+	TYPE	421,421
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3EH,1Fh
+	DS.W	0
+BJUMP_630:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	23h,23h,17h,2Bh
+	DS.W	0
+BJUMP_830:
+	TYPE	326,326
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	5Fh,5Dh,0Fh,10h,21h,2Bh
+	DS.W	0
+
+
+
+;
+;	***** distance 1 *****
+;
+BJUMP_331:
+	TYPE	390,390
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3Bh,3Ch,50h,2Bh
+	DS.W	0
+BJUMP_631:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	15h,16h,17h,2Bh
+	DS.W	0
+BJUMP_831:
+	TYPE	321,321
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	0Fh,34h,21h,2Bh
+	DS.W	0
+
+;
+;	***** distance 2 *****
+;
+BJUMP_132:
+	TYPE	4,4
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	09H,47H,1BH,2BH
+	DS.W	0
+BJUMP_432:
+	TYPE	405,405
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	1DH,1Fh
+	DS.W	0
+BJUMP_532:
+	TYPE	424,424
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	3EH,1Fh
+	DS.W	0
+BJUMP_632:
+	TYPE	413,413
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	13H,23H,17H,2BH
+	DS.W	0
+BJUMP_832:
+	TYPE	318,318
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	21h,38h
+	DS.W	0
+
+
+;************************************************************************
+

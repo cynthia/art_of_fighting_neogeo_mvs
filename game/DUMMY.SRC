@@ -1,0 +1,856 @@
+;************************************************************************
+;*	          BACK_OJBECT SETING & OUPUT PROGRAM			*
+;*  			    version 1.04*10^-9 data 1991.10.7		*
+;*		  		    version 0.07       data 1992/5/21	*
+;*									*
+;************************************************************************
+
+		XDEF	LM_AHO,LM_HAKO,PM_AHO,PM_F_TREE
+		XDEF 	BK_OBJECT_SET,PM_HAKO,BK_CHR_INIT
+		XDEF	LM_HAHEN,PM_HAHEN,B1_BUFFER_INIT
+		XDEF	PM_MAN,BOMB_INIT,BK_SET_LOOP
+
+		XREF	?A5
+;by BACK
+		XREF	GL
+;by GAME_SUB
+		XREF	FREE_OBJ_WORK,FREE_OBJ_WORK_SUB,FREE_HERO_PWORK
+		XREF 	GET_OBJ_BACK_ADRS
+;by ACT_SUB
+		XREF	SET_HIT_AREA
+		XREF	REDUCTION_MOVE
+;by DM_TBL
+		XREF	B_HAKO_TBL,BK_OBJ1_DATA,BK_OBJ2_DATA
+		XREF	EPR_HAKO1,KANBAN_DATA
+
+
+		SECT	GAME,,C
+
+		INCLUDE	SYS.INC		@@@
+		INCLUDE	MACRO.INC	@@@
+		INCLUDE	NEO_GEO.INC	@@@
+		INCLUDE	LABEL.INC
+		INCLUDE	ACT_No.INC
+		INCLUDE	HFLAG.INC
+
+
+;************************************************************************
+
+
+CHECK_MSB:
+		TST.W	TYPE(A6)
+		BPL	CHK_MSB_1
+
+		ADDQ.W	#4,SP	   ;called_prog_skip
+		MOVE.W	#0,TYPE(A6)
+CHK_MSB_1:
+		RTS
+
+;***********************************************************************
+;
+;		back1_init_program	1991/10/31
+;		 presented by k.morikawa
+;
+B1_BUFFER_INIT:
+		MOVEQ.L	#0,D0	;byte*4*8
+		MOVEQ.L	#0,D1
+		MOVEQ.L	#0,D2
+		MOVEQ.L	#0,D3
+		MOVEQ.L	#0,D4
+		MOVEQ.L	#0,D5
+		MOVEQ.L	#0,D6
+		MOVE.L	D0,A1
+
+		LEA.L	BACK1_BUFFER+800H(A5),A0
+		MOVE.W	#800H/(32*8)-1,D7
+B1_INIT_LOOP:
+		MOVEM.L	D0-D6/A1,-(A0)
+		MOVEM.L	D0-D6/A1,-(A0)
+		MOVEM.L	D0-D6/A1,-(A0)
+		MOVEM.L	D0-D6/A1,-(A0)
+		MOVEM.L	D0-D6/A1,-(A0)
+		MOVEM.L	D0-D6/A1,-(A0)
+		MOVEM.L	D0-D6/A1,-(A0)
+		MOVEM.L	D0-D6/A1,-(A0)
+		DBRA	D7,B1_INIT_LOOP
+		RTS
+
+;
+;		*receive_resista:A1(back1_adrs)
+;				:D3(set_data.byte)
+;				:D5(x_size.word)
+;				:D6(y_size.word)
+BACK1_DATA_SET:
+		MOVE.L	A1,A2
+		MOVE.W	D5,D7
+B1_SET_LOOP1:
+		MOVE.B	D3,(A2)+
+		DBRA	D7,B1_SET_LOOP1
+
+		ADDA.W	#32,A1
+		DBRA	D6,BACK1_DATA_SET
+		RTS
+
+;***********************************************************************
+;
+;		* Logical operation program
+;
+;		DUMMY_CHARACTER etc. version 1.02*10^-9
+;		  presented by k.morikawa
+
+LM_AHO:
+		JSR	CHECK_MSB(PC)
+		MOVE.L	VX(A6),D0
+		ADD.L	D0,X_POSITION(A6)
+		ANDI.W	#400H-1,X_POSITION(A6) ;4 screen adrs(vartual)
+		RTS
+
+;************************************************************************
+;
+;		HAKO_operation program
+;				version 1.0*10^-9
+;			        date 1991/11/18
+;
+LM_HAKO:
+		JSR	CHECK_MSB(PC)
+		MOVE.B	WORK_N0(A6),(A5)
+		MOVE.W	(A5),D0
+		LEA.L	0(A5,D0.W),A3
+		MOVE.B	BREAK_FLAG(A6),D0
+		BEQ.S	LM_HAKO_1
+
+		LEA.L	HERO1(A5),A0
+		BTST.B	#BHS_DAMAGE,HERO_STATE(A0)
+		BNE.S	LM_HAKO_2
+
+		LEA.L	HERO2(A5),A0
+		BTST.B	#BHS_DAMAGE,HERO_STATE(A0)
+		BEQ.S	LM_HAKO_1
+LM_HAKO_2:
+		MOVE.W	#C_B_HAKO,ACT_No(A3)
+		MOVE.B	#1,MASTER_REQUEST(A3)
+		JSR	BOMB_INIT(PC)
+LM_HAKO_1:
+		MOVE.W	STEP1(A6),D0
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		MOVE.L	LM_H_TBL(PC,D0.W),A0
+		JMP	(A0)
+
+;		***************************
+LM_H_TBL:
+		DC.L	LM_H_INIT	;00
+		DC.L	LM_H_STOP	;01
+		DC.L	LM_H_FALL	;02
+		DC.L	LM_H_SET	;03
+
+;		***************************
+
+;************************************************************************
+;
+;		step	0
+;
+LM_H_INIT:
+		JSR	SET_HIT_AREA(PC)
+		MOVE.L	VZ(A6),D0
+		BEQ.S	LM_I_1
+
+		MOVE.L	VZ(A6),VZ_INIT(A6)
+		MOVE.W	#2,STEP1(A6)
+LM_I_1:
+		ADDQ.W	#1,STEP1(A6)
+		RTS
+
+
+;************************************************************************
+;
+;		step	1
+;
+LM_H_STOP:
+		MOVE.W	Z_POSITION(A6),D0
+		BMI.S	LM_SP_3
+		BEQ.S	LM_SP_1
+
+		JSR	OBJ_CHECK(PC)
+		BNE.S	LM_SP_1
+
+		MOVE.W	#3,STEP1(A6)
+LM_SP_1:
+		RTS
+
+LM_SP_3:
+		MOVE.L	#0,Z_POSITION(A6)
+		RTS
+
+
+;************************************************************************
+;
+;		step	2
+;
+LM_H_FALL:
+		MOVE.L	Z_POSITION(A6),D0
+		ADD.L	VZ(A6),D0
+		BPL.S	LM_F_1
+
+		MOVE.L	#0,Z_POSITION(A6)
+		JMP	LM_F_4
+LM_F_1:
+		MOVE.L	D0,Z_POSITION(A6)
+		JSR	OBJ_CHECK(PC)
+		BNE.L	LM_F_4
+
+		ADD.L	#-8000H,VZ(A6)
+		RTS
+
+LM_F_4:
+		MOVE.L	#0,VZ(A3)
+		MOVE.L	#0,VZ(A6)
+		SUBQ.W	#1,STEP1(A6)
+		RTS
+
+;************************************************************************
+;
+;		step	3
+;
+LM_H_SET:
+		MOVE.L	VZ_INIT(A6),VZ(A6)
+		MOVE.W	#2,STEP1(A6)
+		RTS
+
+;************************************************************************
+;
+;		object_down_line check_prog
+;		     presented by k.m              1991/11/18
+;
+OBJ_CHECK:
+		LEA.L	(A3),A0
+		JSR	GET_OBJ_BACK_ADRS(PC)
+		SUBA.L	#1,A1
+		MOVEQ.L	#0,D0
+		MOVE.B	WORK_N0(A6),D0
+BK_LOOP:
+		TST.B	(A1)
+		BEQ.S	BK_CHK_3
+
+		CMP.B	(A1),D0
+		BNE.S	BK_CHK_2
+
+BK_CHK_3:
+		ADDA.W	#32,A1
+		DBRA	D6,BK_LOOP
+BK_CHK_1:
+		MOVEQ.L	#0,D0
+		RTS
+BK_CHK_2:
+		MOVEQ.L	#6FH,D0
+		RTS
+
+;************************************************************************
+;
+;		HAHEN_operation  1991/10/29
+;
+LM_HAHEN:
+		JSR	CHECK_MSB(PC)
+		MOVE.W	Y_POSITION(A6),D0
+		ADD.W	Z_POSITION(A6),D0
+		MOVE.W	GROUND_LINE(A6),D1
+		CMP.W	D0,D1
+		BLT	LM_H_1
+		BNE	LM_H_2
+
+		SUB.B	#1,Z_CNT(A6)
+		BMI	LM_HB_END
+
+		MOVE.L	VZ(A6),D0
+		NEG.L	D0
+		MOVE.L	D0,D1
+		LSR.L	#1,D0
+		LSR.L	#3,D1
+		ADD.L	D1,D0
+		MOVE.L	D0,VZ(A6)	;vz=vz*0.625
+LM_H_1:
+		MOVE.L	VX(A6),D0
+		ADD.L	D0,X_POSITION(A6)
+		MOVE.L	VZ(A6),D0
+		ADD.L	D0,Z_POSITION(A6)
+		SUB.L	#0A800H,D0
+		MOVE.L	D0,VZ(A6)
+		RTS
+LM_H_2:
+		MOVE.W	D1,Z_POSITION(A6)
+		RTS
+LM_HB_END:
+		MOVE.W	#0,TYPE(A6)
+		RTS
+
+
+;
+;************************************************************************
+
+		XDEF	LM_KUBIFURI
+;
+;
+;
+LM_KUBIFURI:
+		JSR	CHECK_MSB(PC)
+
+		MOVE.B	WORK_N0(A6),(A5)
+		MOVE.W	(A5),D0
+		LEA.L	0(A5,D0.W),A3
+
+		TST.W	STEP1(A6)
+		BNE.S	ACT_MAIN
+
+		LEA.L	JB_BUFFER(A6),A0
+		MOVE.L	D0,(A0)+
+		MOVE.L	D0,(A0)+
+		MOVE.L	D0,(A0)+
+
+		JSR	INIT_JOB_SET(PC)
+
+		MOVE.W	#1,STEP1(A6)
+ACT_MAIN:
+		LEA.L	JB_BUFFER(A6),A4
+JOB_OPERATION:
+		MOVE.W	JB_POINTER(A6),D0
+		EORI.W	#3,D0
+		MOVE.B	0(A4,D0.W),D0
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		MOVE.L	ACTION_PROG(PC,D0.W),A0
+		JSR	(A0)
+		SUB.W	#1,JB_POINTER(A6)
+		BNE.S	JOB_OPERATION
+
+		MOVE.W	#3,JB_POINTER(A6)
+		RTS
+
+ACTION_PROG:
+	DC.L	JOB_RETURN	 ;0
+;job no.1  command_wait
+	DC.L	WAIT_JOB	 ;1
+;job no.2
+	DC.L	CHECK_DIRECTION ;2
+;job no.3
+	DC.L	CHARACTER_SET     3
+
+
+JOB_RETURN:
+		RTS
+
+;		********************
+;	job macro
+;
+JOB_WAIT_SET	MACRO
+		MOVE.B	#1,0(A4)
+		ENDM
+JOB_WAIT_CLEAR	MACRO
+		MOVE.B	#0,0(A4)
+		ENDM
+
+JOB_CHK_SET	MACRO
+		MOVE.B	#2,1(A4)
+		ENDM
+JOB_CHK_CLEAR	MACRO
+		MOVE.B	#0,1(A4)
+		ENDM
+
+JOB_CHR_SET	MACRO
+		MOVE.B	#3,2(A4)
+		ENDM
+JOB_CHR_CLEAR	MACRO
+		MOVE.B	#0,2(A4)
+		ENDM
+
+JOB_CLEAR	MACRO
+		MOVE.W	JB_POINTER(A6),D0
+		EORI.W	#3,D0
+		MOVE.B	#0,0(A4,D0.W)
+		ENDM
+
+;		********************
+
+WAIT_JOB:
+		TST.B	WAIT_TIMER(A6)
+		BEQ.S	WAIT_JOB_END
+
+		SUB.B	#1,WAIT_TIMER(A6)
+		RTS
+WAIT_JOB_END:
+		JOB_CHK_SET
+		JOB_CLEAR
+		RTS
+
+CHECK_DIRECTION:
+;		LEA.L	HERO1(A5),A0
+;		LEA.L	HERO2(A5),A1
+;
+;		MOVEQ.L	#0EH,D0
+;		MOVE.W	D0,D1
+;		EORI.W	ACT_CTRL(A0),D0
+;		BEQ.S	DAMAGE_CHANGE
+;
+;		MOVEQ.L	#0,D1
+;		EORI.W	ACT_CTRL(A1),D1
+;		BEQ.S	DAMAGE_CHANGE
+;
+;DAMAGE_CHANGE:
+		LEA.L	HERO1(A5),A0
+		MOVEQ.L	#0,D0
+		MOVE.B	LOOK_PLAYER(A6),D0
+		BEQ.S	CHG_DIR_1
+
+		LEA.L	HERO2(A5),A0
+CHG_DIR_1:
+		MOVE.W	X_POSITION(A6),D0
+		SUB.W	X_POSITION(A0),D0
+		ASR.W	#4,D0
+		MOVE.B	POSITION_MAP(PC,D0.W),D0
+		CMP.B	LOOK_DIRECTION(A6),D0
+		BEQ.S	CHK_DIR_2
+
+		MOVE.B	D0,LOOK_DIRECTION(A6)
+		JOB_CHR_SET
+		JOB_CLEAR
+CHK_DIR_2:
+		RTS
+
+POSITION_MIN:
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2
+POSITION_MAP:
+	DC.B	2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4
+	DC.B	4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4
+	DC.B	4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4
+	DC.B	4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4
+;POSITION_MAX-1:
+
+
+CHARACTER_SET:
+		MOVE.W	GUNJIN_TYPE(A6),D0
+		MOVE.W	D0,D1
+		MOVE.B	WAIT_DATA(PC,D1.W),WAIT_TIMER(A6)
+		JOB_WAIT_SET
+
+		LSL.W	#3,D0
+		ADD.B	LOOK_DIRECTION(A6),D0
+		MOVE.W	CHARA_DATA(PC,D0.W),ACT_No(A3)
+		MOVE.B	#1,MASTER_REQUEST(A3)
+		JOB_CLEAR
+		RTS
+CHARA_DATA:
+	DC.W	C_GJ1_RFACE,C_GJ1_FFACE,C_GJ1_LFACE,C_GJ1_LFACE		
+	DC.W	C_GJ2_RFACE,C_GJ2_FFACE,C_GJ2_LFACE,C_GJ1_LFACE		
+	DC.W	C_GJ3_RFACE,C_GJ3_FFACE,C_GJ3_LFACE,C_GJ1_LFACE		
+
+	DC.W	C_MASTER_RFACE,C_MASTER_FFACE,C_MASTER_LFACE,C_MASTER_LFACE
+	DC.W	C_BOY_RFACE,C_BOY_FFACE,C_BOY_LFACE,C_BOY_LFACE
+	DC.W	C_HIGE_RFACE,C_HIGE_FFACE,C_HIGE_LFACE,C_HIGE_LFACE
+	DC.W	C_GIRL1_RFACE,C_GIRL1_FFACE,C_GIRL1_LFACE,C_GIRL1_LFACE
+
+
+WAIT_DATA:
+	DC.B	8,9,7,8
+	DC.B	8,8,8,8
+
+
+INIT_JOB_SET:
+		MOVE.B	VX(A6),LOOK_PLAYER(A6)
+		MOVE.W	VZ(A6),GUNJIN_TYPE(A6)
+
+		MOVE.W	GUNJIN_TYPE(A6),D0
+		LSL.W	#3,D0
+		LEA.L	INIT_JOB_DATA(PC),A0
+		MOVE.L	0(A0,D0.W),JB_BUFFER+0(A6)
+		MOVE.L	4(A0,D0.W),JB_BUFFER+4(A6)
+		MOVE.W	#3,JB_POINTER(A6)
+		RTS
+
+INIT_JOB_DATA:
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+	DC.B	0,2,0,0,0,0,0,0
+
+;************************************************************************
+;
+;		* Physical operation program
+;
+;		version	0.03*10^-9  1991/11/22
+;	aho_operation =>* act_flag not equal then non_action
+;			* action_dec is minus then non_action
+;			* step1 is (pm_hero) 1 then normal_chk
+;			    if not equal then act_timer = minus
+;			* lever_get(???)
+;
+;	* pm warning_comment => if SORT_SET is cut
+;				   then move zero to SPRITE_POS(word)
+
+PM_AHO:
+		JSR	PM_CHECK1(PC)
+		MOVE.W	#-59H,D3
+		MOVE.W	#66H,D4
+		JSR	PM_CHECK2(PC)
+
+		MOVE.L	X_POSITION(A4),X_POSITION(A6)
+		MOVE.L	Y_POSITION(A4),Y_POSITION(A6)
+		MOVE.L	Z_POSITION(A4),Z_POSITION(A6)
+		JSR.S	SORT_SET
+		JSR	REDUCTION_MOVE(PC)
+		JSR.S	NEXT_ACTION
+		RTS
+
+;
+;		HAHEN_operation 1991/10/25
+;
+PM_HAHEN:
+		JSR	PM_CHECK1(PC)
+		TST.W	TYPE(A4)
+		BEQ.S	PM_H_END
+		JSR	PM_CHECK2(PC)
+
+		JSR.S	SORT_SET
+		MOVE.L	X_POSITION(A4),X_POSITION(A6)
+		MOVE.L	Y_POSITION(A4),Y_POSITION(A6)
+		MOVE.L	Z_POSITION(A4),Z_POSITION(A6)
+		JSR	REDUCTION_MOVE(PC)	;from xy_size to sp_adrs_changes
+		JSR.S	NEXT_ACTION		;now_action_chk
+		RTS
+
+PM_H_END:
+		MOVE.W	#0,TYPE(A6)
+		RTS
+
+
+		XDEF	PM_KUBIFURI
+;
+;		HAKO_operatrion 1991/10/29
+;
+PM_KUBIFURI:
+PM_HAKO:
+		JSR	PM_CHECK1(PC)
+
+		MOVE.W	#-80H,D3
+		MOVE.W	#80H,D4
+		JSR	PM_CHECK2(PC)
+
+		TST.B	HIT_FLAG(A6)
+		BPL	PM_HAKO_1
+
+		MOVE.B	#0FFH,BREAK_FLAG(A4)
+		MOVE.B	#0,HIT_FLAG(A6)
+PM_HAKO_1:
+		JSR.S	SORT_SET
+		MOVE.L	X_POSITION(A4),X_POSITION(A6)
+		MOVE.L	Y_POSITION(A4),Y_POSITION(A6)
+		MOVE.L	Z_POSITION(A4),Z_POSITION(A6)
+		JSR	REDUCTION_MOVE(PC)
+		JSR.S	NEXT_ACTION
+		JSR	SET_HIT_AREA(PC)
+		RTS
+
+
+
+
+;************************************************************************
+
+
+PM_MAN:
+		MOVE.W	#-80H,D3
+		MOVE.W	#80H,D4
+;		MOVE.W	#-6EH,D3
+;		MOVE.W	#70H,D4
+		JSR	PM_CHECK2(PC)
+		JSR.S	SORT_SET
+		JSR	REDUCTION_MOVE(PC)
+		JSR.S	NEXT_ACTION
+		RTS
+
+
+PM_F_TREE:
+		JSR	PM_CHECK1(PC)
+		MOVE.W	#-6EH,D3
+		MOVE.W	#70H,D4
+		JSR	PM_CHECK2(PC)
+		BEQ.S	PM_FT_1
+
+		JSR.S	SORT_SET
+PM_FT_1:
+		JSR	REDUCTION_MOVE(PC)
+		JSR.S	NEXT_ACTION
+		RTS
+
+;************************************************************************
+
+
+
+PM_CHECK1:
+		BSET.B	#ACTAT_KEEP,ACT_ATTR(A6)
+		MOVE.B	MASTER_No(A6),(A5)
+		MOVE.W	(A5),D0
+		LEA.L	-LOG(A5,D0.W),A4
+		TST.B	MASTER_REQUEST(A6)
+		BEQ.S	PM_CHK1_1
+
+		CLR.B	MASTER_REQUEST(A6)
+		MOVE.W	ACT_No(A6),D0
+		JSR.S	ACTION_SET
+PM_CHK1_1:
+		RTS
+
+
+;
+;	receive_resista:D3
+;			D4
+PM_CHECK2:
+		MOVE.W	X_POSITION(A6),D0
+		MOVE.W	D0,D1
+		SUB.W	BACK2+Wx(A5),D0
+		BLT.S	PM_CHK2_1
+
+		SUB.W	BACK2+WxRIGHT(A5),D1
+		CMP.W	D4,D1
+		BGE.S	PM_CHK2_3
+
+		BCLR.B	#ACTAT_CUT,ACT_ATTR(A6)
+		BCLR.B	#ACTAT_KEEP,ACT_ATTR(A6)
+		MOVEQ.L	#-1,D0
+		RTS
+PM_CHK2_1:
+		BSET.B	#ACTAT_CUT,ACT_ATTR(A6)
+		BCLR.B	#ACTAT_KEEP,ACT_ATTR(A6)
+		CMP.W	D3,D0
+		BGE.S	PM_CHK2_2
+
+		BCLR.B	#ACTAT_CUT,ACT_ATTR(A6)
+		BSET.B	#ACTAT_KEEP,ACT_ATTR(A6)
+PM_CHK2_2:
+		MOVEQ.L	#0,D0
+		RTS
+PM_CHK2_3:
+		BSET.B	#ACTAT_CUT,ACT_ATTR(A6)
+		BCLR.B	#ACTAT_KEEP,ACT_ATTR(A6)
+		CMP.W	D4,D0
+		BLT.S	PM_CHK2_4
+
+		BCLR.B	#ACTAT_CUT,ACT_ATTR(A6)
+		BSET.B	#ACTAT_KEEP,ACT_ATTR(A6)
+PM_CHK2_4:
+		MOVEQ.L	#0,D0
+		RTS
+
+
+;************************************************************************
+;
+;
+;		character_expolse_initialize  1991/10/29
+;
+
+BOMB_INIT:
+		MOVE.B	#0,BREAK_FLAG(A6)
+		MOVE.B	#0,SETTING_CNT(A6)
+		MOVE.W	AREA_No(A5),D6
+		SUBQ.W	#1,D6
+		ADD.W	D6,D6
+		ADD.W	D6,D6
+
+		LEA.L	B_HAKO_TBL(PC),A2
+		MOVE.L	0(A2,D6.W),A2
+
+		LEA.L	BTYPE_TBL(PC),A4
+		MOVE.L	0(A4,D6.W),A4
+
+		MOVEQ.L	#0,D6
+BOMB_LOOP:
+		MOVE.W	(A2)+,D1	    ;1
+		BEQ	BOMB_END
+
+		JSR	FRONT_DATA_SET(PC)
+		JSR	(A4)
+
+		MOVE.W	X_POSITION(A6),D0
+		ADD.W	D0,X_POSITION(A1)
+		MOVE.W	Z_POSITION(A6),D0
+		ADD.W	D0,Z_POSITION(A1)
+		JMP	BOMB_LOOP(PC)
+BOMB_END:
+		RTS
+
+
+BTYPE_TBL:
+	DC.L	KANBAN_SET	;00
+	DC.L	TOBICHIRI_SET	;01
+	DC.L	NON_OPE		;02
+	DC.L	NON_OPE		;03
+	DC.L	NON_OPE		;04
+	DC.L	NON_OPE		;05
+	DC.L	NON_OPE		;06
+	DC.L	NON_OPE		;07
+	DC.L	NON_OPE		;08
+	DC.L	NON_OPE		;09
+	DC.L	NON_OPE		;10
+	DC.L	NON_OPE		;11
+	DC.L	NON_OPE		;12
+
+KANBAN_SET:
+		LEA.L	KANBAN_DATA(PC),A0
+		MOVEQ.L	#0,D0
+		MOVE.B	SETTING_CNT(A6),D0
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		MOVE.L	0(A0,D0.W),VX(A1)
+		MOVE.L	4(A0,D0.W),VZ(A1)
+		MOVE.B	#3-1,Z_CNT(A1)
+		MOVE.W	#GL+24,GROUND_LINE(A1)
+		ADD.B	#1,SETTING_CNT(A6)
+		RTS
+
+TOBICHIRI_SET:
+		LEA.L	EPR_HAKO1(PC),A0
+		JSR.S	RAND8		;randum(0-255=>D0,byte)
+		ANDI.B	#1FH,D0
+		MOVE.B	D0,D1
+		MULU	#8,D0
+		MOVE.L	0(A0,D0.W),VX(A1)
+		MOVE.L	4(A0,D0.W),VZ(A1)
+		MOVE.W	#GL-30H,GROUND_LINE(A1)
+		MOVE.B	#0,Z_CNT(A1)
+NON_OPE:
+		RTS
+
+
+;************************************************************************
+;
+;		back_object action_character data_setting program
+;			presented by k.m 1991/10/17
+;			version 1.2*10^-9   1991/10/28
+;			version 0.08	    1992/5/21
+;
+;		*warning_comment
+;		  if this character is break or type_changes 
+;			then from lm_operation to call BKCI_LOOP
+;		  but next_parameter_setting 
+;    			*AREA_NO,BK_OBJ_TABLE,use_data_table_address
+;
+BK_CHR_INIT:
+		MOVE.W	AREA_No(A5),D6
+		SUBQ.W	#1,D6
+		ADD.W	D6,D6
+		ADD.W	D6,D6
+		LEA.L	BK_OBJ2_DATA,A2
+		MOVE.L	0(A2,D6.W),A2
+BKCI_LOOP:
+		MOVE.W	(A2)+,D1	    ;2
+		BEQ	BKCI_END
+
+		JSR	FRONT_DATA_SET(PC)
+
+		MOVE.L	(A2)+,VX(A1)	    ;18
+		MOVE.L	(A2)+,VZ(A1)	    ;22
+		MOVE.B	(A2)+,HIT_ACTIVE(A0) ;23
+		MOVE.B	(A2)+,HIT_PASSIVE(A0);24
+		MOVE.B	(A2),HIT_FLAG(A0)
+		ADDA.W	#2,A2
+
+		MOVE.B	#0,BREAK_FLAG(A1)
+		BRA	BKCI_LOOP
+BKCI_END:
+		RTS
+
+
+;************************************************************************
+;
+;	*recieve_resista :D1 (system_label)
+;
+FRONT_DATA_SET:
+		JSR.S	FREE_LWORK
+
+		MOVEQ.L	#0,D0
+		MOVE.W	D0,STEP1(A0)
+		MOVE.L	D0,X_POSITION(A0)
+		MOVE.L	D0,Y_POSITION(A0)
+		MOVE.L	D0,Z_POSITION(A0)
+
+		MOVE.W	D1,TYPE(A0)
+		MOVE.W	(A2)+,X_POSITION(A0);4
+		MOVE.W	(A2)+,Y_POSITION(A0);6
+		MOVE.W	(A2)+,Z_POSITION(A0);8
+		MOVE.L	A0,A1 
+
+		JSR	FREE_OBJ_WORK(PC)	;get free_work_address
+
+		MOVE.L	(A2)+,D2	;type & act_no set
+		MOVE.W	(A2)+,D5	;priority set
+
+		MOVEQ.L	#0,D3
+		MOVEQ.L	#0,D4
+		JSR.S	PWORK_SET
+		BSET.B	#ACTAT_ERACE,ACT_ATTR(A0)
+;A0 = physical
+;A1 = logical
+		MOVE.B	WORK_No(A1),MASTER_No(A0)
+		MOVE.B	WORK_No(A0),WORK_N0(A1)
+
+		RTS
+
+
+;************************************************************************
+;
+;		back & fornt object set program
+;   		 1991/10/11 presented by K.M
+;
+;	* operation  	: work_area_set(FREE_PWORK)
+;		        : read_data(from data_table)
+;			: x_y_pos & priority workset
+;			    *priority :obj1 => 0~63(0~5FH)
+;			 	       obj2 => 0~79(0~8FH)
+;				       obj3 => 0~28(0~1CH)
+;				       obj4 => 0~32(0~20H)
+;			   *WARINING => this priority is
+;					   object_number > priority
+;
+;			: physical_work_set(PWORK_SET)
+;			: special_data setting
+;			: character_erace_bit_set
+;			: if object_no = 0 then operation_end
+;
+;	*receive_resista: A1(back_object_data top_address)
+;
+BK_OBJECT_SET:
+		MOVE.W	AREA_No(A5),D0
+		SUBQ.W	#1,D0
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		LEA.L	BK_OBJ1_DATA,A1
+		MOVE.L	0(A1,D0.W),A1
+BK_SET_LOOP:
+		JSR	FREE_OBJ_WORK(PC)
+
+		TST.W	(A1)
+		BEQ.L	BK_SET_END
+
+		MOVE.L	(A1)+,D2	;type & act_no set
+		MOVE.W	(A1)+,D5	;priority set
+		MOVE.W	(A1)+,D3	;x_position set
+		MOVE.W	(A1)+,D4	;y_position set
+		JSR.S	PWORK_SET
+
+		BSET.B	#ACTAT_ERACE,ACT_ATTR(A0)
+
+		JMP	BK_SET_LOOP
+BK_SET_END
+		RTS
+
+;************************************************************************
+		INCLUDE	WORK.INC
+;************************************************************************
+

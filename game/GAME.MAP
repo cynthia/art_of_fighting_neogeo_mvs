@@ -1,0 +1,170 @@
+            Microtec Research Lod68K V6.4a         Wed Sep 02 19:34:01 1992
+
+Command line: A:\68K\ASM\LOD68K.EXE  @GAME,GAME,GAME 
+
+LIST D
+*MAKE  ABS GAMEL
+*MAKE  @echo .
+*MAKE  @echo .
+
+*MAKE !if $d(WORK)
+*MAKE WORK=WORK.INC
+*MAKE !endif
+
+*MAKE !if $d(LABEL)
+*MAKE LABEL=LABEL.INC
+*MAKE !endif
+
+*MAKE !if $d(NEO_GEO)
+*MAKE NEO_GEO=NEO_GEO.INC
+*MAKE !endif
+
+*MAKE !if $d(MACRO)
+*MAKE MACRO=MACRO.INC
+*MAKE !endif
+
+*MAKE !if $d(SCODE)
+*MAKE SCODE=SCODE.INC
+*MAKE !endif
+
+*MAKE !if $d(ACT_No)
+*MAKE ACT_No=ACT_No.INC
+*MAKE !endif
+
+*MAKE !if $d(EASY_MAC)
+*MAKE EASY_MAC=EASY_MAC.INC
+*MAKE !endif
+
+*MAKE !if $d(SYS)
+*MAKE SYS=SYS.INC
+*MAKE !endif
+
+*MAKE !if $d(HERO_TBL)
+*MAKE HERO_TBL=HERO_TBL.INC
+*MAKE !endif
+
+*MAKE !if $d(HK3_TBL)
+*MAKE HK3_TBL=HK3_TBL.INC
+*MAKE !endif
+
+SECT GAMES=05000H
+SECT GAME=05400H
+SECT MESS=3AE00H
+
+COMMON WORK=100000H
+INDEX ?A5,WORK,8000H
+
+LOAD SYS
+
+LOAD VECTOR
+LOAD PHASE,EASY,GAME_DSP
+LOAD MAIN,PAUSE,STORY,START
+LOAD BACK,SELECT
+LOAD DUMMY,DM_TBL
+LOAD DEMO_CML,RANK,CARD,BONUS,BSEL,MOVE,HOW
+LOAD HIT,ACT_SUB,GAME_SUB
+LOAD MESSAGE,LANG
+
+*MAKE !if 0
+LOAD WORK
+*MAKE !endif
+*MAKE WORK.OBJ: WORK.SRC LABEL.INC WORK.INC 
+*MAKE  $(ASM) WORK,WORK,WORK /D/-T/CASE
+*MAKE  @echo .
+*MAKE  @echo .
+*MAKE  $(LOD) @WORK,WORK,NUL
+*MAKE  @echo .
+*MAKE  @echo .
+
+PUBLIC CH_TABLE=26000H
+
+END
+            Microtec Research Lod68K V6.4a         Wed Sep 02 19:34:01 1992
+
+
+
+OUTPUT MODULE NAME:    GAME
+OUTPUT MODULE FORMAT:  MOTOROLA S2
+
+
+SECTION SUMMARY
+---------------
+
+SECTION    ATTRIBUTE                   START      END        LENGTH     ALIGN
+
+GAMES      NORMAL CODE                 00005000   00005207   00000208   2 (WORD)  
+GAME       NORMAL CODE                 00005400   00010DED   0000B9EE   2 (WORD)  
+MESS       NORMAL CODE                 0003AE00   0003D7D9   000029DA   2 (WORD)  
+WORK       COMMON                      00100000   0010FFFF   00010000   2 (WORD)  
+VECTOR     SHORT CODE                  00000000   0000095F   00000960   2 (WORD)  
+
+
+MODULE SUMMARY
+--------------
+
+MODULE         SECTION:START        SECTION:END       FILE
+
+SYS                  0:                   0:          B:\044\SYS.OBJ   
+VECTOR          VECTOR:00000000      VECTOR:0000095F  B:\044\VECTOR.OBJ   
+PHASE             GAME:00005400        GAME:00005957  B:\044\PHASE.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+EASY              GAME:00005958        GAME:00005C3D  B:\044\EASY.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+GAME_DSP          GAME:00005C3E        GAME:0000675D  B:\044\GAME_DSP.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+MAIN                 0:                   0:          B:\044\MAIN.OBJ   
+                  GAME:0000675E        GAME:00006DCF      
+                  WORK:00100000        WORK:0010FFFF      
+PAUSE             GAME:00006DD0        GAME:000075C5  B:\044\PAUSE.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+STORY             GAME:000075C6        GAME:000088F5  B:\044\STORY.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+START             GAME:000088F6        GAME:0000925D  B:\044\START.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+BACK              GAME:0000925E        GAME:00009F85  B:\044\BACK.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+SELECT            GAME:00009F86        GAME:0000AF17  B:\044\SELECT.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+DUMMY             GAME:0000AF18        GAME:0000B62B  B:\044\DUMMY.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+DM_TBL            GAME:0000B62C        GAME:0000B953  B:\044\DM_TBL.OBJ   
+DEMO_CML          GAME:0000B954        GAME:0000CD09  B:\044\DEMO_CML.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+RANK              GAME:0000CD0A        GAME:0000D667  B:\044\RANK.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+CARD              GAME:0000D668        GAME:0000DA4F  B:\044\CARD.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+BONUS             GAME:0000DA50        GAME:0000ECE9  B:\044\BONUS.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+BSEL              GAME:0000ECEA        GAME:0000F9CF  B:\044\BSEL.OBJ   
+            Microtec Research Lod68K V6.4a         Wed Sep 02 19:34:01 1992
+
+
+
+                  WORK:00100000        WORK:0010FFFF      
+MOVE              GAME:0000F9D0        GAME:00010933  B:\044\MOVE.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+HOW               GAME:00010934        GAME:00010C4D  B:\044\HOW.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+HIT               GAME:00010C4E        GAME:00010DED  B:\044\HIT.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+ACT_SUB          GAMES:00005000       GAMES:000050F9  B:\044\ACT_SUB.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+GAME_SUB         GAMES:000050FA       GAMES:00005207  B:\044\GAME_SUB.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+MESSAGE           MESS:0003AE00        MESS:0003D791  B:\044\MESSAGE.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+LANG              MESS:0003D792        MESS:0003D7D9  B:\044\LANG.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+WORK                 0:                   0:          B:\044\WORK.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+
+
+
+START ADDRESS:   00000000
+
+
+Load Completed 
+
+
+ Errors: 0, Warnings: 0

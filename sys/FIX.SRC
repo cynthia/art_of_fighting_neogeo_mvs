@@ -1,0 +1,948 @@
+************************************************************************
+*								       *
+*		[[[ NOP ]]]  SYSTEM MESSAGE OUTPUT ROUTINE	       *
+*		by S.OKADA from 91/09/17 Tue 09:47		       *
+*								       *
+************************************************************************
+
+
+
+		XDEF	NOP_MESS_OUT
+
+		XREF	?A5
+
+		INCLUDE	NEO_GEO.INC	@@@
+		INCLUDE	LABEL.INC
+
+
+		SECT.S	SYS,,C
+
+
+NOP_MESS_OUT:
+
+;		output message buffer data LSPC
+;		NEO-GEO system MESS_OUT up conversion
+;		all register broked
+
+
+		TST.B	MESS_BUSY(A5)
+		BNE.S	NOP_MESS_OUT_3		now buffer busy
+
+		ADDQ.B	#1,MESS_BUSY(A5)	flag set
+		MOVE.L	#MESS_STACK+4,MESS_STACK(A5)
+		MOVE.L	#MESS_BUFFER,MESS_OUT_POINT(A5)	start pointer
+		LEA.L	BCD_ASCII(PC),A4
+		LEA.L	LSPC_DATA,A2		LSPC data write register
+NOP_MESS_OUT_1:
+		MOVE.L	MESS_OUT_POINT(A5),A0
+		CMPA.L	MESS_POINT(A5),A0
+		BLO.S	NOP_MESS_OUT_4
+
+;		output job over
+
+NOP_MESS_OUT_2:
+		MOVE.L	#MESS_BUFFER,MESS_POINT(A5)	pointer	first position
+		CLR.B	MESS_BUSY(A5)	flag clear
+NOP_MESS_OUT_3:
+		RTS
+
+NOP_MESS_OUT_4:
+		MOVE.L	(A0)+,A3		command	brock start address
+		MOVE.L	A0,MESS_OUT_POINT(A5)
+		MOVE.L	A3,MESS_COM_MODE(A5)
+		BMI.S	NOP_MESS_OUT_5
+		BNE.S	NOP_MESS_OUT_7
+
+		MOVE.L	A0,A3		command	ram mode
+		BRA.S	NOP_MESS_OUT_7
+NOP_MESS_OUT_5:
+;					L_WORK set
+		ADDQ.B	#1,MESS_COM_MODE(A5)
+		BNE.S	NOP_MESS_OUT_6
+
+		MOVE.L	MESS_COM_MODE(A5),A6
+		JMP	NOP_MESS_OUT_1(PC)
+NOP_MESS_OUT_6:
+;					continue fix out
+		CLR.B	MESS_COM_MODE(A5)
+		MOVE.L	MESS_COM_MODE(A5),A6
+		JSR	CONTINUE_FIX(PC)
+		JMP	NOP_MESS_OUT_1(PC)
+
+NOP_MESS_OUT_7:
+		MOVE.B	(A3)+,D1	command	hi-byte	(parameter)
+		MOVEQ.L	#0,D0
+		MOVE.B	(A3)+,D0	command	low-byte (command No)
+		CMP.B	#(COMMAND_VECTOR_END-COMMAND_VECTOR)/4,D0
+		BCC	NOP_MESS_OUT_ERROR	command	error
+
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		JSR	COMMAND_VECTOR(PC,D0.W)
+		JMP	NOP_MESS_OUT_7(PC)
+
+COMMAND_VECTOR:
+		JMP	COMMAND_END(PC)		00
+		JMP	DATA_FORMAT(PC)		01
+		JMP	INCREMENT(PC)		02
+		JMP	OUT_ADDRESS(PC)		03
+		JMP	DATA_ADDRESS(PC)	04
+		JMP	ADDRESS_INC(PC)		05
+		JMP	DATA_CONT(PC)		06
+		JMP	DIRECT_DATA(PC)		07
+		JMP	FIX_OUT(PC)		08
+		JMP	KANA_OUT(PC)		09
+		JMP	SUB_COMMAND(PC)		0A
+		JMP	RET_COMMAND(PC)		0B
+		JMP	SAME_DATA(PC)		0C
+		JMP	INC_DATA(PC)		0D
+
+
+
+;		below only NOP_MESS_OUT
+
+		JMP	WORK_CHANGE(PC)		0E
+		JMP	TABLE_CALL(PC)		0F
+		JMP	CML_POINTER(PC)		10
+		JMP	CML_SAVE(PC)		11
+		JMP	BCD_BASE_SET(PC)	12
+		JMP	BCD_OUT(PC)		13
+		JMP	ADDRESS_INC_BYTE(PC)	14
+		JMP	CONTINUE_FIX(PC)	15
+		JMP	PRINTF(PC)		16
+		JMP	TABLE_COMMAND(PC)	17
+		JMP	KNJ_OUT(PC)		18
+
+
+COMMAND_VECTOR_END:
+
+
+BCD_ASCII:
+		DC.B	'0123456789ABCDEF ',0
+
+NOP_MESS_OUT_ERROR:
+		MOVE.W	1,D0
+
+
+TABLE_COMMAND:
+
+;		No 17	single command table choice
+
+;		command-hi	0:A6 offset  else:A5 offset
+;		parms)		work offset (.w)
+;				table base offset (.w)
+;				command parms (.w)
+;		table is word offset from table base
+
+
+		LEA.L	(A6),A0
+		TST.B	D1
+		BEQ.S	TABLE_COMMAND_1
+
+		LEA.L	(A5),A0
+TABLE_COMMAND_1:
+		MOVE.W	(A3)+,D0
+		MOVEQ.L	#0,D1
+		MOVE.B	0(A0,D0.W),D1
+		ADD.W	D1,D1
+		LEA.L	(A3),A0
+		ADD.W	(A3)+,A0
+		LEA.L	0(A0,D1.W),A0
+		ADD.W	(A0),A0
+		MOVE.B	(A3)+,D1	command	hi-byte	(parameter)
+		MOVEQ.L	#0,D0
+		MOVE.B	(A3)+,D0	command	low-byte (command No)
+		CMP.B	#(COMMAND_VECTOR_END-COMMAND_VECTOR)/4,D0
+		BCC	NOP_MESS_OUT_ERROR	command	error
+
+		MOVE.L	A3,-(SP)
+		LEA.L	(A0),A3
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		LEA.L	COMMAND_VECTOR(PC),A0
+		JSR	0(A0,D0.W)
+
+		MOVE.L	(SP)+,A3
+		RTS
+
+
+
+COMMAND_END:
+
+;		No 0	command	end
+;		command-hi	d7	next mode (rom or cml mode)
+;					0:non next  1:next ram mode
+;				d0	save mode (cml mode only)
+;					0:no save  else:pointer save
+
+
+		TST.L	MESS_COM_MODE(A5)	mode check
+		BEQ.S	COMMAND_END_1		ram mode
+		BMI.S	COMMAND_END_2		cml mode
+		BPL.S	COMMAND_END_3		normal mode
+COMMAND_END_1:
+		MOVE.L	A3,MESS_OUT_POINT(A5)	ram mode,pointer back
+		MOVE.L	#NOP_MESS_OUT_1,(SP)
+		RTS
+COMMAND_END_2:
+		BTST.L	#0,D1
+		BEQ.S	COMMAND_END_3
+
+		MOVE.L	A3,ADRS2(A6)		pointer save
+COMMAND_END_3:
+		TST.B	D1
+		BPL.S	COMMAND_END_4
+
+		MOVE.L	MESS_OUT_POINT(A5),A3
+		CLR.L	MESS_COM_MODE(A5)
+		RTS
+COMMAND_END_4:
+		MOVE.L	#NOP_MESS_OUT_1,(SP)
+		RTS
+
+
+DATA_FORMAT:
+
+;		No 1	data format
+
+		SWAP	D1
+		MOVE.L	D1,D5		format data store
+		MOVE.W	(A3)+,D5	parameter get
+		RTS
+
+
+INCREMENT:
+
+;		No 2	auto increment value
+
+		EXT.W	D1		sign extent 16 bit
+		MOVE.W	D1,2(A2)	set auto increment value
+		RTS
+
+
+OUT_ADDRESS:
+
+;		No 3	output v-ram address
+
+		MOVE.W	(A3)+,D6	address	get
+		MOVE.W	D6,-2(A2)		set address
+		RTS
+
+DATA_ADDRESS:
+
+;		No 4	get data address and data output
+
+		MOVE.L	(A3)+,A1
+		BSR	DATA_OUT	data output
+
+		MOVE.L	A1,MESS_DATA_POINT(A5)
+		RTS
+
+
+ADDRESS_INC:
+
+;		No 5	address	increment
+
+		ADD.W	(A3)+,D6
+		MOVE.W	D6,-2(A2)		set address
+		RTS
+
+
+DATA_CONT:
+
+;		No 6	data continue output
+
+		MOVE.L	MESS_DATA_POINT(A5),A1
+		BSR	DATA_OUT
+
+		MOVE.L	A1,MESS_DATA_POINT(A5)
+		RTS
+
+
+DIRECT_DATA:
+
+;		No 7	direct data
+
+		LEA.L	(A3),A1		data ram mode
+		BSR	DATA_OUT
+
+		ADDQ.W	#1,A1
+		MOVE.L	A1,D0
+;		AND.W	#0FFFEH,D0	address	to even
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A3		pointer	back
+		RTS
+
+
+DATA_OUT:
+		BTST	#17,D5		data type byte or word
+		BNE.S	WORD_OUT
+BYTE_OUT:			       ;data byte type
+		MOVE.W	D5,D2		output hi-byte
+		MOVE.B	D5,D7		end code or data number
+		BTST	#16,D5		end type
+		BNE.S	BYTE_NUMBER
+
+BYTE_CH:			       ;end code type
+		MOVE.B	(A1)+,D2
+		CMP.B	D2,D7		end code ?
+		BEQ.S	BYTE_END
+
+		MOVE.W	D2,(A2)		v-ram output
+		BRA.S	BYTE_CH
+
+BYTE_NUMBER:			       ;data number type
+		MOVE.B	(A1)+,D2
+		MOVE.W	D2,(A2)		v-ram output
+		SUBQ.B	#1,D7
+		BNE.S	BYTE_NUMBER
+BYTE_END:
+		RTS
+
+WORD_OUT:
+
+;		data word type
+
+		MOVE.W	D5,D7
+		BTST	#16,D5		end type
+		BNE.S	WORD_NUMBER
+
+WORD_CH:			       ;end code type
+		MOVE.W	(A1)+,D2
+		CMP.W	D2,D5		end code ?
+		BEQ.S	WORD_END
+
+		MOVE.W	D2,(A2)		v-ram output
+		BRA.S	WORD_CH
+
+WORD_NUMBER:			       ;data number type
+		MOVE.W	(A1)+,(A2)	v-ram output
+		SUBQ.W	#1,D7
+		BNE.S	WORD_NUMBER
+WORD_END:
+		RTS
+
+FIX_OUT:
+
+;		No 8	common Fix 8*16	font output
+
+		MOVE.W	#20H,2(A2)
+		MOVE.B	D1,(A5)
+		MOVE.W	(A5),D2
+		LEA.L	(A3),A1
+		JSR	FIX_OUT_SUB(PC)	       upper line
+
+		ADDQ.W	#1,D6
+		MOVE.W	D6,-2(A2)
+		LEA.L	(A3),A1
+		ADD.W	#100H,D2	   down	line
+		JSR	FIX_OUT_SUB(PC)
+
+		ADDQ.W	#1,A1
+		MOVE.L	A1,D0
+;		AND.W	#0FFFEH,D0	address	to even
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A3		pointer	back
+		RTS
+
+
+FIX_OUT_SUB:
+		MOVE.B	(A1)+,D2
+		CMP.B	#0FFH,D2
+		BEQ.S	FOS_END		FF is end code
+
+		MOVE.W	D2,(A2)		data output
+		BRA	FIX_OUT_SUB
+FOS_END:
+		RTS
+
+
+KANA_OUT:
+
+;		No 9	common Fix 8*16	font output
+
+		MOVE.W	#20H,2(A2)
+		MOVE.B	D1,(A5)
+		MOVE.W	(A5),D2
+		LEA.L	(A3),A1
+		JSR	KANA_OUT_SUB(PC)	upper line
+
+		ADDQ.W	#1,D6
+		MOVE.W	D6,-2(A2)
+		LEA.L	(A3),A1
+		ADD.W	#100H,D2	   down	line
+		JSR	KANA_OUT_SUB(PC)
+
+		ADDQ.W	#1,A1
+		MOVE.L	A1,D0
+;		AND.W	#0FFFEH,D0	address	to even
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A3		pointer	back
+		RTS
+
+
+KANA_OUT_SUB:
+		MOVE.B	(A1)+,D2
+		CMP.B	#0FFH,D2
+		BEQ.S	KOS_END		FF is end code
+
+		CMP.B	#20H,D2
+		BCS.S	DAKU_OUT	(han)dakuten hiragana
+
+		CMP.B	#60H,D2
+		BCS.S	KOS_1
+
+		TST.B	D2
+		BMI	KOS_1
+
+		SUB.B	#40H,D2
+DAKU_OUT:
+		ADD.B	#80H,D2
+		MOVE.W	D2,D1
+		AND.W	#0F0FFH,D1
+		BTST.L	#8,D2
+		BNE.S	DAKU_OUT_1
+
+		ADD.B	#40H,D1		down line
+DAKU_OUT_1:
+		MOVE.W	D1,(A2)		data output
+		BRA	KANA_OUT_SUB
+KOS_1:
+		MOVE.W	D2,(A2)		data output
+		BRA	KANA_OUT_SUB
+KOS_END:
+		RTS
+
+KNJ_OUT:
+
+;		No 18	common Fix 16*16	font output
+;		command-hi	0:palette
+;				end code 0FFH
+
+		MOVE.W	#20H,2(A2)
+		MOVE.B	D1,(A5)
+		MOVE.W	(A5),D2
+		LEA.L	(A3),A1
+		JSR	KNJ_OUT_SUB(PC)		upper line
+
+		ADDQ.W	#1,D6
+		MOVE.W	D6,-2(A2)
+		LEA.L	(A3),A1
+		ADD.W	#100H,D2	   down	line
+		JSR	KNJ_OUT_SUB(PC)
+
+		LEA.L	(A1),A3
+		RTS
+
+KNJ_OUT_SUB:
+		MOVE.W	(A1)+,D0
+		CMP.W	#0FFH,D0
+		BEQ.S	KNJ_END		FF is end code
+
+		ADD.W	D2,D0
+		MOVE.W	D0,(A2)		data output
+		ADDQ.W	#1,D0
+		NOP
+		MOVE.W	D0,(A2)
+		BRA	KNJ_OUT_SUB
+KNJ_END:
+		RTS
+
+
+
+SUB_COMMAND:
+
+;		No 0A		sub data call
+;		command-hi	0:absolute address else:word offset
+
+		TST.B	D1
+		BNE.S	SUB_COMMAND_WORD
+
+		MOVE.L	(A3)+,D0
+		MOVE.L	MESS_STACK(A5),A0
+		MOVE.L	A3,(A0)+
+		MOVE.L	A0,MESS_STACK(A5)
+		MOVE.L	D0,A3
+		RTS
+
+SUB_COMMAND_WORD:
+		MOVE.W	(A3)+,D0
+		MOVE.L	MESS_STACK(A5),A0
+		MOVE.L	A3,(A0)+
+		MOVE.L	A0,MESS_STACK(A5)
+		LEA.L	-2(A3,D0.W),A3
+		RTS
+
+RET_COMMAND:
+
+;		No 0B		sub data return
+
+		MOVE.L	MESS_STACK(A5),A0
+		MOVE.L	-(A0),A3
+		MOVE.L	A0,MESS_STACK(A5)
+		RTS
+
+SAME_DATA:
+
+;		No 0C		same data output
+
+		MOVE.W	(A3)+,D0
+SAME_DATA_1:
+		MOVE.W	D0,(A2)
+		SUBQ.B	#1,D1
+		BNE.S	SAME_DATA_1
+
+		RTS
+
+INC_DATA:
+
+;		No 0D		increment data output
+
+		MOVE.W	(A3)+,D0
+INC_DATA_1:
+		MOVE.W	D0,(A2)
+		ADDQ.B	#1,D0
+		SUBQ.B	#1,D1
+		BNE.S	INC_DATA_1
+
+		RTS
+
+
+WORK_CHANGE:
+
+;		No 0E	A6 work change
+;		command-hi	0-3:WORK_N0-3 80H-:MASTER_WORK
+
+		TST.B	D1
+		BMI.S	WORK_CHANGE_MASTER
+
+		AND.W	#0FFH,D1
+		MOVE.B	WORK_N0(A6,D1.W),(A5)
+		BRA.S	WORK_CHANGE_1
+WORK_CHANGE_MASTER:
+		MOVE.B	MASTER_No(A6),(A5)
+WORK_CHANGE_1:
+		MOVE.W	(A5),D0
+		BMI.S	PWORK_SET
+
+		LEA.L	-LOG(A5,D0.W),A6
+		RTS
+PWORK_SET:
+		AND.W	#7F00H,D0
+		LEA.L	0(A5,D0.W),A6
+		RTS
+
+
+TABLE_CALL:
+
+;		No 0F	command table call
+;		command-hi	0:A6 offset  else:A5 offset
+;		parms)		work offset (.w)
+;				table base offset (.w)
+;		table is word offset from table base
+
+
+		LEA.L	(A6),A0
+		TST.B	D1
+		BEQ.S	TABLE_CALL_1
+
+		LEA.L	(A5),A0
+TABLE_CALL_1:
+		MOVE.W	(A3)+,D0
+		MOVEQ.L	#0,D1
+		MOVE.B	0(A0,D0.W),D1
+		ADD.W	D1,D1
+		JSR	SUB_COMMAND_WORD(PC)
+
+		LEA.L	0(A3,D1.W),A3
+		ADD.W	(A3),A3
+		RTS
+
+
+CML_POINTER:
+;		No 10	command pointer to cml
+
+		MOVE.L	ADRS2(A6),A3
+		MOVE.B	#0FFH,MESS_COM_MODE(A5)
+		RTS
+
+
+CML_SAVE:
+;		No 11	cml pointer save
+
+		MOVE.L	A3,ADRS2(A6)
+		RTS
+
+BCD_BASE_SET:
+;		No 12	BCD convert data table set
+;		parms)		data table address (.l)
+
+		MOVE.L	(A3)+,A4
+		RTS
+
+;*** data table format ***
+;		+0~+F	characer code 0-F
+;		+10	space code
+
+
+BCD_OUT:
+;		No 13	BCD data output by BCD table
+;		command-hi
+;			d7	output size
+;				0:8*8  1:8*16
+;			d6	masking upper zero
+;				0:off  1:on
+;			d5	start code
+;				0:d4-  1:d0-
+;			d4	base register
+;				0:A5   1:A6
+;			d0-3	data number-1
+;		parms)		output address(.w)
+;				data offset from A5(.w)
+;				output hi-byte(.w)
+
+		MOVE.W	#20H,2(A2)		inc 20H
+		MOVE.W	(A3)+,D6
+		LEA.L	(A5),A1
+		BTST.L	#4,D1
+		BEQ.S	BCD_OUT_1
+
+		LEA.L	(A6),A1
+BCD_OUT_1:
+		ADD.W	(A3)+,A1
+		MOVE.W	(A3)+,D2
+		TST.B	D1
+		BPL.S	BCD_OUT_SUB
+
+		MOVE.L	A1,-(SP)
+		BSR	BCD_OUT_SUB
+
+		MOVE.L	(SP)+,A1
+		ADD.W	#100H,D2
+		ADDQ.W	#1,D6
+BCD_OUT_SUB:
+		MOVE.W	D6,-2(A2)
+		MOVEQ.L	#1111B,D7
+		AND.W	D1,D7
+		MOVEQ.L	#0,D3
+		BTST.L	#6,D1
+		BEQ.S	BCD_OUT_SUB_1
+
+		MOVEQ.L	#10H,D3
+BCD_OUT_SUB_1:
+		BTST.L	#5,D1
+		BNE.S	BCD_OUT_SUB_3
+BCD_OUT_SUB_2:
+		MOVE.B	(A1),D0
+		LSR.B	#4,D0
+		BSR	BOS_SUB
+
+		DBRA	D7,BCD_OUT_SUB_3
+
+		RTS
+BCD_OUT_SUB_3:
+		MOVEQ.L	#0FH,D0
+		AND.B	(A1)+,D0
+		BSR	BOS_SUB
+
+		DBRA	D7,BCD_OUT_SUB_2
+
+		RTS
+
+BOS_SUB:
+		BEQ.S	BOS_SUB_1
+
+		MOVEQ.L	#0,D3
+BOS_SUB_1:
+		AND.B	#11110000B,D3
+		OR.B	D0,D3
+
+		TST.W	D7
+		BNE.S	BOS_SUB_2
+
+		MOVE.B	D0,D3
+BOS_SUB_2:
+		MOVE.B	0(A4,D3.W),D2
+		MOVE.W	D2,(A2)
+		RTS
+
+ADDRESS_INC_BYTE:
+
+;		No 14	address	increment byte type
+;		command-hi	offset (word extende)
+
+		EXT.W	D1
+		ADD.W	D1,D6
+		MOVE.W	D6,-2(A2)		set address
+		RTS
+
+
+
+PRINTF:
+;		No 16	C language printf
+;		parms)		output data address(.l)
+;	data format)
+;		code,code,..,%(ctrl code),count,valu offs(-A5 .w-even),code,.
+;		....,0FFH(end code)
+;	value) output hi-byte(.b),value....
+;
+
+
+		MOVE.W	#20H,2(A2)		inc 20H
+		MOVE.W	D5,D0
+PRINTF_1:
+		MOVE.B	(A3)+,D0
+		CMP.B	#'%',D0
+		BEQ.S	PRINTF_3
+
+		CMP.B	#0FFH,D0
+		BEQ.S	PRINTF_2
+
+		MOVE.W	D0,(A2)
+		BRA.S	PRINTF_1
+PRINTF_2:
+		ADDQ.W	#1,A3
+		MOVE.L	A3,D0
+;		AND.W	#0FFFEH,D0	address	to even
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A3		pointer	back
+		RTS
+PRINTF_3:
+		MOVE.B	(A3)+,D7
+		ADDQ.W	#1,A3
+		MOVE.L	A3,D0
+;		AND.W	#0FFFEH,D0	address	to even
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A3		pointer	back
+		LEA.L	(A5),A0
+		ADD.W	(A3)+,A0
+		MOVE.B	(A0)+,(A5)
+		MOVE.W	(A5),D1
+		BTST.L	#0,D7
+		BNE.S	PRINTF_5
+PRINTF_4:
+		MOVE.B	(A0),D0
+		LSR.B	#4,D0
+		AND.W	#0FH,D0
+		MOVE.B	0(A4,D0.W),D1
+		MOVE.W	D1,(A2)
+PRINTF_5:
+		MOVEQ.L	#0FH,D0
+		AND.B	(A0)+,D0
+		MOVE.B	0(A4,D0.W),D1
+		MOVE.W	D1,(A2)
+		SUBQ.B	#2,D7
+		BGT.S	PRINTF_4
+
+		MOVE.W	D5,D0
+		JMP	PRINTF_1(PC)
+
+
+
+
+CONTINUE_FIX:
+;		No 16	fix continue output
+
+		MOVE.L	ADRS2(A6),A1
+CONT_FIX_1:
+		TST.B	BYTE_TIMER(A6)
+		BEQ.S	CONT_FIX_2
+
+		SUBQ.B	#1,BYTE_TIMER(A6)
+		BLS.S	CONT_FIX_2
+
+		RTS
+CONT_FIX_2:
+		MOVE.W	CHAR_INC(A6),D3
+		MOVE.W	D3,2(A2)
+		MOVE.W	TEMP_ADRS(A6),-2(A2)
+		MOVE.W	CHAR_ATTR(A6),D2
+CONT_FIX_3:
+		MOVE.B	(A1)+,D2
+		CMP.B	COMMAND_CHAR(A6),D2
+		BEQ	CONT_FIX_COMMAND
+
+		MOVE.W	D2,(A2)
+CONT_FIX_4:
+		ADD.W	D3,TEMP_ADRS(A6)
+		MOVE.B	CHAR_WAIT(A6),BYTE_TIMER(A6)
+		BEQ.S	CONT_FIX_3
+
+		MOVE.L	A1,ADRS2(A6)
+		RTS
+
+CONT_FIX_COMMAND:
+		MOVEQ.L	#0,D0
+		MOVE.B	(A1)+,D0
+		ADD.W	D0,D0
+		ADD.W	D0,D0
+		JMP	CF_VECTOR(PC,D0.W)
+
+CF_VECTOR:
+		JMP	CF_END(PC)		00:
+		JMP	CF_FIRST(PC)		01:
+		JMP	LINE_FEED(PC)		02:
+		JMP	NEXT_PAGE(PC)		03:
+		JMP	LINE_CLEAR(PC)		04:
+		JMP	PAGE_CLEAR(PC)		05:
+		JMP	CF_TABLE_SUB_A5(PC)	06:
+		JMP	CF_TABLE_SUB_A6(PC)	07:
+		JMP	CF_SUB_RETURN(PC)	08:
+		JMP	CF_WORD_OUT(PC)		09:
+		JMP	CF_ATTR_CHANGE(PC)	0A:
+
+
+CF_END:
+;		CF No 00	data end
+
+		BSET.B	#7,FLAG(A6)
+		RTS
+
+CF_FIRST:
+;		CF No 01	first parm set
+;		parms)		***start even
+;				BASE_ADRS,CHAR_INC,LINE_INC(.w)
+;				CHAR_ATTR(.w)
+
+		ADDQ.W	#1,A1
+		MOVE.L	A1,D0
+;		AND.W	#0FFFEH,D0
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A1
+		MOVE.W	(A1)+,BASE_ADRS(A6)
+		MOVE.W	(A1)+,CHAR_INC(A6)
+		MOVE.W	(A1)+,LINE_INC(A6)
+		MOVE.W	(A1)+,CHAR_ATTR(A6)
+		MOVE.W	BASE_ADRS(A6),TEMP_ADRS(A6)
+		MOVE.W	BASE_ADRS(A6),TEMP_HEAD(A6)
+		JMP	CONT_FIX_2(PC)
+
+LINE_FEED:
+;		CF No 02	line feed
+
+		MOVE.W	TEMP_HEAD(A6),D0
+		ADD.W	LINE_INC(A6),D0
+		MOVE.W	D0,TEMP_HEAD(A6)
+		MOVE.W	D0,TEMP_ADRS(A6)
+		MOVE.W	D0,-2(A2)
+		BSET.B	#5,FLAG(A6)
+		MOVE.B	LINE_WAIT(A6),BYTE_TIMER(A6)
+		BEQ	CONT_FIX_3
+
+		MOVE.L	A1,ADRS2(A6)
+		RTS
+
+NEXT_PAGE:
+;		CF No 03	next page
+
+		MOVE.W	BASE_ADRS(A6),D0
+		MOVE.W	D0,TEMP_ADRS(A6)
+		MOVE.W	D0,TEMP_HEAD(A6)
+		MOVE.W	D0,-2(A2)
+		BSET.B	#6,FLAG(A6)
+		MOVE.B	PAGE_WAIT(A6),BYTE_TIMER(A6)
+		BEQ	CONT_FIX_3
+
+		MOVE.L	A1,ADRS2(A6)
+		RTS
+
+LINE_CLEAR:
+;		CF No 04	temporary 1 line clear
+;		parms)		line length (.b)
+
+		MOVE.B	(A1)+,D7
+		MOVE.W	TEMP_HEAD(A6),-2(A2)
+		MOVE.W	CLEAR_CODE(A6),D0
+LINE_CLEAR_1:
+		MOVE.W	D0,(A2)
+		SUBQ.B	#1,D7
+		BNE.S	LINE_CLEAR_1
+
+		JMP	CONT_FIX_3(PC)
+
+PAGE_CLEAR:
+;		CF No 05	page clear
+;		parms)		line length,page length (.b)
+
+		MOVE.B	1(A1),D7
+		MOVE.W	BASE_ADRS(A6),D1
+		MOVE.W	CLEAR_CODE(A6),D0
+PAGE_CLEAR_1:
+		MOVE.W	D1,-2(A2)
+		MOVE.B	(A1),D4
+PAGE_CLEAR_2:
+		MOVE.W	D0,(A2)
+		SUBQ.B	#1,D4
+		BNE.S	PAGE_CLEAR_2
+
+		ADD.W	LINE_INC(A6),D1
+		SUBQ.B	#1,D7
+		BNE.S	PAGE_CLEAR_1
+
+		JMP	CONT_FIX_3(PC)
+
+CF_TABLE_SUB_A5:
+;		CF No 06	table sub data call with d16(A5)
+;		parms)		***start even
+;				work offset,table offset (.w)
+
+		ADDQ.W	#1,A1
+		MOVE.L	A1,D0
+;		AND.W	#0FFFEH,D0
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A1
+		MOVE.W	(A1)+,D0
+		MOVEQ.L	#0,D1
+		MOVE.B	0(A5,D0.W),D1
+		JMP	CF_TABLE_SUB(PC)
+
+CF_TABLE_SUB_A6:
+;		CF No 07	table sub data call with d16(A6)
+;		parms)		***start even
+;				work offset,table offset (.w)
+
+		ADDQ.W	#1,A1
+		MOVE.L	A1,D0
+;		AND.W	#0FFFEH,D0
+		BCLR.L	#0,D0		address	to even
+		MOVE.L	D0,A1
+		MOVE.W	(A1)+,D0
+		MOVEQ.L	#0,D1
+		MOVE.B	0(A6,D0.W),D1
+CF_TABLE_SUB:
+		ADD.W	D1,D1
+		ADD.W	D1,D1
+		ADD.W	(A1)+,D1
+		MOVE.L	A1,CF_STACK(A6)
+		MOVE.L	-2(A1,D1.W),A1
+		JMP	CONT_FIX_3(PC)
+
+CF_SUB_RETURN:
+;		CF No 08	return from sub data
+
+		MOVE.L	CF_STACK(A6),A1
+		JMP	CONT_FIX_3(PC)
+
+CF_WORD_OUT:
+;		CF No 09	word output
+;		parms)		ch-hi,ch-low(.b)
+
+		MOVE.B	(A1)+,(A5)
+		MOVE.W	(A5),D0
+		MOVE.B	(A1)+,D0
+		MOVE.W	D0,(A2)
+		JMP	CONT_FIX_4(PC)
+
+CF_ATTR_CHANGE:
+;		CF No 0A	CHAR_ATTR change
+;		parms)		ch-hi(.b)
+
+		MOVE.B	(A1)+,CHAR_ATTR(A6)
+		MOVE.W	CHAR_ATTR(A6),D2
+		JMP	CONT_FIX_3(PC)
+
+
+
+		INCLUDE	WORK.INC
+
+

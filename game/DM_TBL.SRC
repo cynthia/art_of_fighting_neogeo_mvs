@@ -1,0 +1,402 @@
+;************************************************************************
+;			back object data				*
+;					1992/1/22			*
+;					presented by k.morikawa		*
+;************************************************************************
+
+		XDEF	B_HAKO_TBL,BK_OBJ1_DATA,BK_OBJ2_DATA
+		XDEF	EPR_HAKO1,KANBAN_DATA
+
+;by BACK
+		XREF	GL
+
+		SECT	GAME,,C
+
+		INCLUDE	LABEL.INC
+		INCLUDE	ACT_No.INC
+
+;*******************************************************************
+
+L_DATA		MACRO	DATA1,DATA2
+		DC.L	DATA1*1000H,DATA2*1000H
+		ENDM
+
+SYS_LABEL	MACRO	DATA1
+		DC.W	DATA1
+		ENDM
+
+XZ_POSITION	MACRO	DATA1,DATA2
+		DC.W	DATA1,DATA2
+		ENDM
+
+XYZ_POSITION	MACRO	DATA1,DATA2,DATA3
+		DC.W	DATA1,DATA2,DATA3
+		ENDM
+
+OBJNO_PRI	MACRO	DATA1,DATA2
+		IFC	\1,'OBJ1'
+		DC.W	DATA2+0
+		ELSEC
+		IFC	\1,'OBJ2'
+		DC.W	DATA2+128
+		ELSEC
+		IFC	\1,'OBJ3'
+		DC.W	DATA2+192
+		ELSEC
+		DC.W	DATA2+0
+		ENDC
+		ENDC
+		ENDC
+		ENDM
+
+PNO_ACTNO	MACRO	DATA1,DATA2
+		DC.W	DATA1,DATA2
+		ENDM
+
+HIT_BIT		MACRO	DATA1,DATA2
+		DC.B	DATA1,DATA2
+		ENDM
+
+VX_VZ		MACRO	DATA1,DATA2
+		DC.L	DATA1*1000H,DATA2*1000H
+		ENDM
+
+HIT		MACRO
+		DC.B	1,0
+		ENDM
+NO_HIT		MACRO
+		DC.B	0,0
+		ENDM
+COM_END		MACRO
+		DC.W	0
+		ENDM
+
+
+;************************************************************************
+
+KANBAN_DATA:
+	L_DATA	-019H,0ACH ;03
+	L_DATA	 027H,08CH ;13
+	L_DATA	-025H,098H ;14
+	L_DATA	 013H,0E4H;03
+
+
+;
+;		hako_explose	dirction_right
+;
+;		data_size	4+4 = 8
+;
+EPR_HAKO1:
+	L_DATA	-01DH,0B0H	;08
+	L_DATA	-01EH,090H      ;09
+	L_DATA	-01CH,0C8H	;07
+	L_DATA	-01FH,094H	;10
+	L_DATA	-01AH,0ECH	;06
+	L_DATA	-020H,0F8H	;11
+	L_DATA	-01AH,094H	;05
+	L_DATA	-021H,0B2H	;12
+	L_DATA	-01AH,088H	;04
+	L_DATA	-022H,0B4H	;13
+	L_DATA	-019H,0ACH	;03
+	L_DATA	-025H,098H	;14
+	L_DATA	-014H,098H	;02
+	L_DATA	-027H,08CH	;15
+	L_DATA	-010H,0DCH	;01
+	L_DATA	-02BH,0F4H	;16
+
+
+;
+;		hako_expolse   dirction_left
+;
+;		data_size	4+4+2 = 10(0AH)
+;
+
+EPL_HAKO1:
+	L_DATA	01EH,098H	;08
+	L_DATA	01EH,0E8H	;09
+	L_DATA	01BH,0B8H	;07
+	L_DATA	01FH,098H	;10
+	L_DATA	01AH,09FH	;06
+	L_DATA	020H,0D4H	;11
+	L_DATA	01AH,104H	;05
+	L_DATA	021H,0B8H	;12
+	L_DATA	015H,0CCH	;04
+	L_DATA	027H,08CH	;13
+	L_DATA	013H,0E4H	;03
+	L_DATA	028H,0ADH	;14
+	L_DATA	011H,09CH	;02
+	L_DATA	029H,0D4H	;15
+	L_DATA	010H,098H	;01
+	L_DATA	02CH,0C4H	;16
+
+
+;************************************************************************
+;
+;
+;
+B_HAKO_TBL:
+		DC.L	BH_STAGE1	;1
+		DC.L	BH_STAGE2	;2
+		DC.L	BH_STAGE2	;BONUS
+		DC.L	BH_STAGE3	;3
+		DC.L	BH_STAGE4	;4
+		DC.L	BH_STAGE4	;BONUS
+		DC.L	BH_STAGE5	;5
+		DC.L	BH_STAGE6	;6
+		DC.L	BH_STAGE6	;BONUS
+		DC.L	BH_STAGE7	;7
+		DC.L	BH_STAGE8	;8
+
+BH_STAGE1:
+	SYS_LABEL	SYS_HAHEN	;01
+	XYZ_POSITION	04H,00H,GL+66H-0EH	;x,y
+	PNO_ACTNO	P_HAHEN,C_HAKO_B1
+	OBJNO_PRI	OBJ1,0006H
+
+	SYS_LABEL	SYS_HAHEN	;02
+	XYZ_POSITION	13H,00H,GL+60H-0EH
+	PNO_ACTNO	P_HAHEN,C_HAKO_B2
+	OBJNO_PRI	OBJ1,0007H
+
+	SYS_LABEL	SYS_HAHEN	;03
+	XYZ_POSITION	04H,00H,GL+40H-0EH
+	PNO_ACTNO	P_HAHEN,C_HAKO_B3
+	OBJNO_PRI	OBJ1,0008H
+
+	SYS_LABEL	SYS_HAHEN	;04
+	XYZ_POSITION	13H,00H,GL+49H-0EH
+	PNO_ACTNO	P_HAHEN,C_HAKO_B4
+	OBJNO_PRI	OBJ1,0009H
+
+BH_STAGE2:
+BH_STAGE3:
+BH_STAGE4:
+BH_STAGE5:
+BH_STAGE6:
+BH_STAGE7:
+BH_STAGE8:
+BH_STAGE9:
+BH_STAGE10:
+BH_STAGE11:
+BH_STAGE12:
+	COM_END
+
+;************************************************************************
+;
+;		*back_object table & data
+;
+;
+;	* data_format
+;	                (up_long)
+;	  1,2 word    	 0000 0000 0000 0000   0000 0000 0000 0000
+;		        <  priority  ><obj_no> <     NOTHING     >
+;				       (1~4)
+;	                (mid_long)
+;	  3,4 word    	 0000 0000 0000 0000   0000 0000 0000 0000
+;		         <PWORK type_number>   <  action_number  >
+;
+;	  	    	(down_long)
+;	  5,6 word    	 0000 0000 0000 0000   0000 0000 0000 0000
+;		    	 <   x_position    >   <   y_position    >
+;
+BK_OBJ1_DATA:
+		DC.L	STAGE1_BK	;1
+		DC.L	STAGE2_BK	;2
+		DC.L	STAGE2_BK	;BONUS
+		DC.L	STAGE3_BK	;3
+		DC.L	STAGE4_BK	;4
+		DC.L	STAGE4_BK	;BONUS
+		DC.L	STAGE5_BK	;5
+		DC.L	STAGE6_BK	;6
+		DC.L	STAGE6_BK	;BONUS
+		DC.L	STAGE7_BK	;7
+		DC.L	STAGE8_BK	;8
+
+STAGE1_BK:
+	COM_END
+STAGE2_BK:
+	PNO_ACTNO 	P_MAN,C_HACHIUE
+	OBJNO_PRI 	OBJ1,0
+	XZ_POSITION	230H,58H
+
+	PNO_ACTNO 	P_MAN,C_STG2_MAN
+	OBJNO_PRI 	OBJ1,0
+	XZ_POSITION	290H,70H
+
+	COM_END
+STAGE3_BK:
+	COM_END
+STAGE4_BK:
+	PNO_ACTNO 	P_MAN,C_BACK_TBL4
+	OBJNO_PRI 	OBJ1,0
+	XZ_POSITION	18H,70H
+
+	PNO_ACTNO 	P_MAN,C_BACK_TBL1
+	OBJNO_PRI 	OBJ1,1
+	XZ_POSITION	0E8H,70H
+
+	PNO_ACTNO 	P_MAN,C_BACK_TBL2
+	OBJNO_PRI 	OBJ1,2
+	XZ_POSITION	210H,GL+10H
+
+	PNO_ACTNO 	P_MAN,C_BACK_TBL3
+	OBJNO_PRI 	OBJ1,2
+	XZ_POSITION	2D8H,GL+20H
+
+	COM_END
+STAGE5_BK:
+	PNO_ACTNO	P_MAN,C_DORAM_FIRE
+	OBJNO_PRI	OBJ1,0
+	XZ_POSITION	98H,0C0H
+
+	COM_END
+STAGE6_BK:
+	PNO_ACTNO	P_MAN,C_GJ_TOP_GUN
+	OBJNO_PRI	OBJ1,0
+	XZ_POSITION	2A0H,70H
+
+	COM_END
+STAGE7_BK:
+	COM_END
+STAGE8_BK:
+	PNO_ACTNO 	P_MAN,C_TAIMATSU
+	OBJNO_PRI 	OBJ1,0
+	XZ_POSITION	050H,GL+18H
+
+	PNO_ACTNO 	P_MAN,C_TAIMATSU
+	OBJNO_PRI 	OBJ1,1
+	XZ_POSITION	120H,GL+18H
+
+	PNO_ACTNO 	P_MAN,C_TAIMATSU
+	OBJNO_PRI 	OBJ1,2
+	XZ_POSITION	1C0H,GL+18H
+
+	PNO_ACTNO 	P_MAN,C_TAIMATSU
+	OBJNO_PRI 	OBJ1,3
+	XZ_POSITION	260H,GL+18H
+
+	COM_END
+
+
+;************************************************************************
+;
+;		* back_object_data
+;
+;
+;	* data_format
+;	  1_word         system_number(logical)
+;	  2,3_word	 x_position,y_position,z_position
+;
+;	  4_word    	 0000 0000 0000 0000
+;		         < priority   ><obj_no>
+;				       (1~4)
+;	  5,6_word    	 0000 0000 0000 0000   0000 0000 0000 0000
+;		         <PWORK type_number>   <  action_number  >
+;
+;	  7,8_long 	 vx,vz
+;
+;	  10,11_byte	 0000 0000 0000 0000
+;		         <action>  <passive>
+;			  0_bit =>attack_bit
+;			  1_bit =>defence_bit
+;			  2_bit =>
+;			  3_bit =>
+;
+;	  		*worning_comment 
+;			  action_byte is hero or enemy
+;			  passive     is  this object
+;
+;	  13_word	  15_bit   => hit_flag_set
+;			  0~14_bit => life_data
+;
+;			    *priority :obj1 => 0~63(0~5FH)
+;			 	       obj2 => 0~79(0~8FH)
+;				       obj3 => 0~28(0~1CH)
+;				       obj4 => 0~32(0~20H)
+
+BK_OBJ2_DATA:
+		DC.L	STAGE1	;1
+		DC.L	STAGE2	;2
+		DC.L	STAGE2	;BONUS
+		DC.L	STAGE3	;3
+		DC.L	STAGE4	;4
+		DC.L	STAGE4	;BONUS
+		DC.L	STAGE5	;5
+		DC.L	STAGE6	;6
+		DC.L	STAGE6	;BONUS
+		DC.L	STAGE7	;7
+		DC.L	STAGE8	;8
+
+STAGE1:
+	COM_END
+STAGE2:
+	SYS_LABEL	SYS_KUBIFURI
+	XYZ_POSITION	30H,0,0D0H
+	PNO_ACTNO	P_KUBIFURI,C_MASTER_FFACE
+	OBJNO_PRI	OBJ1,0
+	VX_VZ		0,30H
+	HIT_BIT		0,0
+	NO_HIT
+
+	SYS_LABEL	SYS_KUBIFURI
+	XYZ_POSITION	0C0H,0,068H
+	PNO_ACTNO	P_KUBIFURI,C_BOY_FFACE
+	OBJNO_PRI	OBJ1,0
+	VX_VZ		1000H,40H
+	HIT_BIT		0,0
+	NO_HIT
+
+	SYS_LABEL	SYS_KUBIFURI
+	XYZ_POSITION	170H,0,80H
+	PNO_ACTNO	P_KUBIFURI,C_HIGE_FFACE
+	OBJNO_PRI	OBJ1,0
+	VX_VZ		1000H,50H
+	HIT_BIT		0,0
+	NO_HIT
+
+	SYS_LABEL	SYS_KUBIFURI
+	XYZ_POSITION	1D8H,0,80H
+	PNO_ACTNO	P_KUBIFURI,C_GIRL1_FFACE
+	OBJNO_PRI	OBJ1,0
+	VX_VZ		0,60H
+	HIT_BIT		0,0
+	NO_HIT
+
+	COM_END
+STAGE3:
+STAGE4:
+STAGE5:
+	COM_END
+STAGE6:
+	SYS_LABEL	SYS_KUBIFURI
+	XYZ_POSITION	1F8H,0,60H
+	PNO_ACTNO	P_KUBIFURI,C_GJ1_FFACE
+	OBJNO_PRI	OBJ1,0
+	VX_VZ		1000H,0
+	HIT_BIT		0,0
+	NO_HIT
+;
+	SYS_LABEL	SYS_KUBIFURI
+	XYZ_POSITION	140H,0,60H
+	PNO_ACTNO	P_KUBIFURI,C_GJ2_FFACE
+	OBJNO_PRI	OBJ1,0
+	VX_VZ		0,10H
+	HIT_BIT		0,0
+	NO_HIT
+
+	SYS_LABEL	SYS_KUBIFURI
+	XYZ_POSITION	0F0H,0,60H
+	PNO_ACTNO	P_KUBIFURI,C_GJ2_FFACE
+	OBJNO_PRI	OBJ1,0
+	VX_VZ		1,20H
+	HIT_BIT		0,0
+	NO_HIT
+
+	COM_END
+STAGE7:
+	COM_END
+STAGE8:
+	COM_END
+
+;************************************************************************
+

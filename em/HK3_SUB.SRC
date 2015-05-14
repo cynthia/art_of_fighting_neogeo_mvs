@@ -1,0 +1,545 @@
+*************************************************************************
+;*									*
+;*		*HK3 SUB_ROUNTINE PROGRAMS				*
+;*					presented by k.morikawa		*
+;*					 	1992/1/28		*
+*************************************************************************
+ 
+		XREF	?A5
+
+		SECT	HK3,,C
+
+;by STATE_CHK
+		XREF	PLAYER_SCLIM_CHECK
+;by EM_DATA
+		XREF	SETTING_TIMER,STATE_DATA_TBL
+		XREF	STA_CONVERT_TBL
+;by GAME_SYM
+		XREF	RAND8
+;by NEWS
+		XREF	NEWS
+
+		INCLUDE	LABEL.INC
+		INCLUDE	HFLAG.INC
+		INCLUDE	EM_MAC2.INC
+
+;************************************************************************
+
+		XDEF	SET_RD16
+		XDEF	SET_RD32
+;
+;
+;	*return_resista:D0(0~fh)
+;					1992/4
+SET_RD16:
+SET_RD32:
+		JSR	RAND8
+		ANDI.B	#00001111B,D0
+;		LEA.L	RD16_SEQ,A2
+;		MOVE.B	(A2,D0),D0
+		RTS
+
+;************************************************************************
+
+		XDEF	TYPE1_SET
+;
+;	*receive_resista:A0
+;	*use_resista	:D3
+;						1992/5/25
+TYPE1_SET:
+		MOVE	HERO_TYPE+HERO_OFFSET(A6),D3
+		D3R_ADD
+		MOVE.L	0(A0,D3),A0
+		RTS
+
+;************************************************************************
+
+		XDEF	TYPE2_SET
+;
+;	*receive_resista:A0
+;	*use_resista	:D3
+;						1992/5/25
+TYPE2_SET:
+		MOVE	HERO_TYPE+HERO_OFFSET(A6),D3
+		ADD	D3,D3
+		ADDA	D3,A0
+		RTS
+
+;************************************************************************
+
+		XDEF	TYPE3_SET
+;
+;	*receive_resista:A0
+;	*use_resista	:D3
+;						1992/5/25
+TYPE3_SET:
+		MOVE	HERO_TYPE+HERO_OFFSET(A6),D3
+		D3R_ADD
+		ADDA	D3,A0
+		RTS
+
+;************************************************************************
+ 
+		XDEF	ACTION_TIMER_SET
+;
+;
+;					1992/
+ACTION_TIMER_SET:
+		MOVEQ.L	#0,D0
+		MOVE.B	GAME_DIP+9(A5),D0
+		LSL	#4,D0
+		ADD	HERO_TYPE+HERO_OFFSET(A6),D0
+		LEA.L	SETTING_TIMER,A2
+		MOVE.B	(A2,D0),SEARCH_WAIT(A6)
+		RTS
+
+;************************************************************************
+
+		XDEF	ACT_TYPE_READ
+;
+;	*receive_resista:A1(anothrer_player logical top_address)
+;	*return_resista	:D4(action_type no)
+;	*use_resista	:D1,D3,A0
+;						1992/5/26
+ACT_TYPE_READ:
+		MOVEQ.L	#0,D1
+		MOVE	ACT_CTRL+HERO_OFFSET(A1),D1
+
+		CMP	#4FH,D1
+		BGT	ACT_READ_END
+
+		LEA.L	STATE_DATA_TBL,A0
+		MOVEQ.L	#0,D4
+		MOVE.B	0(A0,D1),D4		;action_no_set
+ACT_READ_END:
+		RTS
+
+;************************************************************************
+
+		XDEF	MINE_STATE_SET
+
+
+MINE_STATE_SET:
+		MOVE.L	ANOTHER_PLAYER(A6),A1
+		JSR	ACT_TYPE_READ(PC)	;player action_type (0~0ffh)
+
+		MOVE.B	NOW_STATE(A6),BEFORE_STATE(A6)
+		MOVE.B	D4,NOW_STATE(A6)
+
+		CMP	#7,D4
+		BCC	MINE_STA_1
+
+;		MOVE.L	ANOTHER_PLAYER(A6),A1
+;		JSR	PLAYER_SCLIM_CHECK
+;		BEQ	MS_NEXT_1
+;
+;		MOVEQ.L	#5,D4
+MS_NEXT_1:
+		MOVE.B	NML_CONVERT(PC,D4),NOW_STATE(A6);nomal_mode exchange
+MINE_STA_1:
+		LEA.L	(A6),A1
+		JSR	ACT_TYPE_READ(PC)
+
+		TST.B	D4
+		BMI	MINE_STA_NEXT
+
+		CMP	#7,D4
+		BLT	MINE_STA_2
+
+		MOVEQ.L	#0,D4
+MINE_STA_2:
+		LEA.L	STA_CONVERT_TBL,A2
+		MOVE	HERO_TYPE+HERO_OFFSET(A6),D3
+		SUBQ	#2,D3
+		ADD	D3,D3
+		ADDA	(A2,D3),A2
+		MOVE.B	(A2,D4),MINE_STATE(A6)
+MINE_STA_NEXT:
+		RTS
+
+NML_CONVERT:
+	DC.B	0,1,2,3,4,0,0,0
+
+;************************************************************************
+
+		XDEF	DISTANCE_SEARCH
+;
+;		distance searching program 
+;					1991/12/5
+;
+;	*receive_resista:D0(object x_position)
+;	*return_resista	:D2(distance_level)
+;	*use_resista	:A1,D0,D2
+;
+DISTANCE_SEARCH:
+		MOVE	X_DIS_NEG(A6),D0
+SRCH_1:
+		MOVEQ.L	#0,D2
+		CMP	DIS_LONG(A6),D0
+		BLT	SRCH_2
+
+		ADDQ	#1,D2
+SRCH_2:
+		CMP	DIS_MID(A6),D0
+		BLT	SRCH_3
+
+		ADDQ	#1,D2
+SRCH_3:
+		CMP	DIS_SHORT(A6),D0
+		BLT	SRCH_4
+
+		ADDQ	#1,D2
+SRCH_4:
+		MOVE.B	D2,DIS_MODE(A6)
+		RTS
+
+;************************************************************************
+ 
+		XDEF	DISTANCE_CHECK
+;
+;		distance_mode command_out checker program
+;							1992/3/23
+DISTANCE_CHECK:
+;		MOVE	X_POSITION+HERO_OFFSET(A6),D0
+;		CMP	#70H,D0
+;		BLT	DIS_COM_CUT
+
+;		CMP	#02A0H,D0
+;		BCC	DIS_COM_CUT	;screen_check
+
+		MOVEQ.L	#0,D1
+		MOVE.B	DIS_MODE(A6),D1
+		MOVE	D1,D2
+
+		LSL	#4,D1
+		MOVEQ.L	#0,D0
+		MOVE.B	SEARCH_MODE(A6),D0
+		CMP	#3,D0
+		BGT	DIS_COM_CUT
+
+		D0R_ADD
+		ADD	D1,D0
+		MOVE.L	DIS_SEARCHER(PC,D0),A2
+
+		MOVEQ.L	#0CH,D1
+		AND.B	BEFORE_LEVER(A6),D1
+		BEQ.S	DIS_CHECK_1
+
+		BTST.B	#ACTAT_FLIP,ACT_ATTR(A3)
+		BEQ.L	DIS_CHECK_1
+
+		EORI.B	#00001100B,D1
+DIS_CHECK_1:
+		MOVEQ.L	#0,D0
+		JSR	(A2)
+		TST.B	D0
+		BEQ	DIS_NEXT
+
+		ORI.B	#COM_REND_BIT,PLAYER_CONTROL(A6)
+DIS_NEXT:
+		RTS
+
+
+;		***********************
+DIS_SEARCHER:
+		DC.L	DIS0_0  ;01
+		DC.L	DIS0_1  ;02
+		DC.L	DIS0_2  ;03
+		DC.L	DIS0_3  ;04
+
+		DC.L	DIS1_0  ;05
+		DC.L	DIS1_1  ;06
+		DC.L	DIS1_2  ;07
+		DC.L	DIS1_3  ;08
+
+		DC.L	DIS2_0  ;09
+		DC.L	DIS2_1  ;10
+		DC.L	DIS2_2  ;11
+		DC.L	DIS2_3  ;12
+
+		DC.L	DIS3_0  ;13
+		DC.L	DIS3_1  ;14
+		DC.L	DIS3_2  ;15
+		DC.L	DIS3_3  ;16
+
+;		***********************
+
+;
+;
+;
+DIS0_0:
+DIS1_1:
+DIS2_2:
+DIS3_3:
+SRCH_NR_END:
+		ORI.B	#COM_REND_BIT,PLAYER_CONTROL(A6)
+		MOVEQ.L	#0,D0
+		RTS
+
+;
+;
+DIS1_0:
+DIS3_0:
+DIS2_0:
+		JSR	D_SRCH_1(PC)
+		JMP	DIS0_CHECK
+
+;
+;
+;
+DIS2_1:
+DIS3_1:
+		JSR	D_SRCH_1(PC)
+		JMP	DIS1_CHECK
+DIS0_1:
+		JSR	D_SRCH_2(PC)
+		JMP	DIS1_CHECK
+
+;
+;
+;
+DIS3_2:
+		JSR	D_SRCH_1(PC)
+		JMP	DIS2_CHECK
+
+;
+;
+;
+DIS1_2:
+DIS0_2:
+		JSR	D_SRCH_2(PC)
+		JMP	DIS2_CHECK
+
+;
+;
+;
+DIS1_3:
+DIS2_3:
+DIS0_3:
+		JSR	D_SRCH_2(PC)
+		JMP	DIS3_CHECK
+
+
+
+;************************************************************************
+;
+;
+;
+DIS0_CHECK:
+		TST	D2	;now_dis
+		SEQ	D0
+
+		CMP	#2,D2
+		BGT.L	DIS_COM_CUT
+
+		RTS
+DIS1_CHECK:
+		CMP	#1,D2
+		SEQ	D0
+
+		CMP	#2,D2
+		BGT.L	DIS_COM_CUT
+
+		RTS
+DIS2_CHECK:
+		CMP	#2,D2
+		SEQ	D0
+
+		SUBQ	#1,D2
+		BMI.L	DIS_COM_CUT
+
+		RTS
+DIS3_CHECK:
+		CMP	#3,D2
+		SEQ	D0
+
+		CMP	#1,D2
+		BLE	DIS_COM_CUT
+
+		RTS
+
+;************************************************************************
+
+D_SRCH_1:
+;		CMP.B	#8,D1
+;		BEQ.L	DIS_COM_CUT
+
+		RTS
+
+D_SRCH_2:
+;		CMP.B	#4,D1
+;		BEQ.L	DIS_COM_CUT
+
+		RTS
+
+DIS_COM_CUT:
+		MOVE.B	#4,BEFORE_LEVER(A6)
+		ORI.B	#00000011B,PLAYER_CONTROL(A6)
+
+		MOVEQ.L	#0,D0
+		RTS
+
+;************************************************************************
+
+		XDEF	END_LEVER,LEVER_SET
+;		******** 4/27
+;
+;		*lever & pad data setting 
+;
+;	*receive_resista:D0(lever & pad data)
+;			:A3(physical work address)
+;
+END_LEVER:
+		MOVE	#0,ACT_COM(A6)
+		ANDI.B	#11001100B,PLAYER_CONTROL(A6)
+LEVER_SET:
+		CMP.B	#80H,D0
+		BHI.L	DIRECT_MODE
+
+		MOVE	#0F0H,D1
+		AND.B	D0,D1
+		BEQ	LS_3
+
+		JSR	ATTACK_CODE_CHK
+		BEQ	LS_3
+
+		ANDI.B	#00001100B,D0
+LS_3:
+		MOVEQ.L	#0CH,D1
+		AND.B	D0,D1
+		BEQ	LS_1
+
+		BTST.B	#ACTAT_FLIP,ACT_ATTR(A3)
+		BEQ	LS_1
+
+		EORI.B	#00001100B,D0
+LS_1:
+;		MOVE.L	ANOTHER_PLAYER+HERO_OFFSET(A6),A1
+;		BTST.B	#BHS_DAMAGE,HERO_STATE(A1)
+;		BEQ	LS_2
+
+;		ANDI.B	#00001111B,D0
+LS_2:
+		MOVE.B	D0,PLAY_LEVER+HERO_OFFSET(A6)
+
+		MOVEQ.L	#0,D1
+		MOVE.B	BEFORE_LEVER(A6),D1
+		MOVE.B	D0,BEFORE_LEVER(A6)
+		MOVE.B	D0,PLAY_LEVER+HERO_OFFSET+1(A6)
+
+		EOR.B	D0,D1
+		BNE	AT_MODE_CHK
+
+		ANDI.B	#00001111B,D0
+		MOVE.B	D0,PLAY_LEVER+HERO_OFFSET+1(A6)
+AT_MODE_CHK:
+		MOVE.L	A0,ACTION_ADRS(A6)
+		ANDI.B	#1,D0
+		BEQ	LEVER_SET_END
+
+		MOVE	#EINT4,EM_INT(A6)
+LEVER_SET_END:
+		RTS
+
+
+DIRECT_MODE:
+		JSR	ATTACK_CODE_CHK
+		BNE	DIRECT_MODE_1
+
+		BTST.B	#BHS_JUMP,HERO_STATE+HERO_OFFSET(A6)
+		BEQ	DIRECT_SET
+DIRECT_MODE_1:
+		MOVEQ.L	#0,D0
+DIRECT_SET:
+		MOVE.B	#1,CTRL_FLAG+HERO_OFFSET(A6)
+
+		MOVE	D0,DIRECT_CTRL+HERO_OFFSET(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+
+;
+;
+;
+ATTACK_CODE_CHK:
+		CMP.W	D0,D0
+		RTS
+
+		BTST.B	#BHS_JUMP,HERO_STATE+HERO_OFFSET(A6)
+		BNE	AT_CHK_CLEAR
+
+		TST.B	D0
+		BPL	ATC_1
+
+		MOVE	D0,D3
+		ANDI.B	#7FH,D3
+		ADD	D3,D3
+		ADD	#14*2,D3
+		MOVE	D3,D2
+ATC_1:
+		MOVE.B	NOW_STATE(A6),D2
+		ADD	D2,D2
+		MOVE	AT_DIS_DATA(PC,D2),D2
+		CMP	X_DIS_NEG(A6),D2
+		BLT	ATC_2
+
+		MOVEQ.L	#0,D1
+		RTS
+ATC_2:
+		TST.B	TARGET_Y+1(A6)
+		BPL	ATC_3
+
+		CLR.B	TARGET_Y+1(A6)
+ATC_3:
+		MOVE	HERO_TYPE+HERO_OFFSET(A6),D1
+		SUBQ.W	#2,D1
+
+		MOVEQ.L	#0,D2
+		LEA.L	RES_TIME_DATA(PC),A1
+		MOVE.B	(A1,D1),D2
+
+		MOVEQ.L	#0,D1
+		CMP.B	TARGET_Y+1(A6),D2
+		SHI	D1		;
+
+		ADDQ.B	#1,D1
+		RTS
+AT_CHK_CLEAR:
+		MOVEQ.L	#0,D1
+		RTS
+
+RES_TIME_DATA:
+	DC.B	8	;1
+	DC.B	8	;2
+	DC.B	8	;3
+	DC.B	8	;4
+	DC.B	8	;5
+	DC.B	8	;6
+	DC.B	8	;7
+	DC.B	8	;8
+
+;
+;	now_state
+;
+AT_DIS_DATA:
+	DC.W	100	;jub
+	DC.W	100	;strong_punch
+	DC.W	130	;nml_punch
+	DC.W	110	;body_blow
+	DC.W	100	;kick
+	DC.W	100	;strong_kick
+	DC.W	130	;nml_kick
+	DC.W	110	;low_kick
+	DC.W	165	;crounch_punch
+	DC.W	165	;crounch_kick
+	DC.W	170	;jump_punch
+	DC.W	170	;jump_kick
+
+	DC.W	300	;hado_ken
+	DC.W	300	;super_action
+	DC.W	300	;100_retsu
+	DC.W	300	;super_hado_ken
+
+;************************************************************************
+		INCLUDE	WORK.INC
+;************************************************************************
+

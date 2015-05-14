@@ -1,0 +1,228 @@
+;************************************************************************
+;*			enemy action back_moveing			*
+;*						1992/5/6		*
+;*						presented by k.morikawa	*
+;*									*
+;************************************************************************
+ 
+		XDEF	DIS_BACK_TBL
+
+ 	  	SECT	HK3,,C
+
+  		INCLUDE	EM_MAC.INC
+  		INCLUDE	EM_MAC2.INC
+ 		INCLUDE	HFLAG.INC
+
+;
+;************************************************************************
+;
+;
+;
+DIS_BACK_TBL:
+	DSP_T4	BACK_SKIP,EM1_BACK_00,EM1_BACK_01,EM1_BACK_02
+	DSP_T4	BACK_SKIP,EM2_BACK_00,EM2_BACK_01,EM2_BACK_02
+	DSP_T4	BACK_SKIP,EM3_BACK_00,EM3_BACK_01,EM3_BACK_02
+	DSP_T4	BACK_SKIP,EM4_BACK_00,EM4_BACK_01,EM4_BACK_02
+	DSP_T4	BACK_SKIP,EM5_BACK_00,EM5_BACK_01,EM5_BACK_02
+	DSP_T4	BACK_SKIP,EM6_BACK_00,EM6_BACK_01,EM6_BACK_02
+	DSP_T4	BACK_SKIP,EM7_BACK_00,EM7_BACK_01,EM7_BACK_02
+	DSP_T4	BACK_SKIP,EM8_BACK_00,EM8_BACK_01,EM8_BACK_02
+
+;	*enemy 1
+
+EM1_BACK_00:
+	TYPE	494,494
+;dis_mode	  0   1   2   3
+	DC.B	31h,2Ch,2Dh,39h ;0
+	DC.B	31h,32h,33h,39h ;1
+
+EM1_BACK_01:
+	TYPE	495,495
+;dis_mode	  0   1   2   3
+	DC.B	31h,2Ch,2Dh,39h ;0
+	DC.B	31h,32h,33h,39h ;1
+	DC.B	09h,09h,09h,39h ;2
+	DC.B	0Eh,0Eh,0Eh,39h ;3
+
+EM1_BACK_02:
+	TYPE	496,496
+;dis_mode	  0   1   2   3
+	DC.B	31h,2Ch,2Dh,39h ;0
+	DC.B	31h,32h,33h,39h ;1
+	DC.B	09h,09h,09h,39h ;2
+	DC.B	0Fh,0Fh,0Fh,39h ;3
+
+;	*enemy 2
+
+EM2_BACK_00:
+	TYPE	55,55
+;dis_mode	  0   1   2   3
+	DC.B	12h,12h,12h,12h ;0
+	DC.B	13h,13h,13h,13h ;1
+	DC.B	14h,14h,14h,14h ;3
+	DC.B	31h,32h,33h,2Bh ;4
+	DC.B	2Bh,2Ch,2Dh,2Bh ;5
+	DC.B	2Bh,2Ch,2Dh,2Bh ;5
+EM2_BACK_01:
+	TYPE	56,56
+;dis_mode	  0   1   2   3
+	DC.B	09h,09h,09h,09h ;0
+	DC.B	14h,14h,14h,14h ;1
+	DC.B	31h,32h,33h,2Bh ;2
+	DC.B	43h,43h,43h,43h ;3
+	DC.B	2Bh,2Ch,2Dh,2Bh ;4
+EM2_BACK_02:
+	TYPE	48,48
+;dis_mode	  0   1   2   3
+	DC.B	09h,09h,09h,09h ;0
+	DC.B	43h,43h,43h,43h ;1
+	DC.B	31h,32h,33h,2Bh ;2
+	DC.B	2Bh,2Ch,2Dh,2Bh ;3
+
+;	*enemy 3
+
+EM3_BACK_00:
+	TYPE	400,400
+;dis_mode	  0   1   2   3
+	DC.B	05h,05h,05h,05h ;0
+	DC.B	2Bh,2Ch,2Dh,2Bh ;1
+EM3_BACK_01:
+	TYPE	396,396
+;dis_mode	  0   1   2   3
+	DC.B	01h,01h,01h,01h ;0
+	DC.B	3Bh,3Bh,3Bh,3Bh ;1
+	DC.B	2Bh,2Ch,2Dh,2Bh ;2
+EM3_BACK_02:
+	TYPE	396,396
+;dis_mode	  0   1   2   3
+	DC.B	08h,08h,08h,08h ;0
+	DC.B	3Bh,3Bh,3Bh,3Bh ;1
+	DC.B	2Bh,2Ch,2Dh,2Bh ;2
+
+
+	XDEF	EM4_BACK_00
+
+;	*enemy 4
+
+EM4_BACK_00:
+	TYPE	4,4
+;dis_mode	  0   1   2   3
+	DC.B	5Bh,2Ch,2Dh,5Bh ;0
+	DC.B	5Bh,32h,33h,5Bh ;1
+
+EM4_BACK_01:
+	TYPE	23,23
+;dis_mode	  0   1   2   3
+	DC.B	5Bh,2Ch,2Dh,5Bh ;0
+	DC.B	5Bh,32h,33h,5Bh ;1
+	DC.B	4Bh,4Bh,4Bh,4Bh ;2
+
+EM4_BACK_02:
+	TYPE	18,18
+;dis_mode	  0   1   2   3
+	DC.B	5Bh,2Ch,2Dh,5Bh ;0
+	DC.B	4Bh,4Bh,4Bh,4Bh ;1
+	DC.B	5Bh,32h,33h,5Bh ;2
+
+
+;	*enemy 5
+
+EM5_BACK_00:
+	TYPE	420,420
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Ch,2Dh,31h ;
+	DC.B	2Eh,2Fh,30h,31h ;
+	DC.B	09h,09h,09h,09h ;
+	DC.B	0Ah,0Ah,0Ah,0Ah ;
+EM5_BACK_01:
+	TYPE	425,425
+;dis_mode	  0   1   2   3
+	DC.B	31h,32h,33h,31h ;1
+	DC.B	2Bh,2Ch,2Dh,31h ;5
+	DC.B	08h,08h,08h,08h ;1
+	DC.B	09h,09h,09h,09h ;2
+	DC.B	0Ah,0Ah,0Ah,0Ah ;3
+EM5_BACK_02:
+	TYPE	425,425
+;dis_mode	  0   1   2   3
+	DC.B	2Ch,2Dh,2Eh,31h ;1
+	DC.B	31h,32h,33h,31h ;2
+	DC.B	05h,05h,05h,05h ;3
+	DC.B	06h,06h,06h,06h ;4
+	DC.B	07h,07h,07h,07h ;5
+
+
+;	*enemy 6
+
+EM6_BACK_00:
+	TYPE	446,446
+;dis_mode	  0   1   2   3
+	DC.B	31h,32h,33h,31h ;2
+	DC.B	2Bh,2Ch,2Dh,2Bh ;1
+EM6_BACK_01:
+	TYPE	445,445
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Bh,2Bh,2Bh
+	DC.B	2Bh,2Ch,2Dh,2Bh ;1
+	DC.B	31h,32h,33h,31h ;2
+	DC.B	51h,51h,51h,51h ;3
+EM6_BACK_02:
+	TYPE	445,445
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Bh,2Bh,2Bh
+	DC.B	2Bh,2Ch,2Dh,2Bh ;1
+	DC.B	51h,51h,51h,51h ;2
+	DC.B	31h,32h,33h,31h ;3
+
+;	*enemy 7
+
+EM7_BACK_00:
+	TYPE	460,460
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Ch,2Dh,31h ;1
+	DC.B	2Dh,2Dh,2Dh,31h ;1
+EM7_BACK_01:
+	TYPE	460,460
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Ch,2Dh,31h ;1
+	DC.B	2Dh,2Dh,2Dh,31h ;1
+EM7_BACK_02:
+	TYPE	460,460
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Ch,2Dh,31h ;1
+	DC.B	2Dh,2Dh,2Dh,31h ;1
+
+;	*enemy 8
+
+EM8_BACK_00:
+	TYPE	333,333
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Ch,2Dh,2Bh ;1
+	DC.B	31h,32h,33h,31h ;2
+	DC.B	46h,46h,46h,46h ;3
+EM8_BACK_01:
+	TYPE	342,342
+;dis_mode	  0   1   2   3
+	DC.B	2Bh,2Ch,2Dh,2Bh ;1
+	DC.B	31h,32h,33h,31h ;2
+	DC.B	31h,32h,33h,31h ;2
+;	DC.B	60h,60h,60h,60h ;3
+	DC.B	46h,46h,46h,46h ;4
+	DC.B	47h,47h,47h,47h ;5
+EM8_BACK_02:
+	TYPE	333,333
+;dis_mode	  0   1   2   3
+	DC.B	31h,32h,33h,31h ;1
+	DC.B	31h,32h,33h,31h ;1
+;	DC.B	60h,60h,60h,60h ;2
+	DC.B	47h,47h,47h,47h ;3
+
+;	*all_enemy
+
+BACK_SKIP:
+	TYPE	22,22
+;dis_mode 	  0   1   2   3
+	DC.B	2Bh,2Bh,2Bh,2Bh
+	DC.B	31h,31h,31h,31h
+
+

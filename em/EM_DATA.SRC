@@ -1,0 +1,674 @@
+;************************************************************************
+;*									*
+;*  		enemy parameter data					*
+;*					1991/12/24~1992/		*
+;*									*
+;************************************************************************
+
+    		SECT	HK3,,C
+
+;EM_Pn
+	XREF	PATERN1_STAND,PATERN2_STAND
+	XREF	PATERN1_DOWN,PATERN2_DOWN
+	XREF	PATERN1_VJUMP,PATERN2_VJUMP
+	XREF	PATERN1_FJUMP,PATERN2_FJUMP
+	XREF	PATERN1_BJUMP,PATERN2_BJUMP
+;EM_SPn
+	XREF	SPECIAL1,SPECIAL2,SPECIAL3,SPECIAL4
+	XREF	SC_LIMIT,SP_CHOHATSU,FORCE_POWER,SP_FURA_FURA
+	XREF	SP_UP_DEFENCE,SP_DOWN_DEFENCE
+	XREF	PATERN1_SCLIM,PATERN2_SCLIM
+	XREF	SEACRET_ACTION
+
+	XREF	SPECIAL1H,SPECIAL2H,SPECIAL3H,SPECIAL4H
+	XREF	SCH_LIMIT,SPH_CHOHATSU,FORCE_POWERH,SPH_FURA_FURA
+	XREF	SPH_UP_DEFENCE,SPH_DOWN_DEFENCE
+	XREF	SEACRET_HACTION
+;DEF_1P&2P
+	XREF	DEFENCE_1P,DEFENCE_2P
+	XREF	DEFENCE2_1P,DEFENCE2_2P
+;EMn_TBL
+	XREF	E1_TBLNO,E2_TBLNO,E3_TBLNO,E4_TBLNO
+	XREF	E5_TBLNO,E6_TBLNO,E7_TBLNO,E8_TBLNO
+
+
+		INCLUDE	HFLAG.INC
+		INCLUDE	EM_MAC.INC
+		INCLUDE	EM_MAC2.INC
+
+
+;************************************************************************
+
+		XDEF	ACTION_TABLE
+
+ACTION_TABLE:
+	DC.L	PATERN1_ADRS
+	DC.L	PATERN2_ADRS
+	DC.L	PATERN1_ADRS
+	DC.L	PATERN2_ADRS
+
+PATERN1_ADRS:
+	DC.L	PATERN1_STAND	;0
+	DC.L	PATERN1_DOWN	;1
+	DC.L	PATERN1_VJUMP	;2
+	DC.L	PATERN1_FJUMP	;3
+	DC.L	PATERN1_BJUMP	;4
+	DC.L	PATERN1_SCLIM	;5
+
+PATERN2_ADRS:
+	DC.L	PATERN2_STAND	;0
+	DC.L	PATERN2_DOWN	;1
+	DC.L	PATERN2_VJUMP	;2
+	DC.L	PATERN2_FJUMP	;3
+	DC.L	PATERN2_BJUMP	;4
+	DC.L	PATERN1_SCLIM	;5
+
+
+		XDEF	SPECIAL_TBL
+
+SPECIAL_TBL:
+;	DC.L	NORMAL_SP
+;	DC.L	SPECIAL_SP
+;
+NORMAL_SP:
+	DC.L	SPECIAL1	;0
+	DC.L	SPECIAL2	;1
+	DC.L	SPECIAL3	;2
+	DC.L	SPECIAL4	;3
+	DC.L	SC_LIMIT	;4
+	DC.L	SP_CHOHATSU	;5
+	DC.L	FORCE_POWER	;6
+	DC.L	SP_FURA_FURA	;7
+	DC.L	SP_UP_DEFENCE	;8
+	DC.L	SP_DOWN_DEFENCE	;9
+	DC.L	SEACRET_HACTION	;10
+
+SPECIAL_SP:
+	DC.L	SPECIAL1H	;0
+	DC.L	SPECIAL2H	;1
+	DC.L	SPECIAL3H	;2
+	DC.L	SPECIAL4H	;3
+	DC.L	SC_LIMIT	;4
+	DC.L	SPH_CHOHATSU	;5
+	DC.L	FORCE_POWERH	;6
+	DC.L	SPH_FURA_FURA	;7
+	DC.L	SPH_UP_DEFENCE	;8
+	DC.L	SPH_DOWN_DEFENCE;9
+	DC.L	SEACRET_ACTION	;10
+
+		XDEF	DEFENCE_TBL
+DEFENCE_TBL:
+	DC.L	DEFENCE_1P,DEFENCE2_1P
+	DC.L	DEFENCE_2P,DEFENCE2_2P
+
+
+		XDEF	TBLNO_TBL
+TBLNO_TBL:
+	DC.L	E1_TBLNO	:1P
+	DC.L	E1_TBLNO	:2P
+
+	DC.L	E1_TBLNO	:Todo
+	DC.L	E2_TBLNO	:Jack
+	DC.L	E3_TBLNO	:Lee
+	DC.L	E4_TBLNO	:King
+	DC.L	E5_TBLNO	:Mike
+	DC.L	E6_TBLNO	:John
+	DC.L	E7_TBLNO	:Big
+	DC.L	E8_TBLNO	:Oyagi
+
+
+;************************************************************************
+;	*for refarence	from act_no
+;************************************************************************
+
+		XDEF	STATE_DATA_TBL
+;
+;	 0:standing  		 1:down
+;	 2:v_jump		 3:front_jump,front_walk
+;	 4:back_jump,back_walk	 5:front_walk
+;	 6:back_walk
+;	 7:up_punch(jub)	 8:up_punch(strong,long)
+;	 9:up_punch(strong,short)10:body_blow
+;
+;	11:up_kick(jub)		12:up_kick(strong,long)
+;	13:up_kick(strong,short)14:low_kick
+;
+;	15:crouch_punch		16:crouch_kick
+;	17:jump_punch		18:jump_kick
+;
+;	21:built_upper
+;
+;	80:hado_ken
+;	81:hiyaku_retsu_ken	82:super_hado_ken
+;	83:super_action		84:screen_limit
+;	85:chohatsu		86:force_power
+;	87:fura_fura		88:up_defence
+;	89:down_defence		8A:???
+
+;	from CTRL_NO.INC
+
+STATE_DATA_TBL:;  0:  1:  2:  3:  4:  5:  6:  7
+	DC.B	00h,00h,05h,06h,00h,00h,01h,01h ;00h
+	DC.B	8Ah,00h,02h,01h,00h,00h,00h,00h
+
+	DC.B	00h,00h,00h,00h,00h,03h,04h,00h ;10h
+	DC.B	00h,87h,86h,00h,88h,00h,00h,00h
+
+	DC.B	07h,09h,07h,08h,0Ah,0Ah,13h,0Fh ;20h
+	DC.B	11h,00h,00h,00h,00h,00h,00h,00h
+
+	DC.B	0Bh,0Dh,0Bh,0Ch,0Eh,0Eh,00h,10h ;30h
+	DC.B	12h,12h,12h,00h,00h,00h,00h,00h
+
+	DC.B	81h,82h,83h,84h,00h,00h,00h,00h ;40h
+	DC.B	00h,00h,00h,00h,00h,00h,00h,85h
+
+
+
+
+	DC.B	00h,00h,05h,06h,00h,00h,01h,01h ;00h
+	DC.B	8Ah,00h,02h,00h,00h,00h,00h,00h
+
+	DC.B	00h,00h,00h,00h,89h,03h,04h,00h ;10h
+	DC.B	00h,87h,86h,00h,88h,00h,00h,00h
+
+	DC.B	07h,09h,07h,08h,0Ah,0Ah,13h,0Fh ;20h
+	DC.B	11h,00h,00h,00h,00h,00h,00h,00h
+
+	DC.B	0Bh,0Dh,0Bh,0Ch,0Eh,0Eh,00h,10h ;30h
+	DC.B	12h,12h,12h,00h,00h,00h,00h,00h
+
+	DC.B	81h,83h,84h,82h,00h,00h,00h,00h ;40h
+	DC.B	00h,00h,00h,00h,00h,00h,00h,86h
+
+;************************************************************************
+
+	XDEF	STA_CONVERT_TBL
+;
+;	enemy mine_state convert_data
+;
+STA_CONVERT_TBL:
+	DC.W	PATERN_1-STA_CONVERT_TBL	;enemy1
+	DC.W	PATERN_1-STA_CONVERT_TBL	;enemy2
+	DC.W	PATERN_1-STA_CONVERT_TBL	;enemy3
+	DC.W	PATERN_1-STA_CONVERT_TBL	;enemy4
+	DC.W	PATERN_2-STA_CONVERT_TBL	;enemy5
+	DC.W	PATERN_1-STA_CONVERT_TBL	;enemy6
+	DC.W	PATERN_3-STA_CONVERT_TBL	;enemy7
+	DC.W	PATERN_1-STA_CONVERT_TBL	;enemy8
+
+;
+;	0:standing etc. 1:v_jump
+;	2:front_jump	3:back_jump	
+;
+PATERN_1:
+	DC.B	0,0,2,3,4,0,0,0 ;00h
+
+;
+;	0:standing etc. 1:down
+;	2:v_jump	3:front_jump
+;	4:back_jump	
+;
+PATERN_2:
+	DC.B	0,1,2,3,4,0,0,0
+
+;
+;	0:standing etc. 1:front_walk
+;	2:back_walk
+;
+PATERN_3:
+	DC.B	0,0,0,0,0,1,2,0
+
+;
+;************************************************************************
+
+		XDEF	SETTING_TIMER
+;
+;
+;
+SETTING_TIMER:;	1:2: 3: 4: 5: 6: 7: 8: 9:10:<  DUMMY  > ;level
+	DC.B	0,0,72,64,56,64,56,48,48,40,0,0,0,0,0,0 ;01
+	DC.B	0,0,64,56,48,56,48,40,40,32,0,0,0,0,0,0 ;02
+	DC.B	0,0,56,48,40,48,40,32,32,24,0,0,0,0,0,0 ;03
+	DC.B	0,0,48,40,16,40,32,24,24,16,0,0,0,0,0,0 ;04
+;	DC.B	0,0,48,40,32,40,32,24,24,16,0,0,0,0,0,0 ;04
+	DC.B	0,0,40,32,24,32,24,16,16,08,0,0,0,0,0,0 ;05
+	DC.B	0,0,64,56,48,56,48,40,40,32,0,0,0,0,0,0 ;06
+	DC.B	0,0,64,56,48,56,48,40,40,32,0,0,0,0,0,0 ;07
+	DC.B	0,0,16,08,00,00,00,00,00,00,0,0,0,0,0,0 ;08
+
+
+;************************************************************************
+
+		XDEF	AF_WAIT_TBL
+AF_WAIT_TBL:
+	DC.W	EM1_AF_WAIT-AF_WAIT_TBL
+	DC.W	EM2_AF_WAIT-AF_WAIT_TBL
+	DC.W	EM3_AF_WAIT-AF_WAIT_TBL
+	DC.W	EM4_AF_WAIT-AF_WAIT_TBL
+	DC.W	EM5_AF_WAIT-AF_WAIT_TBL
+	DC.W	EM6_AF_WAIT-AF_WAIT_TBL
+	DC.W	EM7_AF_WAIT-AF_WAIT_TBL
+	DC.W	EM8_AF_WAIT-AF_WAIT_TBL
+;
+
+PL1_AF_WAIT:
+;
+;	*** Ryo Sakazaki defence wait ****
+;
+PL2_AF_WAIT:
+;
+;	*** Robert Garushia defence wait ****
+;
+EM1_AF_WAIT:
+;
+;	*** Toudo Ryuhaku defence wait ****
+;
+EM2_AF_WAIT:
+;
+;	*** Jack Ternar defence wait ****
+;
+EM3_AF_WAIT:
+;
+;	*** Ree Pailon defence wait ****
+;
+	DC.B	99	;standing	;0
+	DC.B	99	;down		;1
+	DC.B	08	;v_jump		;2
+	DC.B	08	;front_jump	;3
+	DC.B	08	;back_jump	;4
+	DC.B	99	;defence	;5
+	DC.B	99	;down_defence	;6
+
+	DC.B	20	;ËÀÞØ  ½ÄÚ°Ä	;7
+	DC.B	40	;Ð·Þ ½ÄÚ°Ä	;8
+	DC.B	40	;Ð·Þ Ì¯¸	;9
+	DC.B	40	;ÎÞÃÞ¨ÌÞÛ°	;A
+
+	DC.B	40	;ËÀÞØ¥Öº¹ÞØ	;B
+	DC.B	50	;³¼Û¥ÏÜ¼¹ÞØ	;C
+	DC.B	60	;ÄËÞ¥ÏÜ¼¹ÞØ	;D
+	DC.B	70	;Û°·¯¸		;E
+
+	DC.B	70	;¶¶ÞÐ ¾²¹Ý½Þ·	;F
+	DC.B	70	;¶¶ÞÐ¥±¼ÊÞ×²	;10
+
+	DC.B	120	;ÄËÞ¹ÞÀÞÝ ¾²¹Ý	;11
+	DC.B	120	;ÄËÞ¥Öº¹ÞØ	;12
+
+	DC.B	0
+EM4_AF_WAIT:
+;
+;	*** King defence wait ****
+;
+EM5_AF_WAIT:
+;
+;	*** Mike Robinson defence wait ****
+;
+EM6_AF_WAIT:
+;
+;	*** John Crue defence wait ****
+;
+	DC.B	99	;standing	;0
+	DC.B	99	;down		;1
+	DC.B	08	;v_jump		;2
+	DC.B	08	;front_jump	;3
+	DC.B	08	;back_jump	;4
+	DC.B	99	;defence	;5
+	DC.B	99	;down_defence	;6
+
+	DC.B	120	;ËÀÞØ  ½ÄÚ°Ä	;7
+	DC.B	120	;Ð·Þ ½ÄÚ°Ä	;8
+	DC.B	120	;Ð·Þ Ì¯¸	;9
+	DC.B	120	;ÎÞÃÞ¨ÌÞÛ°	;A
+
+	DC.B	120	;ËÀÞØ¥Öº¹ÞØ	;B
+	DC.B	90	;³¼Û¥ÏÜ¼¹ÞØ	;C
+	DC.B	90	;ÄËÞ¥ÏÜ¼¹ÞØ	;D
+	DC.B	12	;Û°·¯¸		;E
+
+	DC.B	12	;¶¶ÞÐ ¾²¹Ý½Þ·	;F
+	DC.B	12	;¶¶ÞÐ¥±¼ÊÞ×²	;10
+
+	DC.B	120	;ÄËÞ¹ÞÀÞÝ ¾²¹Ý	;11
+	DC.B	120	;ÄËÞ¥Öº¹ÞØ	;12
+
+	DC.B	0
+EM7_AF_WAIT:
+;
+;	*** Big defence wait ****
+;
+EM8_AF_WAIT:
+;
+;	*** Oyagi defence wait ****
+;
+	DC.B	99	;standing	;0
+	DC.B	99	;down		;1
+	DC.B	08	;v_jump		;2
+	DC.B	08	;front_jump	;3
+	DC.B	08	;back_jump	;4
+	DC.B	99	;defence	;5
+	DC.B	99	;down_defence	;6
+
+	DC.B	120	;ËÀÞØ  ½ÄÚ°Ä	;7
+	DC.B	120	;Ð·Þ ½ÄÚ°Ä	;8
+	DC.B	120	;Ð·Þ Ì¯¸	;9
+	DC.B	120	;ÎÞÃÞ¨ÌÞÛ°	;A
+
+	DC.B	120	;ËÀÞØ¥Öº¹ÞØ	;B
+	DC.B	90	;³¼Û¥ÏÜ¼¹ÞØ	;C
+	DC.B	90	;ÄËÞ¥ÏÜ¼¹ÞØ	;D
+	DC.B	40	;Û°·¯¸		;E
+
+	DC.B	12	;¶¶ÞÐ ¾²¹Ý½Þ·	;F
+	DC.B	12	;¶¶ÞÐ¥±¼ÊÞ×²	;10
+
+	DC.B	120	;ÄËÞ¹ÞÀÞÝ ¾²¹Ý	;11
+	DC.B	120	;ÄËÞ¥Öº¹ÞØ	;12
+
+	DC.B	0
+
+;************************************************************************
+
+		XDEF	SRCH_INIT_TBL
+;
+;		distnace_mode select suru kakuritsu
+;
+SRCH_INIT_TBL:
+
+;		0;1;2;3;4;5;6;7;8;9;A;B;C;D;E;F
+PLY1_DIS:
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+PLY2_DIS:
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+ENE1_DIS:
+	DC.B	0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2
+ENE2_DIS:
+	DC.B	0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2
+	DC.B	0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2
+	DC.B	0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2
+ENE3_DIS:
+	DC.B	0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2
+	DC.B	0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2
+ENE4_DIS:
+	DC.B	0,0,0,0,0,1,1,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2
+	DC.B	0,0,0,0,0,0,0,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2
+ENE5_DIS:
+	DC.B	0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2
+	DC.B	0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,0,1,1,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2
+ENE6_DIS:
+	DC.B	0,0,0,0,0,0,0,0,1,1,1,1,1,2,2,2
+	DC.B	0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2
+	DC.B	0,0,0,0,0,1,1,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2
+ENE7_DIS:
+	DC.B	0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2
+	DC.B	0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2
+ENE8_DIS:
+	DC.B	0,0,0,0,1,0,1,0,1,0,1,0,1,1,2,2
+	DC.B	0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2
+	DC.B	0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2
+
+
+;************************************************************************
+
+ 		XDEF	REST_TIME_TBL
+;
+;
+;
+REST_TIME_TBL:
+	    ;	 0: 1: 2: 3:
+PLAYER1_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+PLAYER2_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY1_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY2_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY3_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY4_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY5_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY6_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY7_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+ENEMY8_TIME:
+	DC.B	15,00,00,00	;change_data(time)
+
+;************************************************************************
+
+		XDEF	LIFE_TBL
+;
+LIFE_TBL:
+;		 0: 1: 2: 3:
+PLAYER1_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+PLAYER2_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY1_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY2_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY3_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY4_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY5_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY6_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY7_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+ENEMY8_LIFE:
+	DC.B	75,50,25,00	;chnage_data(life)
+
+;************************************************************************
+
+		XDEF	FORCE_TBL
+;
+;
+;
+FORCE_TBL:
+;		 0: 1: 2: 3:
+PLAYER1_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+PLAYER2_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY1_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY2_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY3_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY4_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY5_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY6_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY7_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+ENEMY8_FORCE:
+	DC.B	75,50,25,00	;chnage_data(force)
+
+
+;************************************************************************
+
+		XDEF	SELECT_DISTANCE
+
+SELECT_DISTANCE:
+
+EM1_SEL_DIS:
+	DC.W	194,138,16,0	;normal_seq
+EM2_SEL_DIS:
+	DC.W	140,90,16,0	;normal_seq
+EM3_SEL_DIS:
+	DC.W	124,46,16,0	;normal_seq
+EM4_SEL_DIS:
+	DC.W	121,58,24,0	;normal_seq
+EM5_SEL_DIS:
+	DC.W	248,104,24,0	;normal_seq
+EM6_SEL_DIS:
+	DC.W	160,142,2,0 	;normal_seq
+EM7_SEL_DIS:
+	DC.W	288,192,10,0	;normal_seq
+EM8_SEL_DIS:
+	DC.W	234,146,18,0	;normal_seq
+
+;************************************************************************
+
+		XDEF	NML_SEQ_TBL
+;
+;
+;
+NML_SEQ_TBL:
+
+
+;	change_data	: 0=>(a)
+;			: 1=>(b)
+;			: 2=>(c)
+;			: 3=>(d)
+;	based  by life (0,1,2,3)
+;	offset by force(0,4,8,12)
+;
+EM1_LEVEL1:;	 0: 1: 2: 3: 4: 5: 6: 7: 8: 9:10:11:12:13:14:15
+;	DC.B	00,00,00,01,00,00,00,01,00,00,00,01,00,00,00,01
+	DC.B	00,00,00,01,00,00,00,01,00,00,00,00,00,00,00,00
+EM2_LEVEL1:
+	DC.B	00,01,01,00,01,01,00,01,01,01,00,00,00,00,00,00
+EM3_LEVEL1:
+	DC.B	00,01,01,00,01,01,00,01,01,01,00,00,00,00,00,00
+EM4_LEVEL1:
+	DC.B	00,00,00,00,00,00,00,00,00,01,01,01,01,01,01,01
+EM5_LEVEL1:
+	DC.B	01,01,01,01,00,01,01,01,01,01,01,01,00,00,00,01
+EM6_LEVEL1:
+	DC.B	00,00,00,00,00,01,01,00,01,01,01,01,01,01,01,00
+EM7_LEVEL1:
+	DC.B	00,00,01,01,00,00,01,01,00,00,00,01,01,01,01,01
+EM8_LEVEL1:
+	DC.B	00,00,00,01,00,00,01,01,01,00,01,01,01,01,01,01
+
+;************************************************************************
+
+		XDEF	SP_SEQ_TBL
+;
+;
+;
+SP_SEQ_TBL:
+
+;	change_data	: 0=>(a)
+;			: 1=>(b)
+;			: 2=>(c)
+;			: 3=>(d)
+;	based  by life (0,1,2,3)
+;	offset by force(0,4,8,12)
+;
+EM1_LEVEL2:;	 0: 1: 2: 3: 4: 5: 6: 7: 8: 9:10:11:12:13:14:15
+;	DC.B	00,00,00,01,00,00,00,01,00,00,00,01,00,00,00,01
+	DC.B	00,00,00,01,00,00,00,01,00,00,00,00,00,00,00,00
+EM2_LEVEL2:
+	DC.B	00,00,01,01,00,01,00,01,00,01,00,00,01,00,01,00
+EM3_LEVEL2:
+	DC.B	00,00,01,01,00,00,01,01,00,01,01,01,01,01,00,00
+EM4_LEVEL2:
+	DC.B	00,00,00,00,00,00,00,00,00,00,01,01,01,01,01,00
+EM5_LEVEL2:
+	DC.B	00,01,00,01,00,01,00,01,00,00,01,01,00,00,01,01
+EM6_LEVEL2:
+	DC.B	00,00,00,00,00,01,01,00,01,01,01,01,01,01,01,00
+EM7_LEVEL2:
+	DC.B	00,00,01,01,00,00,01,01,00,00,00,01,01,01,01,01
+EM8_LEVEL2:
+	DC.B	00,00,01,01,00,00,01,01,00,00,01,01,01,01,01,01
+
+;************************************************************************
+
+		XDEF	DIS_SEQ_TBL
+;
+;
+;
+DIS_SEQ_TBL:
+
+
+;	change_data	: 0=>(a)
+;			: 1=>(b)
+;			: 2=>(c)
+;			: 3=>(d)
+;	based  by life (0,1,2,3)
+;	offset by force(0,4,8,12)
+;
+EM1_LEVEL3:;	 0: 1: 2: 3: 4: 5: 6: 7: 8: 9:10:11:12:13:14:15
+	DC.B	01,00,01,01,00,00,01,01,01,02,02,00,01,02,03,01
+EM2_LEVEL3:
+	DC.B	00,02,02,03,01,01,01,03,00,02,02,01,01,00,02,03
+EM3_LEVEL3:
+	DC.B	00,01,02,03,02,00,03,03,01,02,01,02,00,01,00,01
+EM4_LEVEL3:
+	DC.B	00,00,01,03,00,01,02,03,01,02,02,03,02,03,03,03
+EM5_LEVEL3:
+	DC.B	00,00,03,03,00,02,03,00,01,02,02,00,01,01,01,00
+EM6_LEVEL3:
+	DC.B	00,00,01,03,00,01,02,03,01,02,02,02,01,03,03,03
+EM7_LEVEL3:
+	DC.B	00,00,02,03,00,01,01,01,01,01,02,03,02,02,01,03
+EM8_LEVEL3:
+	DC.B	00,00,00,01,00,00,01,01,01,01,01,02,02,02,02,02
+
+;************************************************************************
+
+		XDEF	DEF_SEQ_TBL
+;
+;
+;
+DEF_SEQ_TBL:
+
+
+;	change_data	: 0=>(a)
+;			: 1=>(b)
+;	based  by life (0,1,2,3)
+;	offset by force(0,4,8,12)
+;
+EM1_LEVEL4:;	 0: 1: 2: 3: 4: 5: 6: 7: 8: 9:10:11:12:13:14:15
+;	DC.B	00,00,00,01,00,00,00,01,00,00,00,01,00,00,00,01
+	DC.B	00,00,00,01,00,00,00,01,00,00,00,00,00,00,00,00
+EM2_LEVEL4:
+	DC.B	00,00,00,01,00,00,01,00,00,00,00,01,00,00,01,01
+EM3_LEVEL4:
+	DC.B	00,00,00,01,00,00,01,00,00,00,00,01,00,00,01,01
+EM4_LEVEL4:
+	DC.B	00,00,00,00,00,00,00,00,01,01,01,01,01,01,01,00
+EM5_LEVEL4:
+	DC.B	00,01,01,01,00,01,01,01,00,00,01,01,00,00,00,01
+EM6_LEVEL4:
+	DC.B	00,00,00,00,00,01,01,00,01,01,01,01,01,01,01,00
+EM7_LEVEL4:
+	DC.B	00,00,01,01,00,00,01,01,00,01,01,01,01,01,01,01
+EM8_LEVEL4:
+	DC.B	00,00,01,01,00,00,01,01,01,01,01,01,01,01,01,01
+
+;************************************************************************
+

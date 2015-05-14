@@ -1,0 +1,792 @@
+
+*************************************************************************
+;*									*
+;* 	 	ACTION COMMAND OPERATION PROGRAM			*
+;*					1992/2/29~1992/5/30		*
+;*					   version 0.08			*
+;*					1992/6/1~1992/6/26		*
+;*					   version 0.09			*
+;************************************************************************
+
+ 		XREF	?A5
+
+		SECT	HK3,,C
+
+		INCLUDE	NEO_GEO.INC	@@@
+		INCLUDE	LABEL.INC
+		INCLUDE	HFLAG.INC
+		INCLUDE	EM_MAC2.INC
+
+;by HK3_SET
+		XREF	ACT_DATA_SET
+;by HK3_SUB
+		XREF	END_LEVER,LEVER_SET
+		XREF	ACTION_TIMER_SET,TYPE1_SET
+		XREF	DISTANCE_CHECK
+		XREF	PLAYER_SCLIM_CHECK
+;by EM_DATA
+		XREF	AF_WAIT_TBL
+;by HK3_INT
+		XREF	INT4_TBL
+
+
+;************************************************************************
+
+		XDEF	OPERATION_STOP
+;
+;
+;
+OPERATION_STOP:
+		BTST.B	#DIS_SRCH_MODE,PLAYER_CONTROL(A6)
+		BEQ	STOP_SEARCH
+
+		MOVE.L	ANOTHER_PLAYER(A6),A0
+		CMP	#0EH,ACT_CTRL+HERO_OFFSET(A0)
+		BEQ.S	STOP_SEARCH	;player is damage_action
+
+		BRA	SEQ_COM_SET	;to normal_seq_set
+STOP_SEARCH:
+		BRA	ACT_COM_READ
+
+;************************************************************************
+
+		XDEF	COMMAND_WAIT
+;
+;
+;
+COMMAND_WAIT:
+		TST.B	SEARCH_WAIT(A6)
+		BMI.S	COM_OPE_SET
+		BEQ.S	COM_OPE_SET
+
+		MOVEQ.L	#0,D0
+		MOVE.B	DIS_MODE(A6),D0
+		EOR.B	#3,D0
+		SUB.B	D0,SEARCH_WAIT(A6)
+
+		MOVE	#0,PLAY_LEVER+HERO_OFFSET(A6)
+		RTS
+
+;************************************************************************
+
+		XDEF	COMMAND_OPERATION,ACT_COM_READ
+;
+;		action_commmand opreation program
+;						1992/3/
+;
+COM_OPE_SET:
+COMMAND_OPERATION:
+		BTST.B	#COMMAND_STOP,PLAYER_CONTROL(A6)	;<**
+		BNE	COM_OPE_1
+
+		MOVE.L	ANOTHER_PLAYER(A6),A0
+		CMP	#0EH,ACT_CTRL+HERO_OFFSET(A0)
+		BNE	COM_OPE_2
+
+		MOVE	#EM_INIT,EM_STEP(A6)
+		RTS
+COM_OPE_2:
+		CMP.B	#5,STEP2+HERO_OFFSET(A6)
+		BEQ.S	DM_NON
+
+		BTST.B	#BHS_DAMAGE,HERO_STATE+HERO_OFFSET(A6)
+		BNE	DAMAGE_CUT
+DM_NON:
+		CMP	#20H,ACT_CTRL+HERO_OFFSET(A6)
+		BCC	COM_OPE_1
+ACT_COM_READ:
+		MOVE.L	ACTION_ADRS(A6),A0
+		MOVE	ACT_COM(A6),D0
+		D0R_ADD
+		JMP	ACT_COM_PROG(PC,D0)
+COM_OPE_1:
+		MOVEQ.L	#0,D0
+		MOVE.B	BEFORE_LEVER(A6),D0  ;if no_action or action_skip then
+		MOVEA.L	ACTION_ADRS(A6),A0   ;set berofre lever
+
+		BRA	LEVER_SET
+
+
+
+;		************************
+
+ACT_COM_PROG:;				  ;act_no
+		BRA	COM_INITIAL       ; 00
+		BRA	DIRECT_LEVER 	  ; 01
+		BRA	SRCH_STA_DIS 	  ; 02
+		BRA	SRCH_ONLY_DIS	  ; 03
+		BRA	CHECK_AT_DIS1	  ; 04
+		BRA	CHECK_AT_DIS2	  ; 05
+		BRA	DLS_REPEAT_LEVER  ; 06
+		BRA	DLS_TIMER_LEVER   ; 07
+		BRA	DLS_SRCH_STA_DIS  ; 08
+		BRA	DLS_SRCH_ONLY_DIS ; 09
+		BRA	DLS_CHECK_AT_DIS1 ; 10
+		BRA	DLS_CHECK_AT_DIS2 ; 11
+		BRA	KIRYOKU_POWER_ON  ; 12
+		BRA	SANKAKU_PROG	;13
+
+;		************************
+
+
+;************************************************************************
+;
+;
+;
+COM_INITIAL:
+		CLR.B	BEFORE_LEVER(A6)
+
+		MOVEQ.L	#0,D0
+		MOVE.B	(A0)+,D0
+		CMP.B	#0FFH,D0
+		BEQ	COM_OPE_END
+
+		SUBQ	#1,D0		;1
+		BEQ.L	DIRECT_INIT
+
+		SUBQ	#1,D0		;2
+		BEQ.L	SRCH_SD_INIT
+
+		SUBQ	#1,D0		;3
+		BEQ.L	ONLY_DIS_INIT
+
+		SUBQ	#1,D0		;4
+		BEQ.L	CHK_AT1_INIT
+
+		SUBQ	#1,D0		;5
+		BEQ.L	CHK_AT2_INIT
+
+		SUBQ	#1,D0		;6
+		BEQ.L	INIT_DEFENCE
+
+		SUBQ	#1,D0		;7
+		BEQ.L	INIT_SANKAKU
+
+		MOVEQ.L	#0,D0
+		BRA	END_LEVER
+
+;************************************************************************
+
+		XDEF	COM_OPE_END
+		XDEF	DAMAGE_CUT
+;
+;
+;
+DAMAGE_CUT:
+		BSET.B	#DAMAGE_END,PLAYER_CONTROL(A6)
+		MOVE.W	#15,EM_STEP(A6)
+COM_OPE_END:
+		JSR	COM_END(PC)
+
+		CLR.B	PLAYER_CONTROL(A6)
+
+		MOVEQ.L	#0,D0
+		MOVE.B	D0,TEST_R+1(A5)
+		MOVE.B	D0,DG_TBLNO(A6)
+		MOVE.B	D0,STATE_MODE(A6)
+		MOVEA.L	ACTION_ADRS(A6),A0
+
+		JSR	END_LEVER
+
+		BSET.B	#COM_RESULT_END,PLAYER_CONTROL(A6)
+		RTS
+
+;************************************************************************
+;
+;		*action commnad no.1
+;
+DIRECT_INIT:
+		MOVE	#1,ACT_COM(A6)
+DIRECT_LEVER:
+		MOVEQ.L	#0,D0
+		CMP.B	#0FFH,(A0)
+		BEQ	ACTC_ESTEP
+
+		MOVE.B	(A0)+,D0
+		CMP.B	#0F0H,D0
+		BEQ	ACTC1_1
+ 
+		JMP	LEVER_SET
+ACTC1_1:
+		MOVE.B	(A0)+,D0
+		D0R_ADD
+		JMP	SUB_OPE_TBL(PC,D0.W)
+
+ACTC_ESTEP:
+		JSR	COM_END
+		MOVE.B	#0,DG_TBLNO(A6)
+
+		MOVEQ.L	#00001110B,D0
+		AND.B	BEFORE_LEVER(A6),D0
+		JMP	END_LEVER
+
+
+;		***************************
+SUB_OPE_TBL:
+		BRA	DLS_REPT_INIT	;0
+		BRA	DLS_TIMER_INIT	;1
+		BRA	DLS_SD_INIT	;2
+		BRA	DLS_DIS_INIT	;3
+		BRA	DLS_AT1_INIT	;4
+		BRA	DLS_AT2_INIT	;5
+		BRA	INIT_DEFENCE	;6
+		BRA	INIT_SANKAKU	;7
+		BRA	INIT_KIRYOKU	;8
+
+;		***************************
+
+;
+;************************************************************************
+
+		XDEF	SRCH_SD_INIT
+;
+;		*action commnad no.2
+;
+SRCH_SD_INIT:
+		MOVE	#2,ACT_COM(A6)
+		MOVE.B	(A0)+,SEARCH_MODE(A6)
+		MOVE.B	(A0)+,SEARCH_STATE(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.B	(A0)+,FAIL_LEVER(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+SRCH_STA_DIS:
+		JSR	DISTANCE_CHECK
+
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	SRSD_2
+
+		MOVEQ.L	#0,D1
+		MOVE.B	SEARCH_STATE(A6),D1
+		MOVE.L	ANOTHER_PLAYER(A6),A1
+		CMP	ACT_CTRL+HERO_OFFSET(A1),D1
+		BEQ	SRSD_4
+
+		SUB.B	#1,SRCH_TIMER(A6)
+		MOVEQ.L	#3,D1
+		AND.B	PLAYER_CONTROL(A6),D1
+		BNE	SRSD_1
+
+		MOVE.B	(A0),D0
+		JMP	LEVER_SET
+SRSD_1:
+		SUBQ	#3,D1
+		BEQ	SRSD_2
+SRSD_4:
+		MOVE.B	SUCCESS_LEVER(A6),D0
+		BRA	SRSD_3
+SRSD_2:
+		MOVE.B	FAIL_LEVER(A6),D0
+SRSD_3:
+		JSR	END_LEVER
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+		MOVE.L	ACTION_ADRS(A6),A0
+		JMP	COM_INITIAL(PC)
+
+;************************************************************************
+;
+;
+;
+ONLY_DIS_INIT:
+		MOVE	#3,ACT_COM(A6)
+		MOVE.B	(A0)+,SEARCH_MODE(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+SRCH_ONLY_DIS:
+		JSR	DISTANCE_CHECK
+
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	SROD_1
+
+		SUB.B	#1,SRCH_TIMER(A6)
+		MOVE.B	(A0),D0
+
+		MOVEQ.L	#3,D1
+		AND.B	PLAYER_CONTROL(A6),D1
+		BNE	SROD_1
+
+		BRA	LEVER_SET
+SROD_1:
+		MOVE.B	BEFORE_LEVER(A6),D0
+		JSR	END_LEVER
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+;************************************************************************
+
+		XDEF	ACT_COM_4
+;
+;
+;
+ACT_COM_4:
+CHK_AT1_INIT:
+		MOVE	#4,ACT_COM(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+CHECK_AT_DIS1:
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	CHKAD1_3
+
+		SUB.B	#1,SRCH_TIMER(A6)
+
+		BTST.B	#COM_RESULT_END,PLAYER_CONTROL(A6)
+		BNE	DLSAD1_3
+
+		MOVE	X_DIS_NEG(A6),D1
+CHKAD1_1:
+		MOVEQ.L	#0,D2
+		MOVE.B	(A0),D2
+		CMP.B	#255,D2
+		BEQ.S	CHKAD1_101
+
+		CMP	D2,D1
+		BGT	CHKAD1_2
+CHKAD1_101:
+		MOVE.B	SUCCESS_LEVER(A6),D0
+CHKAD1_3:
+		JSR	END_LEVER
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+CHKAD1_2:
+		BRA	LEVER_SET
+
+;************************************************************************
+;
+;
+;
+CHK_AT2_INIT:
+		MOVE	#5,ACT_COM(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+CHECK_AT_DIS2:
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	CHKAD2_3
+
+		SUB.B	#1,SRCH_TIMER(A6)
+
+		MOVE	X_DIS_NEG(A6),D1
+CHKAD2_1:
+		MOVEQ.L	#0,D2
+		MOVE.B	1(A0),D2
+		CMP.B	#255,D2
+		BEQ.S	CHKAD2_101
+
+		CMP	D2,D1
+		BGT	CHKAD1_4
+CHKAD2_101:
+		MOVE.B	1(A0),D2
+		CMP	D2,D1
+		BLE	CHKAD1_4
+
+		MOVE.B	SUCCESS_LEVER(A6),D0
+CHKAD2_3:
+		JSR	END_LEVER
+		ADD.L	#1,ACTION_ADRS(A6)
+		MOVE.L	ACTION_ADRS(A6),A0
+		JMP	COM_INITIAL(PC)
+CHKAD1_4:
+		BRA	LEVER_SET
+
+;************************************************************************
+;
+;		*action sub_command no.1
+;						<*** 1992/8/25
+
+		XDEF	SP_SRCH
+
+SP_SRCH:
+DLS_REPT_INIT:
+		MOVE	#6,ACT_COM(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+DLS_REPEAT_LEVER
+;		LEA.L	(A6),A1
+;		JSR	PLAYER_SCLIM_CHECK
+;		BNE	DLSREP_F_END
+
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	DLSREP_F_END
+
+		SUBQ.B	#1,SRCH_TIMER(A6)
+		MOVE.L	#80004H,D0
+		MOVEQ.L	#0,D3
+		MOVE.B	(A0),D3
+		MOVE.W	X_DIS_NEG(A6),D4
+		CMP.W	OLD_X_DIS(A6),D3
+		BHI.S	DLS_REP_1
+
+		SWAP	D0
+		EXG.L	D3,D4
+DLS_REP_1:
+		CMP.W	D4,D3
+		BLS	DLSREP_END
+
+		MOVE.L	D0,D1
+		BTST.B	#ACTAT_FLIP,ACT_ATTR(A3)
+		BEQ	DLS_REP_2
+
+		SWAP	D1
+DLS_REP_2:
+		CMP.B	LIMIT_STOP(A6),D1
+		BNE	LEVER_SET
+DLSREP_END:
+		MOVE.B	SUCCESS_LEVER(A6),D0
+DLSREP_F_END:
+		JSR	END_LEVER
+
+		MOVE	#1,ACT_COM(A6)
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+
+
+;************************************************************************
+;
+;		*action sub_command no.2
+;
+DLS_TIMER_INIT:
+		MOVE	#7,ACT_COM(A6)
+		MOVE.B	(A0)+,ACT_WAIT(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+DLS_TIMER_LEVER:
+		MOVEQ.L	#0,D0
+		TST.B	ACT_WAIT(A6)
+		BEQ	DLSTM_END
+
+		SUB.B	#1,ACT_WAIT(A6)
+		JMP	LEVER_SET
+DLSTM_END:
+		MOVE.B	SUCCESS_LEVER(A6),D0
+		JSR	END_LEVER
+		MOVE	#1,ACT_COM(A6)
+;		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+;************************************************************************
+;
+;		*action sub_command no.3
+;
+DLS_SD_INIT:
+		MOVE	#8,ACT_COM(A6)
+		MOVE.B	(A0)+,SEARCH_MODE(A6)
+		MOVE.B	(A0)+,SEARCH_STATE(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.B	(A0)+,FAIL_LEVER(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+DLS_SRCH_STA_DIS:
+
+		JSR	DISTANCE_CHECK
+
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	DLSSD_2
+
+		MOVEQ.L	#0,D1
+		MOVE.B	SEARCH_STATE(A6),D1
+		MOVE.L	ANOTHER_PLAYER(A6),A1
+		CMP	ACT_CTRL+HERO_OFFSET(A1),D1
+		BEQ	DLSSD_4
+
+		SUB.B	#1,SRCH_TIMER(A6)
+		MOVEQ.L	#3,D1
+		AND.B	PLAYER_CONTROL(A6),D1
+		BNE	DLSSD_1
+
+		MOVE.B	(A0),D0
+		JMP	LEVER_SET
+DLSSD_1:
+		SUBQ	#3,D1
+		BEQ	DLSSD_2
+DLSSD_4:
+		MOVE.B	SUCCESS_LEVER(A6),D0
+		JMP	DLSSD_3
+DLSSD_2:
+		MOVE.B	FAIL_LEVER(A6),D0
+DLSSD_3:
+		JSR	END_LEVER
+
+		MOVE	#1,ACT_COM(A6)
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+;************************************************************************
+;
+;		*action sub_command no.4
+;
+DLS_DIS_INIT:
+		MOVE	#9,ACT_COM(A6)
+		MOVE.B	(A0)+,SEARCH_MODE(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+DLS_SRCH_ONLY_DIS:
+
+		JSR	DISTANCE_CHECK
+
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	DLSOD_1
+
+		SUB.B	#1,SRCH_TIMER(A6)
+
+		MOVEQ.L	#3,D1
+		AND.B	PLAYER_CONTROL(A6),D1
+		BNE	DLSOD_1
+
+		MOVE.B	(A0),D0
+		JMP	LEVER_SET
+DLSOD_1:
+;		MOVE.B	BEFORE_LEVER(A6),D0
+		JSR	END_LEVER
+
+		MOVE.W	#1,ACT_COM(A6)
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+;************************************************************************
+;
+;		*action sub_command no.5
+;
+DLS_AT1_INIT:
+		MOVE	#10,ACT_COM(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+DLS_CHECK_AT_DIS1:
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	DLSAD1_3
+
+		SUB.B	#1,SRCH_TIMER(A6)
+
+		BTST.B	#COM_RESULT_END,PLAYER_CONTROL(A6)
+		BNE	DLSAD1_3
+
+		MOVE	X_DIS_NEG(A6),D1
+DLSAD1_1:
+		MOVEQ.L	#0,D2
+		MOVE.B	(A0),D2
+		CMP	D2,D1
+		BLE	DLSAD1_2
+
+		JMP	LEVER_SET
+
+DLSAD1_2:
+		MOVE.B	SUCCESS_LEVER(A6),D0
+DLSAD1_3:
+		JSR	END_LEVER
+		MOVE	#1,ACT_COM(A6)
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+;************************************************************************
+;
+;
+;
+;
+DLS_AT2_INIT:
+		MOVE	#11,ACT_COM(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.B	(A0)+,SUCCESS_LEVER(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		RTS
+DLS_CHECK_AT_DIS2:
+		MOVEQ.L	#0,D0
+		TST.B	SRCH_TIMER(A6)
+		BEQ	DLSAD2_3
+
+		SUB.B	#1,SRCH_TIMER(A6)
+		MOVE	X_DIS_NEG(A6),D1
+DLSAD2_1:
+		MOVEQ.L	#0,D2
+		MOVE.B	1(A0),D2
+		CMP.B	#255,D2
+		BEQ.S	DLSAD2_101
+
+		CMP	D2,D1
+		BGT	DLSAD1_4
+DLSAD2_101:
+		MOVE.B	1(A0),D2
+		CMP	D2,D1
+		BGT	DLSAD1_2
+DLSAD1_4:
+		JMP	LEVER_SET
+DLSAD2_2:
+		MOVE.B	SUCCESS_LEVER(A6),D0
+DLSAD2_3:
+		JSR	END_LEVER
+		MOVE	#1,ACT_COM(A6)
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+;************************************************************************
+;
+;
+;
+INIT_DEFENCE:
+		ADDQ.L	#2,A0
+		BRA	END_LEVER
+
+;************************************************************************
+
+	XDEF	SANKAKU_PROG
+
+SANKAKU_LEVER	EQU	3Ah+80h
+;
+;
+;
+INIT_SANKAKU:
+		MOVE	#13,ACT_COM(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+		MOVE.B	#00000101B,D0
+		BRA	LEVER_SET
+SANKAKU_PROG:
+		MOVEQ.L	#0,D0
+		BTST.B	#BHS_JUMP,HERO_STATE+HERO_OFFSET(A6)
+		BEQ	SANKAKU_END
+
+		CMP.W	#3AH,ACT_CTRL+HERO_OFFSET(A6)
+		BEQ	SANKAKU_NEXT
+
+		MOVE.B	AREA_POSITION+HERO_OFFSET(A6),D0
+		BEQ.S	SANKAKU_NEXT
+
+		MOVE.L	VZ+HERO_OFFSET(A6),D0
+		BPL	S_PROG_1
+
+		NEG.L	D0
+S_PROG_1:
+		CMP.L	#30000H,D0
+		BCS	SANKAKU_SET
+SANKAKU_NEXT:
+		RTS
+SANKAKU_END:
+		JSR	END_LEVER
+		MOVE	#0,ACT_COM(A6)
+		ADD.L	#1,ACTION_ADRS(A6)
+		RTS
+
+
+;************************************************************************
+
+
+
+SANKAKU_SET:
+		MOVEQ.L	#0,D0
+		MOVE.B	#SANKAKU_LEVER,D0
+		MOVE.L	ACTION_ADRS(A6),A0
+		JSR	LEVER_SET
+		RTS
+
+DEFENCE_END:
+SANKAKU_CHECK_END:
+		CLR.B	STATE_MODE(A6)
+		MOVE	#EM_ATTACK,EM_STEP(A6)
+
+		MOVE.B	NOW_STATE(A6),STATE_MODE(A6)
+		JSR	ACT_DATA_SET
+DEF_NEXT_2:
+		RTS
+
+;************************************************************************
+
+KIRYOKU		EQU	19H+80H
+
+	XDEF	INIT_KIRYOKU
+
+
+INIT_KIRYOKU:
+		MOVE.B	(A0)+,SEARCH_MODE(A6)
+		MOVE.B	(A0)+,SRCH_TIMER(A6)
+		MOVE.W	#12,ACT_COM(A6)
+		MOVE.L	A0,ACTION_ADRS(A6)
+
+		MOVEQ.L	#0,D0
+		MOVE.B	RIKI_MAX+HERO_OFFSET(A6),D1
+		SUB.B	HERO_SPIRIT+HERO_OFFSET(A6),D1
+		CMP.B	#16,D1
+		BCS	KIRYOKU_2
+
+		MOVEQ.L	#0,D0
+		MOVE.B	#KIRYOKU,D0
+		BRA	LEVER_SET
+KIRYOKU_POWER_ON:
+		MOVEQ.L	#0,D0
+		MOVE.B	HERO_SPIRIT+HERO_OFFSET(A6),D1
+		CMP.B	RIKI_MAX+HERO_OFFSET(A6),D1
+		BEQ	KIRYOKU_2
+
+		TST.B	SRCH_TIMER(A6)
+		BEQ	KIRYOKU_2
+
+		SUB.B	#1,SRCH_TIMER(A6)
+
+		JSR	DISTANCE_CHECK
+
+		MOVEQ.L	#3,D1
+		AND.B	PLAYER_CONTROL(A6),D1
+		BNE	KIRYOKU_2
+
+		MOVE.B	#10H,D0
+		BRA	LEVER_SET
+KIRYOKU_2:
+		MOVEQ.L	#0,D0
+		JSR	END_LEVER
+		MOVE	#1,ACT_COM(A6)
+		RTS
+
+;
+;	BNE => RESULT_END
+;	BEQ => CONTINUE
+;
+F_MAX_CHK:
+		MOVEQ.L	#0,D1
+		MOVE.B	RIKI_MAX+HERO_OFFSET(A6),D1
+		SUB.B	HERO_SPIRIT+HERO_OFFSET(A6),D1
+		MOVEQ.L	#0,D0
+		CMP.B	#16,D1
+		SHS.B	D0
+		ADDQ.B	#1,D0
+		RTS
+
+;************************************************************************
+
+
+COM_END:
+		CLR.B	SPEED_RANK(A6)
+		CLR.B	ATTACK_ON(A6)
+		CLR.B	ACT_ON(A6)
+		BTST.B	#DIS_SRCH_MODE,PLAYER_CONTROL(A6)
+		BNE	SEQ_COM_SET
+
+;		MOVE	#EINT1,EM_INT(A6)
+		RTS
+SEQ_COM_SET:
+;		JSR	ACTION_TIMER_SET
+
+		BCLR.B	#DIS_SRCH_MODE,PLAYER_CONTROL(A6)
+		RTS
+
+;************************************************************************
+		INCLUDE	WORK.INC
+;************************************************************************
+

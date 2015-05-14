@@ -1,0 +1,165 @@
+;************************************************************************
+;*			enemy action screen_limit data 			*
+;*						1992/4/24		*
+;************************************************************************
+
+		XDEF	SCH_LIMIT
+
+ 	  	SECT	HK3,,C
+
+  		INCLUDE	EM_MAC.INC
+  		INCLUDE	EM_MAC2.INC
+ 		INCLUDE	HFLAG.INC
+
+
+
+SCH_LIMIT:
+	DSP_T4	SCLIM_100,SCLIM_101,SCLIM_102,SCLIM_993	;enemy 1
+	DSP_T4	SCLIM_100,SCLIM_101,SCLIM_102,SCLIM_993	;enemy 1
+
+	DSP_T4	SCLIM_100,SCLIM_101,SCLIM_102,SCLIM_993	;enemy 1
+	DSP_T4	SCLIM_200,SCLIM_201,SCLIM_202,SCLIM_993	;enemy 2
+	DSP_T4	SCLIM_300,SCLIM_301,SCLIM_302,SCLIM_993	;enemy 3
+	DSP_T4	SCLIM_400,SCLIM_401,SCLIM_402,SCLIM_993	;enemy 4
+	DSP_T4	SCLIM_500,SCLIM_501,SCLIM_502,SCLIM_993	;enemy 5
+	DSP_T4	SCLIM_600,SCLIM_601,SCLIM_602,SCLIM_993	;enemy 6
+	DSP_T4	SCLIM_700,SCLIM_701,SCLIM_702,SCLIM_993	;enemy 7
+	DSP_T4	SCLIM_800,SCLIM_801,SCLIM_802,SCLIM_993	;enemy 8
+
+;	************************
+SCLIM_100:
+	TYPE	19,19
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	08H,10H,11H,22H
+	DS.W	0
+SCLIM_200:
+	TYPE	49,49
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+	DC.B	22H,3BH,16H,56H
+	DS.W	0
+SCLIM_300:
+ 	TYPE	92,92
+;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	13H,16H,21H,09H,06H,08H
+	DS.W	0
+ SCLIM_400:
+ 	TYPE	407,407
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	09H,51H,11H,63H
+	DS.W	0
+ SCLIM_500:
+ 	TYPE	420,420
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	11H,15H,20H,32H
+	DS.W	0
+ SCLIM_600:
+ 	TYPE	448,448
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	07H,1EH,1BH,2BH
+	DS.W	0
+ SCLIM_700:
+ 	TYPE	304,304
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	22H,23H
+	DS.W	0
+ SCLIM_800:
+ 	TYPE	317,317
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	15H,15H,37H,37H
+	DS.W	0
+ 
+ ;	************************
+ 
+ SCLIM_101:
+ 	TYPE	19,19
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	08H,11H,12H,22H
+	DS.W	0
+ SCLIM_201:
+ 	TYPE	48,48
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	35h,12h,1BH,56H
+	DS.W	0
+ SCLIM_301:
+ 	TYPE	95,95
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	55H,14H,0FH,39H,16H,11H
+	DS.W	0
+ SCLIM_401:
+ 	TYPE	407,407
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	09H,27H,23H,15H
+	DS.W	0
+ SCLIM_501:
+ 	TYPE	420,420
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	11H,15H,20H,32H
+	DS.W	0
+ SCLIM_601:
+ 	TYPE	438,438
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	07H,40H,06H,3DH
+	DS.W	0
+ SCLIM_701:
+ 	TYPE	458,458
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	25H,17H,18H,2BH
+	DS.W	0
+ SCLIM_801:
+ 	TYPE	334,334
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	03H,06H,09H,1BH
+	DS.W	0
+ 
+ ;	************************
+ 
+ SCLIM_102:
+ 	TYPE	03,03
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B    08H,13H,21H,22H,45H,2Bh
+	DS.W	0
+ SCLIM_202:
+ 	TYPE	49,49
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	51H,56H,47H,51H
+	DS.W	0
+ SCLIM_302:
+ 	TYPE	95,95
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	54H,19H,0DH,0AH,20H,21H
+	DS.W	0
+ SCLIM_402:
+ 	TYPE	407,407
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	24H,5AH,26H,43H
+	DS.W	0
+ SCLIM_502:
+ 	TYPE	420,420
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	27H,42H,3FH,40H
+	DS.W	0
+ SCLIM_602:
+ 	TYPE	438,438
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	3AH,3CH,3FH,40H
+	DS.W	0
+ SCLIM_702:
+ 	TYPE	458,458
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	25H,10H,18H,2BH
+	DS.W	0
+ SCLIM_802:
+ 	TYPE	334,334
+ ;		 0:  1:  2:  3:  4:  5:  6:  7:
+ 	DC.B	5FH,44H,0AH,66H
+	DS.W	0
+ 
+ ;	************************
+ 
+ SCLIM_993:
+ 	TYPE	1,3
+ 	DC.B	1,1,1,1,1,1,1,1
+	DS.W	0
+ 
+ ;************************************************************************
+

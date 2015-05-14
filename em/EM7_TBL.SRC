@@ -1,0 +1,476 @@
+;************************************************************************
+;*                   enemy7 action_data					*
+;* 				Mr. Big 				*
+;*  					1992/7/31			*
+;************************************************************************
+
+
+ 	  	SECT	HK3,,C
+
+	XREF	MOTION_001,MOTION_002,MOTION_003,MOTION_004
+	XREF	MOTION_005,MOTION_006,MOTION_007,MOTION_008
+	XREF	MOTION_009,MOTION_010,MOTION_011,MOTION_012
+	XREF	MOTION_013,MOTION_014,MOTION_999
+	XREF	UP_DEF_1,UP_DEF_2,UP_DEF_3
+	XREF	DOWN_DEF_1
+
+  		INCLUDE	EM_MAC.INC
+  		INCLUDE	EM_MAC2.INC
+
+;************************************************************************
+
+		XDEF	E7_TBLNO
+
+	DC.W	3BH
+E7_TBLNO:
+	DSP_T1	COMB_001		;1
+	DSP_T1	COMB_002		;2
+	DSP_T1	COMB_003		;3
+	DSP_T1	COMB_004		;4
+	DSP_T1	COMB_005		;5
+	DSP_T1	COMB_006		;6
+	DSP_T1	COMB_007		;7
+	DSP_T1	COMB_008		;8
+	DSP_T1	COMB_009		;9
+	DSP_T1	COMB_010		;A
+
+	DSP_T1	COMB_011		;B
+	DSP_T1	COMB_012		;C
+	DSP_T1	COMB_013		;D
+	DSP_T1	COMB_014		;E
+	DSP_T1	COMB_015		;F
+	DSP_T1	COMB_016		;10
+	DSP_T1	COMB_017		;11
+	DSP_T1	COMB_018		;12
+	DSP_T1	COMB_019		;13
+	DSP_T1	COMB_020		;14
+
+	DSP_T1	COMB_021		;15
+	DSP_T1	COMB_022		;16
+	DSP_T1	COMB_023		;17
+	DSP_T1	COMB_024		;18
+	DSP_T1	COMB_025		;19
+	DSP_T1	COMB_026		;1A
+	DSP_T1	COMB_027		;1B
+	DSP_T1	COMB_028		;1C
+	DSP_T1	COMB_029		;1D
+	DSP_T1	COMB_030		;1E
+
+	DSP_T1	AT_CHUDAN1_SPIA		;1F
+	DSP_T1	AT_SAKATE_SPIA		;20
+	DSP_T1	AT_LIFT_SPIA		;21
+	DSP_T1	AT_MACHINE_SPIA		;22
+	DSP_T1	AT_MACHINEGUN_SPIA	;23
+	DSP_T1	AT_DOWN_SPIA		;24
+	DSP_T1	AT_ROLLING_SPIA		;25
+	DSP_T1	AT_CROSS_DIVING		;26
+	DSP_T1	AT_CHUDAN2_SPIA		;27
+
+	DSP_T1	MOTION_001		;28
+	DSP_T1	MOTION_002		;29
+	DSP_T1	MOTION_003		;2A
+	DSP_T1	MOTION_004		;2B
+	DSP_T1	MOTION_005		;2C
+	DSP_T1	MOTION_006		;2D
+	DSP_T1	MOTION_007		;2E
+	DSP_T1	MOTION_008		;2F
+	DSP_T1	MOTION_009		;30
+	DSP_T1	MOTION_010		;31
+	DSP_T1	MOTION_011		;32
+	DSP_T1	MOTION_012		;33
+
+	DSP_T1	ACT_ONE_STEP		;34
+
+	DSP_T1	UP_DEF_1		;35
+	DSP_T1	UP_DEF_2		;35
+	DSP_T1	ACT_UP_DEF		;37
+
+	DSP_T1	DOWN_DEF_1		;38
+	DSP_T1	ACT_CHOHATSU		;39
+	DSP_T1	COMB_031		;3A
+	DSP_T1	COMB_032		;3B
+
+;************************************************************************
+
+CHUDAN1_SPIA	EQU	10H
+CHUDAN2_SPIA	EQU	21H+80H
+
+SAKATE_SPIA	EQU	22H+80H
+LIFT_SPIA	EQU	26H+80H
+RIGHT_SPIA	EQU	20H
+DOWN_SPIA	EQU	37H+80H
+MACHINE_SPIA	EQU	20H
+MACHINEGUN_SPIA	EQU	31H+80H
+ROLLING_SPIA	EQU	41H+80H
+CROSS_DIVING	EQU	40H+80H
+DOWN_ATTACK	EQU	42H+80H
+
+;************************************************************************
+;
+;	*atacked_distance
+;
+;CHUDAN1_SPIA    => 159
+;SAKATE_SPIA     => 153
+;LIFT_SPIA       => 141
+;RIGHT_SPIA      => 167
+;MACHINEGUN_SPIA => 155
+;DOWN_SPIA       => 161
+;ROLLING_SPIA    => 256
+;CROSS_DIVING	 => 256
+;
+;************************************************************************
+
+ACT_UP_DEF:
+	T6_ACT	26,BACK_WALK
+	ACT_END
+;	T1_ACT
+;	DC.B	14h+80h
+;	T1_CHG2	DM3,0EH,CHUDAN1_SPIA,NACT,BACK_WALK,60
+;	ACT_END
+
+ACT_ONE_STEP:
+	T1_ACT
+	T1_CHG1	20,FRONT_WALK
+	ACT_END
+
+ACT_CHOHATSU:
+	T3_ACT	DM0,CHOHATSU,1
+	ACT_END
+
+AT_CHUDAN1_SPIA:
+	T4_ACT	159,CHUDAN1_SPIA,1
+	ACT_END
+
+AT_CHUDAN2_SPIA:
+	T4_ACT	180,CHUDAN2_SPIA,1
+	ACT_END
+
+AT_LIFT_SPIA:
+	T4_ACT	141,LIFT_SPIA,70
+	ACT_END
+
+AT_SAKATE_SPIA:
+AT_RIGHT_SPIA:
+	T4_ACT	153,RIGHT_SPIA,1
+	ACT_END
+
+AT_DOWN_SPIA:
+	T4_ACT	161,DOWN_SPIA,1
+	ACT_END
+
+AT_ROLLING_SPIA:
+	T4_ACT	255,ROLLING_SPIA,1
+	ACT_END
+
+AT_MACHINE_SPIA:
+	T4_ACT	167,MACHINE_SPIA,1
+	ACT_END
+
+AT_MACHINEGUN_SPIA:
+	T4_ACT	155,MACHINEGUN_SPIA,1
+	ACT_END
+
+AT_CROSS_DIVING:
+	T4_ACT	255,CROSS_DIVING,1
+	ACT_END
+
+
+COMB_031:
+	T1_ACT
+	DC.B	DOWN_ATTACK
+	T1_CHG8	DM0,120
+	T1_CHG0	146,DOWN_SPIA,90
+	ACT_END
+
+
+;
+;	*chudan1_hit => lift_spia
+;
+COMB_001:
+	T4_ACT	159,CHUDAN2_SPIA,12
+	T4_ACT	141,LIFT_SPIA,24
+	ACT_END
+
+;
+;	*cross_diving => rolling_spia
+;
+COMB_002:
+	T1_ACT
+	DC.B	CROSS_DIVING
+	T1_CHG4	161,DOWN_SPIA,12
+	ACT_END
+
+;
+;	*lift_spia => rolling_spia
+;
+COMB_003:
+	T4_ACT	141,LIFT_SPIA,15
+	T4_ACT	255,ROLLING_SPIA,15
+	ACT_END
+
+;
+;	*cross_diving => machine_spia
+;
+COMB_004:
+	T1_ACT
+	DC.B	CROSS_DIVING
+	T4_ACT	167,MACHINE_SPIA,12
+	ACT_END
+
+;
+;	*front_walk => machine_spia => front_walk => machine_spia =>
+;
+;	*sakate_spia
+;
+COMB_005:
+	T3_ACT	DM0,FRONT_WALK,60
+	T4_ACT	167,MACHINE_SPIA,12
+	T3_ACT	DM0,FRONT_WALK,60
+	T4_ACT	167,MACHINE_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,15
+	ACT_END
+
+;
+;	*machine_spia => machinegun_spia => sakate_spia
+;
+COMB_006:
+	T4_ACT	167,MACHINE_SPIA,12
+	T4_ACT	155,MACHINEGUN_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,15
+	ACT_END
+
+;
+;	*front_walk => chudan1_spia => front_walk => chudan1_spia
+;
+;	*machinegun_spia
+;
+COMB_007:
+	T3_ACT	DM1,FRONT_WALK,60
+	T4_ACT	159,CHUDAN2_SPIA,12
+	T3_ACT	DM1,FRONT_WALK,12
+	T4_ACT	159,CHUDAN2_SPIA,12
+	T4_ACT	255,ROLLING_SPIA,15
+	ACT_END
+
+;
+;	*back_walk => cross_diving => chohatsu
+;
+COMB_008:
+	T1_ACT
+	T1_CHG3	DM2,BACK_WALK,90
+	DC.B	CROSS_DIVING
+	T1_CHG3	DM0,CHOHATSU,1
+	ACT_END
+
+;
+;	*machine_spia => front_walk(0.3) => chudan1_spia => machinegun_spia
+;
+COMB_009:
+	T1_ACT
+	T1_CHG4	167,CHUDAN1_SPIA,12
+	T1_CHG1	20,FRONT_WALK
+	T1_CHG4	159,CHUDAN2_SPIA,12
+	T1_CHG4	155,MACHINEGUN_SPIA,12
+	ACT_END
+
+;
+;	*lift_spia => machine_spia => rolling_spia
+;
+COMB_010:
+	T4_ACT	141,LIFT_SPIA,15
+	T4_ACT	167,MACHINE_SPIA,12
+	T4_ACT	255,ROLLING_SPIA,30
+	ACT_END
+
+;
+;	*front_walk => chudan1_spia => rolling_spia
+;
+COMB_011:
+	T3_ACT	DM1,FRONT_WALK,60
+	T4_ACT	159,CHUDAN2_SPIA,12
+	T4_ACT	255,ROLLING_SPIA,30
+	ACT_END
+
+;
+;	*chudan1_spia => chudan1_spia => back_walk => machine_spia
+;
+COMB_012:
+	T4_ACT	167,CHUDAN2_SPIA,12
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T3_ACT	DM2,BACK_WALK,60
+	T4_ACT	167,CHUDAN1_SPIA,12
+	ACT_END
+
+;
+;	*lift_spia => front_walk => machine_spia
+;
+COMB_013:
+	T4_ACT	141,LIFT_SPIA,15
+	T3_ACT	DM0,FRONT_WALK,60
+	T4_ACT	167,CHUDAN1_SPIA,12
+	ACT_END
+
+;
+;	*lift_spia => chudan1_spia => machine_spia => sakate_spia
+;
+COMB_014:
+	T4_ACT	141,LIFT_SPIA,15
+	T4_ACT	167,CHUDAN2_SPIA,12
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,12
+	ACT_END
+
+;
+;	*back_walk => chudan1_spia => machinegun_spia => sakate_spia
+;
+COMB_015:
+	T3_ACT	DM2,BACK_WALK,60
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	155,MACHINEGUN_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,12
+	ACT_END
+
+;
+;	*rolling_spia => machine_spia => sakate_spia
+;
+COMB_016:
+	T4_ACT	255,ROLLING_SPIA,30
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,12
+	ACT_END
+
+;
+;	*chudan1_spia => machine_spia => machine_spia => sakate_spia
+;
+COMB_017:
+	T4_ACT	159,CHUDAN2_SPIA,12
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,24
+	ACT_END
+
+;
+;	*lift_spia => machine_spia => machine_spia => sakate_spia
+;
+COMB_018:
+	T4_ACT	141,LIFT_SPIA,70
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,24
+	ACT_END
+
+;
+;	*lift_spia => front_walk => sakate_spia
+;
+COMB_019:
+	T4_ACT	141,LIFT_SPIA,70
+	T3_ACT	DM0,FRONT_WALK,60
+	T4_ACT	153,SAKATE_SPIA,12
+	ACT_END
+
+;
+;	*front_walk => lift_spia => machine_spia
+;
+COMB_020:
+	T3_ACT	DM0,FRONT_WALK,60
+	T4_ACT	141,LIFT_SPIA,70
+	T4_ACT	176,CHUDAN1_SPIA,12
+	ACT_END
+
+;
+;	*front_walk => lift_spia => machine_spia
+;
+COMB_021:
+	T3_ACT	DM1,FRONT_WALK,60
+	T4_ACT	141,LIFT_SPIA,70
+	T4_ACT	176,CHUDAN1_SPIA,12
+	ACT_END
+
+;
+;	*front_walk => roling_spia => machine_spia
+;
+COMB_022:
+	T3_ACT	DM1,FRONT_WALK,240
+	T4_ACT	255,ROLLING_SPIA,70
+	T4_ACT	167,CHUDAN1_SPIA,12
+	ACT_END
+
+;
+;	*rolling_spia => chudan1_spia => chudan1_spia
+;
+COMB_023:
+	T4_ACT	255,ROLLING_SPIA,30
+	T4_ACT	159,CHUDAN2_SPIA,12
+	T4_ACT	159,CHUDAN2_SPIA,12
+	ACT_END
+
+;
+;	*rolling_spia => machine_spia => sakate_spia
+;
+COMB_024:
+	T4_ACT	255,ROLLING_SPIA,30
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	153,SAKATE_SPIA,12
+	ACT_END
+
+;
+;	*lift_spia => machine_spia => rolling_spia
+;
+COMB_025:
+	T4_ACT	141,LIFT_SPIA,15
+	T4_ACT	167,CHUDAN1_SPIA,12
+	T4_ACT	255,ROLLING_SPIA,30
+	ACT_END
+
+;
+;	*rolling_spia => lift_spia => front_walk => machine_spia
+;
+COMB_026:
+	T4_ACT	255,ROLLING_SPIA,30
+	T4_ACT	141,LIFT_SPIA,15
+	T3_ACT	DM0,FRONT_WALK,60
+	T4_ACT	167,CHUDAN1_SPIA,12
+	ACT_END
+
+;
+;	*front_walk => foot_work => front_walk
+;
+COMB_027:
+	T3_ACT	DM1,FRONT_WALK,60
+	T3_ACT	DM0,NACT,60
+	T3_ACT	DM0,FRONT_WALK,60
+	ACT_END
+
+;
+;	*back_walk => foot_work => back_walk
+;
+COMB_028:
+	T3_ACT	DM1,BACK_WALK,60
+	T3_ACT	DM0,NACT,60
+	T3_ACT	DM0,BACK_WALK,60
+	ACT_END
+
+;
+;	*kiryoku_power_on
+;
+COMB_029:
+	T1_ACT
+	T1_CHG8	DM0,180
+	ACT_END
+
+COMB_030:
+	T1_ACT
+	DC.B	FDASH
+	T1_CHG3	DM0,FRONT_WALK,30
+	T1_CHG4	161,DOWN_SPIA,18
+	ACT_END
+
+COMB_032:
+	T3_ACT	DM0,CHOHATSU,1
+	T1_ACT
+	DC.B	ROLLING_SPIA
+	ACT_END
+
+
+;************************************************************************
+

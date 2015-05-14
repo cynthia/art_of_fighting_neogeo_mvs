@@ -1,0 +1,52 @@
+            Microtec Research Lod68K V6.4a         Wed Aug 26 13:52:05 1992
+
+Command line: A:\68K\ASM\LOD68K.EXE  @LANG,LANG,LANG 
+
+LIST D
+*MAKE  ABS LANGL
+*MAKE  @echo .
+*MAKE  @echo .
+
+SECT LANG=3D800H
+COMMON WORK=100000H
+INDEX ?A5,WORK,8000H
+LOAD LANG2,LANG3
+PUBLIC GEN_LCHILD=24000H
+PUBLIC GEN_PCHILD=24000H
+PUBLIC COLOR_COM_SET=24000H
+END
+            Microtec Research Lod68K V6.4a         Wed Aug 26 13:52:05 1992
+
+
+
+OUTPUT MODULE NAME:    LANG
+OUTPUT MODULE FORMAT:  MOTOROLA S2
+
+
+SECTION SUMMARY
+---------------
+
+SECTION    ATTRIBUTE                   START      END        LENGTH     ALIGN
+
+LANG       NORMAL CODE                 0003D800   00042AFF   00005300   2 (WORD)  
+WORK       COMMON                      00100000   0010FFFF   00010000   2 (WORD)  
+
+
+MODULE SUMMARY
+--------------
+
+MODULE         SECTION:START        SECTION:END       FILE
+
+LANG2             LANG:0003D800        LANG:000400FD  B:\044\LANG2.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+LANG3             LANG:000400FE        LANG:00042AFF  B:\044\LANG3.OBJ   
+
+
+
+START ADDRESS:   00000000
+
+
+Load Completed 
+
+
+ Errors: 0, Warnings: 0

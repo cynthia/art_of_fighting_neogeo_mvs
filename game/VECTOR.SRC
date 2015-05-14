@@ -1,0 +1,448 @@
+************************************************************************
+*								       *
+*		044 [ART OF FIGHT]				       *
+*			VECTOR DEFINITION			       *
+*		by S.OKADA from 91/09/03 Tue 11:52		       *
+*								       *
+************************************************************************
+
+
+;by MAIN
+		XREF	INT1,INT2
+		XREF	USER,PLAYER_START,DEMO_END,COIN_SOUND
+;by ACT_SUB
+		XREF	USER_HIT,USER_HIT_OFF,USER_HIT2,USER_HITD
+;by GAME_SUB
+		XREF	RANDOM_EFFECT_ACT,LANG_SOUND,DEAD_BAN
+;by CHARA
+		XREF	CH_TABLE
+;by BONUS
+		XREF	ICE_MAKE
+
+		SECT.S	VECTOR,,C
+
+
+		INCLUDE	KANA.INC	@@@
+		INCLUDE	HERO_TBL.INC
+
+;
+;	    ***	VECTOR DEFINITION ***
+;
+
+SV		EQU	0C00402H	SYSTEM_VECTOR
+USER_ERROR	EQU	SV+6*6
+
+;		ORG	0
+
+VECTOR_START:
+		DC.L	10F300H		0  Reset:Initial SSP
+		DC.L	SV+6*0		1  Reset:Initial PC
+		DC.L	SV+6*1		2  Bus Error=monitor entry
+		DC.L	SV+6*2		3  Address Error
+		DC.L	SV+6*3		4  Illegal Instruction
+		DC.L	USER_ERROR	5  ZD_ENTRY
+		DC.L	USER_ERROR	6  CHK_ENTRY
+		DC.L	USER_ERROR	7  TRAPV_ENTRY
+
+		DC.L	SV+6*4		8  Privilege Violation
+		DC.L	SV+6*5		9  Trace
+		DC.L	USER_ERROR	10 L1010_ENTRY
+		DC.L	USER_ERROR	11 L1111_ENTRY
+		DC.L	SV+6*6		12 Unassigned
+		DC.L	SV+6*6		13 Unassigned
+		DC.L	SV+6*6		14 Unassigned
+		DC.L	SV+6*7		15 Uninitialized interrupt
+
+		DC.L	SV+6*6		16 Unassigned
+		DC.L	SV+6*6		17 Unassigned
+		DC.L	SV+6*6		18 Unassigned
+		DC.L	SV+6*6		19 Unassigned
+		DC.L	SV+6*6		20 Unassigned
+		DC.L	SV+6*6		21 Unassigned
+		DC.L	SV+6*6		22 Unassigned
+		DC.L	SV+6*6		23 Unassigned
+
+		DC.L	SV+6*8		24 Spurious Interrupt
+		DC.L	INT1		25 Interrupt 1 (v-blanking)
+		DC.L	INT2		26
+		DC.L	USER_ERROR	27 INT3
+		DC.L	USER_ERROR	28 INT4
+		DC.L	USER_ERROR	29 INT5
+		DC.L	USER_ERROR	30 INT6
+		DC.L	USER_ERROR	31 INT7 NMI
+
+
+		DC.L	SV+6*9		TRAP 0 (SYSTEM_INT1)
+
+		DS.B	0F0H-(*-VECTOR_START)
+
+		DC.W	1		version
+		DC.B	00000000B	DEBUG_DIP1	hk3 off
+		DC.B	0		DEBUG_DIP2
+		DC.L	0		dummy
+		DC.L	07FE00H
+		DC.L	CH_TABLE
+
+;		ORG	100H
+
+;
+;	    ***	GAME-ID	SECTOR ***
+;
+
+
+		DC.B	'NEO-GEO',1	cassette ID + system version
+		DC.W	0044H		game code
+		DC.L	100000H		p-rom size
+		DC.L	108800H		backup start
+		DC.W	800H		backup size
+		DC.B	0		eye-catch type
+		DC.B	37H		eye-catch bank
+
+		DC.L	JAPAN_DATA
+		DC.L	USA_DATA
+		DC.L	EUROPE_DATA
+
+		JMP	USER		user request
+		JMP	PLAYER_START	user player start
+		JMP	DEMO_END	MVS demo end job
+		JMP	COIN_SOUND	coin sound request
+
+		DS.B	6*12
+
+		DC.L	TRAP_DATA
+		DC.L	0
+		DC.L	1
+		DC.L	SPAIN_DATA
+
+JAPAN_DATA:
+
+		DC.B	'RYUUKO NO KEN   '
+
+		DC.W	0FFFFH	0
+		DC.W	0FFFFH	2
+		DC.B	060	4 round time	(max 99 sec)
+		DC.B	0FFH	5
+
+		DC.B	01H	6 language dummy
+		DC.B	12H	7 continue	1=with 0=without
+		DC.B	02H	8 rannyuu	0=with 1=without
+		DC.B	28H	9 difficulty	0-7
+		DC.B	13H	A stage-round	0=1 1=3 2=5 round
+		DC.B	02H	B demo sound	0=on 1=off
+		DC.B	01H	C next
+		DC.B	02H	D credit disp	0=on 1=off
+		DC.B	02H	E how to play	0=on 1=off
+		DC.B	00H	F dummy
+
+
+		DC.B	_RA,_U,_N,_TO,_DAKU,6,7,8,9,'   '
+
+		DC.B	'            '		dummy in japan
+		DC.B	'(10-99 sec) '
+
+		DC.B	_KO,_N,_TE,_II,_NI,_YYU,_CHOU,'     '
+		DC.B	14H,15H,SI_,'         '
+		DC.B	0EH,0FH,RI_,'         '
+
+		DC.B	TO_,TI_,YYU_,U_,SA_,N_,KA_,'     '
+		DC.B	0EH,0FH,RI_,'         '
+		DC.B	14H,15H,SI_,'         '
+
+		DC.B	00H,01H,02H,03H,04H,05H,16H,17H,18H,19H,'  '
+		DC.B	'LEVEL 1     '
+		DC.B	'LEVEL 2     '
+		DC.B	'LEVEL 3     '
+		DC.B	'LEVEL 4     '
+		DC.B	'LEVEL 5     '
+		DC.B	'LEVEL 6     '
+		DC.B	'LEVEL 7     '
+		DC.B	'LEVEL 8     '
+
+		DC.B	'1 ',_SU,_TE,_CHOU,_SI,_DAKU,'     '
+		DC.B	'1 ',_RA,_U,_N,_TO,_DAKU,'     '
+		DC.B	'3 ',_RA,_U,_N,_TO,_DAKU,'     '
+		DC.B	'5 ',_RA,_U,_N,_TO,_DAKU,'     '
+
+		DC.B	_TE,DAKU_,_MO,_SA,_U,_N,_TO,DAKU_,'    '
+		DC.B	0EH,0FH,RI_,'         '
+		DC.B	14H,15H,SI_,'         '
+
+		DC.B	13H,20H,TU_,KI_,DAKU_,NO_,_HE,_HAN,_CHOU,_SI,_DAKU,20H
+		DC.B	'            '
+
+		DC.B	_KU,_RE,_SI,DAKU_,_TTU,_TO,HI_,YYO_,U_,SI_,DAKU_,' '
+		DC.B	0EH,0FH,RI_,'         '
+		DC.B	14H,15H,SI_,'         '
+
+		DC.B	7CH,7DH,7EH,7FH,0BCH,0BDH,0BEH,0BFH,0FCH,0FDH,'  '
+		DC.B	0EH,0FH,RI_,'         '
+		DC.B	14H,15H,SI_,'         '
+
+USA_DATA:
+		DC.B	'ART OF FIGHTING '
+
+		DC.W	0FFFFH	0
+		DC.W	0FFFFH	2
+		DC.B	060	4 round time	(max 99 sec)
+		DC.B	0FFH	5
+
+		DC.B	01H	6 language dummy
+		DC.B	12H	7 continue	1=with 0=without
+		DC.B	02H	8 rannyuu	0=with 1=without
+		DC.B	28H	9 difficulty	0-7
+		DC.B	13H	A stage-round	0=1 1=3 2=5 round
+		DC.B	02H	B demo sound	0=on 1=off
+		DC.B	01H	C next
+		DC.B	02H	D credit disp	0=on 1=off
+		DC.B	02H	E how to play	0=on 1=off
+		DC.B	00H	F dummy
+
+		DC.B	'ROUND TIME  '
+
+		DC.B	'            '		dummy in japan
+		DC.B	'(10-99 sec) '
+
+		DC.B	'CONTINUE    '
+		DC.B	'WITHOUT     '
+		DC.B	'WITH        '
+
+		DC.B	'BUY-IN      '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	'DIFFICULTY  '
+		DC.B	'LEVEL 1     '
+		DC.B	'LEVEL 2     '
+		DC.B	'LEVEL 3     '
+		DC.B	'LEVEL 4     '
+		DC.B	'LEVEL 5     '
+		DC.B	'LEVEL 6     '
+		DC.B	'LEVEL 7     '
+		DC.B	'LEVEL 8     '
+
+		DC.B	'1 STAGE     '
+		DC.B	'1 ROUND     '
+		DC.B	'3 ROUNDS    '
+		DC.B	'5 ROUNDS    '
+
+		DC.B	'DEMO SOUND  '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	13H,' NEXT PAGE '
+		DC.B	'            '
+
+		DC.B	'CREDIT DISP.'
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	'HOW TO PLAY '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+EUROPE_DATA:
+		DC.B	'ART OF FIGHTING '
+
+		DC.W	0FFFFH	0
+		DC.W	0FFFFH	2
+		DC.B	060	4 round time	(max 99 sec)
+		DC.B	0FFH	5
+
+		DC.B	13H	6 language	japanese,english,spanish
+		DC.B	12H	7 continue	1=with 0=without
+		DC.B	02H	8 rannyuu	0=with 1=without
+		DC.B	28H	9 difficulty	0-7
+		DC.B	13H	A stage-round	0=1 1=3 2=5 round
+		DC.B	02H	B demo sound	0=on 1=off
+		DC.B	01H	C next
+		DC.B	02H	D credit disp	0=on 1=off
+		DC.B	02H	E how to play	0=on 1=off
+		DC.B	00H	F dummy
+
+		DC.B	'ROUND TIME  '
+
+		DC.B	'LANGUAGE    '
+		DC.B	'JAPANESE    '
+		DC.B	'ENGLISH     '
+		DC.B	'SPANISH     '
+
+		DC.B	'CONTINUE    '
+		DC.B	'WITHOUT     '
+		DC.B	'WITH        '
+
+		DC.B	'BUY-IN      '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	'DIFFICULTY  '
+		DC.B	'LEVEL 1     '
+		DC.B	'LEVEL 2     '
+		DC.B	'LEVEL 3     '
+		DC.B	'LEVEL 4     '
+		DC.B	'LEVEL 5     '
+		DC.B	'LEVEL 6     '
+		DC.B	'LEVEL 7     '
+		DC.B	'LEVEL 8     '
+
+		DC.B	'1 STAGE     '
+		DC.B	'1 ROUND     '
+		DC.B	'3 ROUNDS    '
+		DC.B	'5 ROUNDS    '
+
+		DC.B	'DEMO SOUND  '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	13H,' NEXT PAGE '
+		DC.B	'            '
+
+		DC.B	'CREDIT DISP.'
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	'HOW TO PLAY '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+
+
+
+SPAIN_DATA:
+		DC.B	'ART OF FIGHTING '
+
+		DC.W	0FFFFH	0
+		DC.W	0FFFFH	2
+		DC.B	060	4 round time	(max 99 sec)
+		DC.B	0FFH	5
+
+		DC.B	23H	6 language	japanese,english,spanish
+		DC.B	12H	7 continue	1=with 0=without
+		DC.B	02H	8 rannyuu	0=with 1=without
+		DC.B	28H	9 difficulty	0-7
+		DC.B	13H	A stage-round	0=1 1=3 2=5 round
+		DC.B	02H	B demo sound	0=on 1=off
+		DC.B	01H	C next
+		DC.B	02H	D credit disp	0=on 1=off
+		DC.B	02H	E how to play	0=on 1=off
+		DC.B	00H	F dummy
+
+		DC.B	'ROUND TIME  '
+
+		DC.B	'LANGUAGE    '
+		DC.B	'JAPANESE    '
+		DC.B	'ENGLISH     '
+		DC.B	'SPANISH     '
+
+		DC.B	'CONTINUE    '
+		DC.B	'WITHOUT     '
+		DC.B	'WITH        '
+
+		DC.B	'BUY-IN      '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	'DIFFICULTY  '
+		DC.B	'LEVEL 1     '
+		DC.B	'LEVEL 2     '
+		DC.B	'LEVEL 3     '
+		DC.B	'LEVEL 4     '
+		DC.B	'LEVEL 5     '
+		DC.B	'LEVEL 6     '
+		DC.B	'LEVEL 7     '
+		DC.B	'LEVEL 8     '
+
+		DC.B	'1 STAGE     '
+		DC.B	'1 ROUND     '
+		DC.B	'3 ROUNDS    '
+		DC.B	'5 ROUNDS    '
+
+		DC.B	'DEMO SOUND  '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	13H,' NEXT PAGE '
+		DC.B	'            '
+
+		DC.B	'CREDIT DISP.'
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+		DC.B	'HOW TO PLAY '
+		DC.B	'WITH        '
+		DC.B	'WITHOUT     '
+
+
+TRAP_DATA:
+
+		DC.W	07600H
+		DC.W	04A6DH,00A14H
+		DC.W	06600H,0003CH
+		DC.W	0206DH,00A04H
+		DC.W	03E2DH,00A08H
+		DC.W	013C0H,00030H,00001H
+		DC.W	03210H
+		DC.W	00C01H,000FFH
+		DC.W	0671AH
+		DC.W	03028H,00002H
+		DC.W	0B02DH,00ACEH
+		DC.W	06610H
+		DC.W	03028H,00004H
+		DC.W	0B02DH,00ACFH
+		DC.W	06606H
+		DC.W	0B22DH,00AD0H
+		DC.W	06708H
+		DC.W	05088H
+		DC.W	051CFH,0FFD4H
+		DC.W	03607H
+		DC.W	04E75H
+		DC.W	0206DH,00A04H
+		DC.W	03E2DH,00A08H
+		DC.W	03210H
+		DC.W	0E049H
+		DC.W	00C01H,000FFH
+		DC.W	0671AH
+		DC.W	03010H
+		DC.W	0B02DH,00ACEH
+		DC.W	06612H
+		DC.W	03028H,00002H
+		DC.W	0E048H
+		DC.W	0B02DH,00ACFH
+		DC.W	06606H
+		DC.W	0B22DH,00AD0H
+		DC.W	06708H
+		DC.W	05888H
+		DC.W	051CFH,0FFD8H
+		DC.W	03607H
+		DC.W	04E75H
+
+
+		DS.B	900H-(*-VECTOR_START)
+
+;USER ACTION COMMAND
+
+		DC.L	USER_HIT		0
+		DC.L	USER_HIT_OFF		1
+		DC.L	USER_HITD		2
+		DC.L	LANG_SOUND		3
+		DC.L	JUMP_SET0		4
+		DC.L	JUMP_SET1		5
+		DC.L	JUMP_SET2		6
+		DC.L	JUMP_SET3		7
+		DC.L	DEAD_NEXT		8
+		DC.L	ADC_SET			9
+		DC.L	TAMA_SET		0A
+		DC.L	KAGE_CHG		0B
+		DC.L	BLOD_SET		0C
+		DC.L	ICE_MAKE		0D
+		DC.L	USER_HIT2		0E
+		DC.L	RANDOM_EFFECT_ACT	0F
+		DC.L	DEAD_BAN		10
+		DC.L	JUMP_SET4		11
+		DC.L	JUMP_OFF		12
+		DC.L	RET100			13
+		DC.L	RET100_OFF		14
+		DC.L	HIT_LOCK_OFF		15
+		DC.L	GETA_MAKE		16
+		DC.L	MEGANE			17
+
+

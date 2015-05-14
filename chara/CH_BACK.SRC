@@ -1,0 +1,524 @@
+;
+;	    ***	CHARA DATA  BACK ***
+;
+
+
+		SECT	CHARA,2,D
+
+		INCLUDE	CH_MAC.INC
+
+;
+;	*action_data format
+;		dc.b	hit_offset_x,y,hit_size_x,y
+;		CHT2	00000B,00000000b,00,chracter_data_label
+;
+;		CODE	center_offset_x,y
+;
+;************************************************************************
+
+
+
+
+;******************************************************************************
+
+;		Stage 6
+
+
+		CNAME	GJ_TOP_GUN
+
+		CHT2	00000B,00000000B,04,GJTP1
+		CHT2	00000B,00000000B,04,GJTP2
+		CHT2	00000B,00000000B,04,GJTP3
+		CHT2	00000B,00000000B,04,GJTP4
+
+GJTP1:
+		CODE	C0EH,-32,128
+		CEND
+GJTP2:
+		CODE	C0FH,-32,128
+		CEND
+GJTP3:
+		CODE	C10H,-32,128
+		CEND
+GJTP4:
+		CODE	C11H,-32,128
+		CEND
+
+;******************************************************************************
+;
+;		Stage 6
+;
+;		gune_jin(sannin_gumi)
+;
+
+		CNAME	GJ1_FFACE
+
+		CHT2	00000B,00000000B,04,GJ1F_1
+
+GJ1F_1:
+		CODE	C44H,-80,144
+		CEND
+
+		CNAME	GJ1_LFACE
+
+		CHT2	00000B,00000000B,04,GJ1L_1
+
+GJ1L_1:
+		CODE	C45H,-80,144
+		CEND
+
+		CNAME	GJ1_RFACE
+
+		CHT2	00000B,00000000B,04,GJ1R_1
+GJ1R_1:
+		CODE	C46H,-80,144
+		CEND
+
+
+;******************************************************************************
+;
+;		Stage 6
+;
+;		gune_jin(futari_gumi A)
+;
+
+		CNAME	GJ2_FFACE
+
+		CHT2	00000B,00000000B,04,GJF2_1
+		CHT2	00000B,00000000B,04,GJF2_2
+		CHT2	00000B,00000000B,04,GJF2_3
+		CHT2	00000B,00000000B,04,GJF2_4
+
+GJF2_1:
+		CODE	C38H,-40,144
+		CEND
+GJF2_2:
+		CODE	C39H,-40,144
+		CEND
+GJF2_3:
+		CODE	C3AH,-40,144
+		CEND
+GJF2_4:
+		CODE	C3BH,-40,144
+		CEND
+
+		CNAME	GJ2_LFACE
+
+		CHT2	00000B,00000000B,04,GJL2_1
+		CHT2	00000B,00000000B,04,GJL2_2
+		CHT2	00000B,00000000B,04,GJL2_3
+		CHT2	00000B,00000000B,04,GJL2_4
+
+GJL2_1:
+		CODE	C3CH,-40,144
+		CEND
+GJL2_2:
+		CODE	C3DH,-40,144
+		CEND
+GJL2_3:
+		CODE	C3EH,-40,144
+		CEND
+GJL2_4:
+		CODE	C3FH,-40,144
+		CEND
+
+		CNAME	GJ2_RFACE
+
+		CHT2	00000B,00000000B,04,GJR2_1
+		CHT2	00000B,00000000B,04,GJR2_2
+		CHT2	00000B,00000000B,04,GJR2_3
+		CHT2	00000B,00000000B,04,GJR2_4
+
+GJR2_1:
+		CODE	C40H,-40,144
+		CEND
+GJR2_2:
+		CODE	C41H,-40,144
+		CEND
+GJR2_3:
+		CODE	C42H,-40,144
+		CEND
+GJR2_4:
+		CODE	C43H,-40,144
+		CEND
+
+;******************************************************************************
+;
+;		Stage 6
+;
+;		gune_jin(futari_gumi B)
+;
+
+		CNAME	GJ3_FFACE
+
+		CHT2	00000B,00000000B,04,GJ3F_1
+		CHT2	00000B,00000000B,04,GJ3F_2
+		CHT2	00000B,00000000B,04,GJ3F_3
+		CHT2	00000B,00000000B,04,GJ3F_4
+
+GJ3F_1:
+		CODE	C16H,-40,144
+		CEND
+GJ3F_2:
+		CODE	C17H,-40,144
+		CEND
+GJ3F_3:
+		CODE	C18H,-40,144
+		CEND
+GJ3F_4:
+		CODE	C19H,-40,144
+		CEND
+
+		CNAME	GJ3_LFACE
+
+		CHT2	00000B,00000000B,04,GJ3L_1
+		CHT2	00000B,00000000B,04,GJ3L_2
+		CHT2	00000B,00000000B,04,GJ3L_3
+		CHT2	00000B,00000000B,04,GJ3L_4
+
+GJ3L_1:
+		CODE	C34H,-40,144
+		CEND
+GJ3L_2:
+		CODE	C35H,-40,144
+		CEND
+GJ3L_3:
+		CODE	C36H,-40,144
+		CEND
+GJ3L_4:
+		CODE	C37H,-40,144
+		CEND
+
+		CNAME	GJ3_RFACE
+
+		CHT2	00000B,00000000B,04,GJ3R_1
+		CHT2	00000B,00000000B,04,GJ3R_2
+		CHT2	00000B,00000000B,04,GJ3R_3
+		CHT2	00000B,00000000B,04,GJ3R_4
+
+GJ3R_1:
+		CODE	C12H,-40,144
+		CEND
+GJ3R_2:
+		CODE	C13H,-40,144
+		CEND
+GJ3R_3:
+		CODE	C14H,-40,144
+		CEND
+GJ3R_4:
+		CODE	C15H,-40,144
+		CEND
+
+
+;******************************************************************************
+;
+;		Stage 2
+;
+;		MAC'S BAR MASTER
+;
+
+		CNAME	MASTER_FFACE
+
+		CHT2	00000B,00000000B,04,BMF_1
+
+		CNAME	MASTER_LFACE
+
+		CHT2	00000B,00000000B,04,BML_1
+
+		CNAME	MASTER_RFACE
+
+		CHT2	00000B,00000000B,04,BMR_1
+
+BMF_1:
+		CODE	DA0H,-32,64
+		CEND
+BML_1:
+		CODE	DA1H,-32,64
+		CEND
+BMR_1:
+		CODE	DA2H,-32,64
+		CEND
+
+
+;******************************************************************************
+
+
+		CNAME	BOY_FFACE
+
+		CHT2	00000B,00000000B,04,BOYF_1
+
+		CNAME	BOY_LFACE
+
+		CHT2	00000B,00000000B,04,BOYL_1
+
+		CNAME	BOY_RFACE
+
+		CHT2	00000B,00000000B,04,BOYR_1
+BOYF_1:
+		CODE	DA3H,-32,144
+		CEND
+
+BOYL_1:
+		CODE	DA4H,-32,144
+		CEND
+
+BOYR_1:
+		CODE	DA5H,-32,144
+		CEND
+
+;******************************************************************************
+
+
+		CNAME	HIGE_MFACE
+
+		CHT2	00000B,00000000B,00,HIGEM_1
+
+		CNAME	HIGE_FFACE
+
+		CHT2	00000B,00000000B,00,HIGEF_1
+
+		CNAME	HIGE_LFACE
+
+		CHT2	00000B,00000000B,00,HIGEL_1
+
+		CNAME	HIGE_RFACE
+
+		CHT2	00000B,00000000B,00,HIGER_1
+
+HIGEM_1:
+		CODE	DA7H,-48,112
+		CEND
+
+HIGEF_1:
+		CODE	DA8H,-48,112
+		CEND
+
+HIGEL_1:
+		CODE	DA6H,-48,112
+		CEND
+
+HIGER_1:
+		CODE	DA9H,-48,112
+		CEND
+
+
+;******************************************************************************
+
+
+		CNAME	GIRL1_MFACE
+
+		CHT2	00000B,00000000B,04,G1F_1
+
+		CNAME	GIRL1_FFACE
+
+		CHT2	00000B,00000000B,04,G1F_1
+
+		CNAME	GIRL1_LFACE
+
+		CHT2	00000B,00000000B,04,G1L_1
+
+		CNAME	GIRL1_RFACE
+
+		CHT2	00000B,00000000B,04,G1R_1
+
+G1M_1:
+		CODE	DABH,-48,112
+		CEND
+
+G1F_1:
+		CODE	DABH,-48,112
+		CEND
+
+G1L_1:
+		CODE	DAAH,-48,112
+		CEND
+
+G1R_1:
+		CODE	DACH,-48,112
+		CEND
+
+
+;******************************************************************************
+
+
+		CNAME	HACHIUE
+
+		CHT2	00000B,00000000B,04,HACHIUE_1
+
+HACHIUE_1:
+		CODE	DADH,-32,144
+		CEND
+
+		CNAME	STG2_MAN
+
+		CHT2	00000B,00000000B,04,S2_MAN
+
+S2_MAN:
+		CODE	DAEH,-32,144
+		CEND
+
+
+;******************************************************************************
+;
+;		Stage 8
+
+
+
+		CNAME	TAIMATSU
+
+		CHT2	00000B,00000000B,05,TAI_1
+		CHT2	00000B,00000000B,05,TAI_2
+		CHT2	00000B,00000000B,05,TAI_3
+		CHT2	00000B,00000000B,05,TAI_4
+
+TAI_1:
+		CODE	108H,-30,170
+		CEND
+TAI_2:
+		CODE	109H,-30,170
+		CEND
+TAI_3:
+		CODE	10AH,-30,170
+		CEND
+TAI_4:
+		CODE	10BH,-30,170
+		CEND
+
+
+;******************************************************************************
+;
+;		Stage 6
+
+
+
+		CNAME	DORAM_FIRE
+
+		CHT2	00000B,00000000B,05,DFIRE_1
+		CHT2	00000B,00000000B,05,DFIRE_2
+		CHT2	00000B,00000000B,05,DFIRE_3
+		CHT2	00000B,00000000B,05,DFIRE_4
+
+DFIRE_1:
+		CODE	DAFH,-24,96
+		CEND
+DFIRE_2:
+		CODE	DB0H,-24,96
+		CEND
+DFIRE_3:
+		CODE	DB1H,-24,96
+		CEND
+DFIRE_4:
+		CODE	DB2H,-24,96
+		CEND
+
+
+;******************************************************************************
+;
+;		Stage 4
+;
+		CNAME	BACK_TBL1
+
+		CHT2	00000B,00000000B,00,BT1_CHR
+BT1_CHR:
+		FLIP
+
+		CODE	010FH,-40,79
+		CEND
+
+		CNAME	BACK_TBL2
+
+		CHT2	00000B,00000000B,00,BT2_CHR
+BT2_CHR:
+		CODE	010FH,-80,96
+		CEND
+
+		CNAME	BACK_TBL3
+
+		CHT2	00000B,00000000B,00,BT3_CHR
+BT3_CHR:
+		CODE	0110H,-40,79
+		CEND
+
+		CNAME	BACK_TBL4
+
+		CHT2	00000B,00000000B,00,BT4_CHR
+BT4_CHR:
+		CODE	0111H,-40,79
+		CEND
+
+;******************************************************************************
+
+
+		CNAME	HAKO
+
+		CHT2	10000B,00000000B,00,H_CHR
+H_CHR:
+		HIT	-40,80,72,76
+ 		CODE	101H,-20,58
+		CEND
+
+
+		CNAME	HAKO2
+
+		CHT2	10000B,00000000B,00,H_CHR2
+H_CHR2:
+		HIT	-40,80,72,76
+ 		CODE	101H,-20,58
+		CEND
+
+
+
+		CNAME	B_HAKO
+
+		CHT2	10000B,00000000B,00,BREAK_H
+BREAK_H:
+		HIT	0,0,0,0
+		CODE	102H,-20,36
+		CEND
+
+
+;************************************************************************
+;
+;		break hako hahen_data
+;
+		CNAME	HAKO_B1
+
+		CHT2	00000B,00000000B,00,H_B1
+H_B1:
+		BLINK
+		CODE	103H,-16,32
+		CEND
+
+		CNAME	HAKO_B2
+
+		CHT2	00000B,00000000B,01,H_B2
+H_B2:
+		BLINK
+		CODE	104H,-16,38
+		CEND
+
+		CNAME	HAKO_B3
+
+		CHT2	00000B,00000000B,01,H_B3
+H_B3:
+		BLINK
+  		CODE	105H,-16,40
+		CEND
+
+		CNAME	HAKO_B4
+
+		CHT2	00000B,00000000B,01,H_B4
+H_B4:
+		BLINK
+		CODE	106H,-16,32
+		CEND
+
+		CNAME	HAKO_B5
+
+		CHT2	00000B,00000000B,01,H_B5
+H_B5:
+		BLINK
+		CODE	107H,-3,8
+		CEND
+
+

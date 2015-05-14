@@ -1,0 +1,191 @@
+;************************************************************************
+;*                   enemy1 action_data table				*
+;* 					Todo ryuhaku			*
+;*  					1992/7/25			*
+;************************************************************************
+  
+
+ 	  	SECT	HK3,,C
+
+  		INCLUDE	EM_MAC.INC
+  		INCLUDE	EM_MAC2.INC
+
+;************************************************************************
+
+	XDEF	MOTION_001
+
+;
+;	normal_fornt_walk (to distance_mode '0')
+;
+MOTION_001:;
+	T3_ACT	DM2,FRONT_WALK,100
+	T3_ACT	DM1,FRONT_WALK,60
+	T3_ACT	DM0,FRONT_WALK,60
+	ACT_END
+
+	XDEF	MOTION_002
+
+;
+;	normal_fornt_walk (to distance_mode '1')
+;
+MOTION_002:
+	T3_ACT	DM2,FRONT_WALK,100
+	T3_ACT	DM1,FRONT_WALK,60
+	ACT_END
+
+	XDEF	MOTION_003
+
+;
+;	normal_fornt_walk (to distance_mode '2')
+;
+MOTION_003:
+	T3_ACT	DM2,FRONT_WALK,60
+	ACT_END
+
+	XDEF	MOTION_004
+
+;
+;	non_action
+;
+MOTION_004:
+	T1_ACT
+	DC.B	NACT
+	ACT_END
+
+	XDEF	MOTION_005
+
+;
+;	normal_back_walk (to distance_mode '1')
+;
+MOTION_005:
+	T3_ACT	DM1,BACK_WALK,60
+	ACT_END
+
+	XDEF	MOTION_006
+
+;
+;	normal_back_walk (to distance_mode '2')
+;
+MOTION_006:
+	T3_ACT	DM1,BACK_WALK,100
+	T3_ACT	DM2,BACK_WALK,60
+	ACT_END
+
+	XDEF	MOTION_007
+
+;
+;	normal_front_dash (to distance_mode '0')
+;
+MOTION_007:
+	T1_ACT
+	DC.B	FDASH
+	T1_CHG3	DM0,FRONT_WALK,30
+	DC.B	BACK_WALK
+	ACT_END
+
+	XDEF	MOTION_008
+
+;
+;	normal_front_dash (to distance_mode '1')
+;
+MOTION_008:
+	T1_ACT
+	DC.B	FDASH
+	T1_CHG3	DM1,FRONT_WALK,30
+	DC.B	BACK_WALK
+	ACT_END
+
+	XDEF	MOTION_009
+
+;
+;	normal_front_dash (to distance_mode '2')
+;
+MOTION_009:
+	T1_ACT
+	DC.B	FDASH
+	T1_CHG3 DM2,FRONT_WALK,30
+	DC.B	BACK_WALK
+	ACT_END
+
+	XDEF	MOTION_010
+
+;
+;	non_action
+;
+MOTION_010:
+	T1_ACT
+	DC.B	NACT
+	ACT_END
+
+	XDEF	MOTION_011
+
+;
+;	normal_back_dash (to distance_mode '1')
+;
+MOTION_011:
+	T1_ACT
+	DC.B	BDASH
+	T1_CHG3	DM1,BACK_WALK,30
+	DC.B	FRONT_WALK
+	ACT_END
+
+	XDEF	MOTION_012
+
+;
+;	normal_back_dash (to distance_mode '2')
+;
+MOTION_012:
+	T1_ACT
+	DC.B	BDASH
+	T1_CHG3	DM2,BACK_WALK,30
+	DC.B	FRONT_WALK
+	ACT_END
+
+	XDEF	MOTION_013
+	XDEF	MOTION_014
+
+MOTION_013:
+MOTION_014:
+	ACT_END
+
+	XDEF	MOTION_999
+
+MOTION_999:
+	T1_ACT
+	DC.B	NACT
+	ACT_END
+
+
+	XDEF	UP_DEF_1
+
+UP_DEF_1:
+;	T1_ACT
+;	DC.B	14h+80h
+;	T1_CHG2	DM3,0EH,NACT,NACT,BACK_WALK,20
+;	ACT_END
+
+	XDEF	UP_DEF_2
+
+UP_DEF_2:
+;	T1_ACT
+;	DC.B	14h+80h
+;	T1_CHG2	DM3,0EH,NACT,NACT,BACK_WALK,30
+;	ACT_END
+
+	XDEF	UP_DEF_3
+
+UP_DEF_3:
+	T6_ACT	26,BACK_WALK
+	ACT_END
+;	T1_ACT
+;	DC.B	14h+80h
+;	T1_CHG2	DM3,0EH,NACT,NACT,BACK_WALK,50
+;	ACT_END
+
+	XDEF	DOWN_DEF_1
+
+DOWN_DEF_1:
+	T6_ACT	26,BACK_WALK+DOWN
+	ACT_END
+
+

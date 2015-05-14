@@ -1,0 +1,385 @@
+
+;************************************************************************
+;*									*
+;*		*HK3 COMMAND INTERRUPT PROGRAM				*
+;*					presented by k.morikawa		*
+;*						1992/4/3~		*
+;************************************************************************
+
+
+		XREF	?A5
+
+		SECT	HK3,,C
+
+;by HK3
+		XREF	ACTION_PROG
+;by HK3_SUB
+		XREF	TYPE1_SET,TYPE2_SET,SET_RD16
+
+		INCLUDE	GAME_SYM.INC	@@@
+		INCLUDE	LABEL.INC
+		INCLUDE	HFLAG.INC
+		INCLUDE	EM_MAC2.INC
+
+
+;************************************************************************
+;
+;		action command interrupt program
+;					1992/3/4
+
+	XDEF	COM_INT
+
+COM_INT:
+		MOVE	EM_INT(A6),D0
+		CMP	#1,D0
+		BNE	COM_INT_OPE
+
+		CLR	EM_INT(A6)
+		RTS
+COM_INT_OPE:
+		D0R_ADD
+		LEA.L	ACTION_PROG,A0
+		MOVE.L	(A0,D0),A0
+		JMP	(A0)
+
+
+	XDEF	COM_INT1
+;
+;	*now_player lock
+;
+COM_INT1:
+		MOVE.W	#0,ACT_COM(A6)
+		ANDI.B	#11111000B,PLAYER_CONTROL(A6)
+;		JOB_CLEAR
+
+		CLR	EM_INT(A6)
+		RTS
+
+	XDEF	COM_INT2
+;
+;	*command_data_skip
+;
+COM_INT2:
+		RTS
+
+
+		MOVE.W	ACT_COM(A6),D0
+		SUBQ.W	#2,D0
+		BNE	A2_SKIP_1
+
+		ADD.L	#1,ACTION_ADRS(A6)
+A2_SKIP_1:
+		SUBQ.W	#3,D0
+		BNE	A2_SKIP_2
+
+		ADD.L	#1,ACTION_ADRS(A6)
+A2_SKIP_2
+		CMP.B	#3,1(A0)
+		BNE	ADRS_SKIP
+
+		ADD.L	#4,ACTION_ADRS(A6)
+ADRS_SKIP:
+		CLR	EM_INT(A6)
+
+;		JOB_CLEAR
+		RTS
+
+
+
+	XDEF	COM_INT3
+;
+;	*com_ope interrupt
+;		action_data creative program
+;						1992/5/28
+;
+COM_INT3:
+		RTS
+
+
+	XDEF	COM_INT4
+;
+;	*com_ope interrupt
+;		act_operation checker program
+;						1992/6/4~6/10
+;
+COM_INT4:
+		MOVE.W	#11000000B,D0
+		AND.B	PLAYER_CONTROL(A6),D0
+		BEQ	COM_INT4_NEXT
+
+		BTST.B	#BHS_JUMP,HERO_STATE+HERO_OFFSET(A6)
+		BEQ	COM_INT4_END
+
+		ADD.B	D0,D0
+		BCS.L	LANDING_CHECK
+ 
+		MOVE.W	ACT_COM(A6),D0
+		BEQ.L	COM_OPE_CLEAR
+
+		SUBQ.W	#1,D0
+		BEQ.L	COM_OPE_CLEAR
+COM_INT4_NEXT:
+		MOVE.L	ACTION_ADRS(A6),A0
+
+		MOVE.W	ACT_COM(A6),D0
+		ADD.W	D0,D0
+		LEA.L	CHECKER_PROG(PC),A1
+		ADDA.W	(A1,D0),A1
+		JMP	(A1)
+
+
+CHECKER_PROG:
+	DC.W	CHK_SKIP-CHECKER_PROG	  ;0
+	DC.W	CHK_ACT1-CHECKER_PROG	  ;1
+	DC.W	CHK_ACT2-CHECKER_PROG	  ;2
+	DC.W	CHK_ACT3-CHECKER_PROG	  ;3
+	DC.W	CHK_ACT4-CHECKER_PROG	  ;4
+	DC.W	CHK_ACT5-CHECKER_PROG	  ;5
+
+	DC.W	CHK_ACTS0-CHECKER_PROG	  ;6
+	DC.W	CHK_ACTS1-CHECKER_PROG	  ;7
+	DC.W	CHK_ACTS2-CHECKER_PROG	  ;8
+	DC.W	CHK_ACTS3-CHECKER_PROG	  ;9
+	DC.W	CHK_ACTS4-CHECKER_PROG	  ;10
+	DC.W	CHK_ACTS5-CHECKER_PROG	  ;11
+	DC.W	CHK_ACTS0-CHECKER_PROG	  ;12
+	DC.W	CHK_SKIP-CHECKER_PROG	  ;13
+
+
+;
+;	*************************************
+;
+CHK_ACT1:
+		CMP.B	#0F0H,(A0)
+		BEQ.L	SUB_ACT_CHK
+
+		MOVE.W	#11H,D0
+		SUB.B	(A0),D0
+		BEQ	COM_INT4_SET
+
+		MOVE.W	#21H,D0
+		SUB.B	(A0),D0
+		BEQ	COM_INT4_SET
+CHK_ACTS0:
+CHK_ACTS1:
+		BRA	COM_OPE_CLEAR
+
+CHK_SKIP:
+		RTS
+
+
+SUB_ACT_CHK:
+		MOVEQ.L	#0,D0
+		MOVE.B	1(A0),D0
+
+		LEA.L	SUB_CHK_TBL(PC),A1
+		TST.B	(A1,D0)
+		BEQ.L	COM_OPE_CLEAR
+
+		MOVE.B	3(A0),D0	;jump_kick or jump_punch code check
+		MOVEQ.L	#11H,D1
+		SUB.B	D0,D1
+		BEQ.S	COM_INT4_SET
+
+		MOVEQ.L	#21H,D1
+		SUB.B	D0,D1
+		BEQ	COM_INT4_SET
+
+		BRA	COM_OPE_CLEAR
+
+SUB_CHK_TBL:;		0:1:2:3:4,5
+		DC.B	0,0,0,1,1,1
+
+
+
+;	*************************************
+
+CHK_ACT3:
+CHK_ACT4:
+CHK_ACT5:
+CHK_ACTS3:
+CHK_ACTS4:
+CHK_ACTS5:
+		MOVE	#11H,D0
+		SUB.B	SUCCESS_LEVER(A6),D0
+		BEQ.S	COM_INT4_SET
+
+		MOVE	#21H,D0
+		SUB.B	SUCCESS_LEVER(A6),D0
+		BEQ	COM_INT4_SET
+
+		BRA	COM_OPE_CLEAR
+
+CHK_ACT2:
+CHK_ACTS2:
+		MOVE	#11H,D0
+		CMP.B	SUCCESS_LEVER(A6),D0
+		BEQ	COM_INT4_SET
+		CMP.B	FAIL_LEVER(A6),D0
+		BEQ	COM_INT4_SET
+
+		MOVE	#21H,D0
+		CMP.B	SUCCESS_LEVER(A6),D0
+		BEQ	COM_INT4_SET
+		CMP.B	FAIL_LEVER(A6),D0
+		BEQ	COM_INT4_SET
+
+		BRA	COM_OPE_CLEAR
+
+
+;	*************************************
+
+COM_INT4_SET:
+		BSET.B	#6,PLAYER_CONTROL(A6)
+		RTS
+
+
+	XDEF	LANDING_CHECK
+
+LANDING_CHECK:
+		LEA.L	INT4_TBL(PC),A1
+
+		MOVEQ.L	#0,D0
+		MOVE	ACT_CTRL+HERO_OFFSET(A6),D0
+		BEQ.S	INT4_NEXT_1
+
+		TST.B	(A1,D0)
+		BEQ.S	COM_INT4_END
+INT4_NEXT_1:
+		CMP.B	#0CH,D0
+		BNE	INT4_NEXT_3
+
+		BSET.B	#COM_RESULT_END,PLAYER_CONTROL(A6)
+INT4_NEXT_3:
+		RTS
+COM_INT4_END:
+		BTST.B	#4,HERO_STATE+HERO_OFFSET(A6)
+		BNE.S	INT4_NEXT_2
+
+		ANDI.B	#00111000B,PLAYER_CONTROL(A6)
+		CLR	EM_INT(A6)
+INT4_NEXT_2:
+		RTS
+
+	XDEF	INT4_TBL
+
+INT4_TBL:;	0:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F
+	DC.B	0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,0	;0	<**
+	DC.B	0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0	;1
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	;2
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	;3
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	;4
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	;5
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	;6
+	DC.B	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	;7
+
+
+COM_OPE_CLEAR:
+		ORI.B	#10000100B,PLAYER_CONTROL(A6)	<**
+;		BSET.B	#7,PLAYER_CONTROL(A6)
+		RTS
+
+;************************************************************************
+
+		XDEF	SPECIAL_CHECKER
+;
+;		enemy_type checker_program
+;					1992/3/4
+SPECIAL_CHECKER:
+		LEA.L	EM_JUDGE_VECTOR(PC),A0
+		MOVE	HERO_TYPE+HERO_OFFSET(A6),D3
+		ADD	D3,D3
+		ADDA	(A0,D3),A0
+		JSR	(A0)
+;		BNE	NML_STA_NEXT
+;
+;		JOB_CHG	SC_LIM_JOB
+;NML_STA_NEXT:
+		RTS
+
+
+
+EM_JUDGE_VECTOR:				;type
+	DC.W	HR1_JUDGE-EM_JUDGE_VECTOR	;0
+	DC.W	HR2_JUDGE-EM_JUDGE_VECTOR	;1
+	DC.W	EM1_JUDGE-EM_JUDGE_VECTOR	;2
+	DC.W	EM2_JUDGE-EM_JUDGE_VECTOR	;3
+	DC.W	EM3_JUDGE-EM_JUDGE_VECTOR	;4
+	DC.W	EM4_JUDGE-EM_JUDGE_VECTOR	;5
+	DC.W	EM5_JUDGE-EM_JUDGE_VECTOR	;6
+	DC.W	EM6_JUDGE-EM_JUDGE_VECTOR	;7
+	DC.W	EM7_JUDGE-EM_JUDGE_VECTOR	;8
+	DC.W	EM7_JUDGE-EM_JUDGE_VECTOR	;9
+;
+;	non_reaction
+;
+HR1_JUDGE:
+HR2_JUDGE:
+EM1_JUDGE:
+EM3_JUDGE:
+EM6_JUDGE:
+EM7_JUDGE:
+		MOVEQ.L	#0,D0
+		RTS
+
+
+
+EM8_JUDGE:
+		MOVEQ.L	#0,D0
+		RTS
+
+		MOVE.L	ANOTHER_PLAYER(A6),A0
+		MOVE	X_POSITION+HERO_OFFSET(A6),D0
+		MOVE	X_POSITION+HERO_OFFSET(A6),D1
+
+		MOVEQ.L	#0,D3		;judge_type
+
+		MOVE	#0FFE0H,D2	;frame_position check(near)
+		AND	D0,D2
+		BEQ	E8_JD_1
+
+		ADDQ	#1,D3
+E8_JD_1:
+		MOVE	#0FFE0H,D2	;frame_position check(near)
+		AND	D1,D2
+		BEQ	E8_JD_2
+
+		ADDQ	#1,D3
+E8_JD_2:
+
+
+;		MOVEQ.L	#3AH,D4
+;		JMP	CTRL_CHANGE(PC)	;move_chg
+
+
+
+EM2_JUDGE:
+EM4_JUDGE:
+EM5_JUDGE:
+
+		MOVEQ.L	#0,D0
+		RTS
+
+		TST.B	OBJECT_WORK(A6)
+		BEQ.S	OBJ_JUDGE_END
+
+		MOVEQ.L	#0,D0
+		MOVE.B	0(A0,D0.W),D0
+		BEQ.S	OBJ_JUDGE_END
+
+		CLR.W	(A5)
+		MOVE.B	OBJECT_WORK(A6),(A5)
+		MOVE.W	(A5),D0
+		MOVE.L	(A5,D0),A0	;fornt object_physical_work
+		MOVE.W	X_POSITION(A0),D0
+;		JSR	EM_OBEJCT_SRCH(PC)
+
+		JOB_INIT_SET
+;		BSET.B	?????
+OBJ_JUDGE_END:
+		RTS
+
+;************************************************************************
+		INCLUDE	WORK.INC
+;************************************************************************
+

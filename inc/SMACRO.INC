@@ -1,0 +1,11 @@
+
+
+SCN		SET	0
+
+SCODE		MACRO	CODE,NAME
+S_\2		SET	SCN
+SCN		SET	SCN+2
+		ENDM
+
+
+

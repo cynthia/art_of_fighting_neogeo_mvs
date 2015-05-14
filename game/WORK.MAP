@@ -1,0 +1,41 @@
+            Microtec Research Lod68K V6.4a         Wed May 13 15:59:22 1992
+
+Command line: A:\68K\ASM\LOD68K.EXE  @WORK,WORK,WORK 
+
+LIST S
+COMMON WORK=100000H
+LOAD WORK
+END
+            Microtec Research Lod68K V6.4a         Wed May 13 15:59:22 1992
+
+
+
+OUTPUT MODULE NAME:    WORK
+OUTPUT MODULE FORMAT:  MOTOROLA S2
+
+
+SECTION SUMMARY
+---------------
+
+SECTION    ATTRIBUTE                   START      END        LENGTH     ALIGN
+
+WORK       COMMON                      00100000   0010FFFF   00010000   2 (WORD)  
+
+
+MODULE SUMMARY
+--------------
+
+MODULE         SECTION:START        SECTION:END       FILE
+
+WORK                 0:                   0:          B:\044\WORK.OBJ   
+                  WORK:00100000        WORK:0010FFFF      
+
+
+
+START ADDRESS:   00000000
+
+
+Load Completed 
+
+
+ Errors: 0, Warnings: 0
